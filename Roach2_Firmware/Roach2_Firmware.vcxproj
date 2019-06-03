@@ -70,6 +70,9 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Roach2_Comm\Roach2_Comm.vcxproj">
+      <Project>{63d90ca3-9ae2-4e88-86c7-4f8c119762c6}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
