@@ -47,6 +47,7 @@ private:
 	std::vector<double> values;             // data to hold
 
 public:
+	/*
 	Data(DATA_FRAME_IDS id,
 		const unsigned long time,
 		const std::vector<std::string> columnNames,
@@ -57,12 +58,13 @@ public:
 		 * columnNames is a vector of strings to name the value columns
 		 * values is a vector of doubles which contains the values
 		 * @return returns a instance of the Data class
-		 * */
+		 * 
 		this->id = id;
 		this->time = time;
 		this->columnNames = columnNames;
 		this->values = values;
 	}
+	*/
 
 	void setId(DATA_FRAME_IDS id) {
 		this->id = id;
