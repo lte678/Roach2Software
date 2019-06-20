@@ -6,7 +6,7 @@ This is the repository for the software of the ROACH2 project. RCU and OBC share
 ## Source code documentation
 
 The source code has to be documented according to the following style, so that a API documentation can be generated with Doxygen (see also: http://fnch.users.sourceforge.net/doxygen_c.html):
-`
+```
 /**
  * @file Dateiname.txt
  * @date 03-06-2019
@@ -29,7 +29,7 @@ class CLASS {
         */
         int function(int param);
 }
-`
+```
 
 
 ## Building
