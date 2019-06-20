@@ -35,9 +35,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{63d90ca3-9ae2-4e88-86c7-4f8c119762c6}</ProjectGuid>
+    <ProjectGuid>{160ce38d-814e-43b5-89a7-f92ab5207df8}</ProjectGuid>
     <Keyword>Linux</Keyword>
-    <RootNamespace>Roach2_Comm</RootNamespace>
+    <RootNamespace>SQLite</RootNamespace>
     <MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>
     <ApplicationType>Linux</ApplicationType>
     <ApplicationTypeRevision>1.0</ApplicationTypeRevision>
@@ -75,7 +75,6 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
-    <ClInclude Include="ReceiveHandler.h" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

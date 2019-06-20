@@ -35,9 +35,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{63d90ca3-9ae2-4e88-86c7-4f8c119762c6}</ProjectGuid>
+    <ProjectGuid>{3a5f7cf7-e7a7-4a72-9d0d-fcb86063f826}</ProjectGuid>
     <Keyword>Linux</Keyword>
-    <RootNamespace>Roach2_Comm</RootNamespace>
+    <RootNamespace>Roach2_Control</RootNamespace>
     <MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>
     <ApplicationType>Linux</ApplicationType>
     <ApplicationTypeRevision>1.0</ApplicationTypeRevision>
@@ -75,7 +75,30 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
-    <ClInclude Include="ReceiveHandler.h" />
+    <ClInclude Include="FSM_Controller.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="FSM_Controller.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Roach2_Actuators\Roach2_Actuators.vcxproj">
+      <Project>{981203a2-0fe1-40a4-9f82-622cbc3a5cc7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Roach2_Camera\Roach2_Camera.vcxproj">
+      <Project>{f1310822-add5-4d06-8e7a-d4d710980391}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Roach2_Comm\Roach2_Comm.vcxproj">
+      <Project>{63d90ca3-9ae2-4e88-86c7-4f8c119762c6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Roach2_DataStore\Roach2_DataStore.vcxproj">
+      <Project>{f2dac19d-c6f3-4b98-89df-257a207661f9}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Roach2_Processing\Roach2_Processing.vcxproj">
+      <Project>{99d220a8-842c-4dd1-b597-8b119224252d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Roach2_Sensor\Roach2_Sensor.vcxproj">
+      <Project>{7046de7b-2b66-4b52-a291-d712025d0f0d}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
