@@ -74,6 +74,9 @@
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <SourcePath>C:\Users\burkm\source\repos\Roach2_Firmware\includes\boost_1_66_0\boost;$(SourcePath)</SourcePath>
+  </PropertyGroup>
   <ItemGroup>
     <ClInclude Include="ReceiveHandler.h" />
   </ItemGroup>

@@ -32,8 +32,9 @@ Data::Data(std::string id,
  * 2. public methods
  * */
 
-void Data::setId(const std::string id){
-    this->id = id;
+void Data::setId(int id)
+{
+	this->id = std::to_string(id);
 }
 
 std::string Data::getId(){
@@ -56,12 +57,22 @@ std::vector<std::string> Data::getColumnNames(){
     return this->columnNames;
 }
 
+void Data::amendColumnName(std::string name)
+{
+	this->columnNames.push_back(name);
+}
+
 void Data::setValues(const std::vector<double> values){
     this->values = values;
 }
 
 std::vector<double> Data::getValues(){
     return this->values;
+}
+
+void Data::amendValue(double value)
+{
+	this->values.push_back(value);
 }
 
 std::string Data::serialize(){

@@ -13,6 +13,7 @@
 */
 void FSM_Controller::pollSensors()
 {
+
 }
 
 void FSM_Controller::triggerActuators()
@@ -21,6 +22,7 @@ void FSM_Controller::triggerActuators()
 
 void FSM_Controller::saveData()
 {
+
 }
 
 /*
@@ -39,4 +41,20 @@ void FSM_Controller::enableSimMode(void)
 void FSM_Controller::disableSimMode(void)
 {
 	this->isSimMode = false;
+}
+
+void FSM_Controller::packageReceivedEthernet()
+{
+}
+
+void FSM_Controller::packageReceivedRexus()
+{
+}
+
+void FSM_Controller::rocketSignalReceived()
+{
+}
+
+void FSM_Controller::packageReceivedUART()
+{
 }

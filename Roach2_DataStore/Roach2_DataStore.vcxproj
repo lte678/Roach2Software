@@ -34,6 +34,21 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="data.cpp" />
+    <ClCompile Include="database.cpp" />
+    <ClCompile Include="serialization.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="data.h" />
+    <ClInclude Include="database.h" />
+    <ClInclude Include="serialization.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SQLite\SQLite.vcxproj">
+      <Project>{160ce38d-814e-43b5-89a7-f92ab5207df8}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{f2dac19d-c6f3-4b98-89df-257a207661f9}</ProjectGuid>
     <Keyword>Linux</Keyword>
@@ -74,10 +89,6 @@
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
-  <ItemGroup>
-    <ClInclude Include="data.h" />
-    <ClInclude Include="serialization.h" />
-  </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

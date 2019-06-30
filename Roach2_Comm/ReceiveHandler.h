@@ -16,15 +16,19 @@ public:
 	/*
 	 * @brief Function called when data was received through an Ethernet link
 	**/
-	virtual void PackageReceivedEthernet() = 0;
+	virtual void packageReceivedEthernet() = 0;
 	/* 
 	 * @brief Function called when data was received from the Rexus service module link
 	 **/
-	virtual void PackageReceivedRexus() = 0;
+	virtual void packageReceivedRexus() = 0;
 	/*
 	 * @brief Function called when a rocket signal was detected
 	**/
-	virtual void RocketSignalReceived() = 0;
+	virtual void rocketSignalReceived() = 0;
+	/*
+	 * @brief Function called when data from the UART port was received 
+	 **/
+	virtual void packageReceivedUART() = 0;
 };
 
 #endif

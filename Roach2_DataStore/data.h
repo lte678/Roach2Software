@@ -36,7 +36,7 @@ class Data {
              std::vector<double> values);
 
         // set & get
-        void setId(const std::string id);
+        void setId(int id);
         std::string getId();
 
         void setTime(const unsigned long time);
@@ -44,9 +44,11 @@ class Data {
 
         void setColumnNames(const std::vector<std::string> columnNames);
         std::vector<std::string> getColumnNames();
+		void amendColumnName(std::string name);
 
         void setValues(const std::vector<double> values);
         std::vector<double> getValues();
+		void amendValue(double value);
 
         // serialize & deserialize
         std::string serialize();
