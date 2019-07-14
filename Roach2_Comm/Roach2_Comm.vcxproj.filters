@@ -2,5 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="ReceiveHandler.h" />
+    <ClInclude Include="Connection.h" />
+    <ClInclude Include="RocketSignals.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="RocketSignals.cpp" />
   </ItemGroup>
 </Project>

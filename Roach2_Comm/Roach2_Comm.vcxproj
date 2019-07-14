@@ -78,7 +78,12 @@
     <SourcePath>C:\Users\burkm\source\repos\Roach2_Firmware\includes\boost_1_66_0\boost;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <ItemGroup>
+    <ClInclude Include="Connection.h" />
     <ClInclude Include="ReceiveHandler.h" />
+    <ClInclude Include="RocketSignals.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="RocketSignals.cpp" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

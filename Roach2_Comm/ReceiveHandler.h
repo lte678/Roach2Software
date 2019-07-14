@@ -4,7 +4,7 @@
  *
  * @author Matthias Burk
  * @copyright KSat Stuttgart e.V. Roach2 software team
- * */
+ **/
 
 #ifndef RECEIVE_HANDLER_HEADER
 #define RECEIVE_HANDLER_HEADER
@@ -24,7 +24,7 @@ public:
 	/*
 	 * @brief Function called when a rocket signal was detected
 	**/
-	virtual void rocketSignalReceived() = 0;
+	virtual void rocketSignalReceived(int signal_source) = 0;
 	/*
 	 * @brief Function called when data from the UART port was received 
 	 **/
