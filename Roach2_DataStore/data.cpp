@@ -75,6 +75,17 @@ void Data::amendValue(double value)
 	this->values.push_back(value);
 }
 
+/**
+ * @brief Adds a value with a type identifier (e.g. type=IMU_acc, value=10.0)
+ * @param type: name/identifier of the added value
+ * @param value: Added value with double precision (cast all integer/floating point values to double)
+*/
+void Data::addValue(std::string type, double value)
+{
+	this->amendColumnName(type);
+	this->amendValue(value);
+}
+
 std::string Data::serialize(){
     std::string archive;
     archive += serializeString(id);

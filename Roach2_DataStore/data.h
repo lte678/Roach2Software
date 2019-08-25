@@ -16,20 +16,20 @@
 #include "serialization.h"
 
 enum SENSOR_TYPES {
-    TEMP 0,
-    IMU 1,
-    LASERDIST_0 2,
-    LASERDIST_1 3,
-    LASERDIST_2 4,
-    LASERDIST_3 5,
-    LASERDIST_4 6,
-    LASERDIST_5 7,
-    ADC 8,
-    ROT_ENC 9,
-    CPU_TEMP 10,
-    CPU_LOAD 11,
-    RAM_USAGE 12
-}
+	TEMP 0,
+	IMU 1,
+	LASERDIST_0 2,
+	LASERDIST_1 3,
+	LASERDIST_2 4,
+	LASERDIST_3 5,
+	LASERDIST_4 6,
+	LASERDIST_5 7,
+	ADC 8,
+	ROT_ENC 9,
+	CPU_TEMP 10,
+	CPU_LOAD 11,
+	RAM_USAGE 12
+};
 
 class Data {
     /*
@@ -65,6 +65,8 @@ class Data {
         void setValues(const std::vector<double> values);
         std::vector<double> getValues();
 		void amendValue(double value);
+
+		void addValue(std::string type, double value);
 
         // serialize & deserialize
         std::string serialize();
