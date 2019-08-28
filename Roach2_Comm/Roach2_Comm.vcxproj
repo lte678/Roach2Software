@@ -80,12 +80,18 @@
   <ItemGroup>
     <ClInclude Include="Connection.h" />
     <ClInclude Include="ReceiveHandler.h" />
-    <ClInclude Include="RocketSignals.h" />
+    <ClInclude Include="UART.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="RocketSignals.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="UART.cpp" />
   </ItemGroup>
-  <ItemDefinitionGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <Link>
+      <AdditionalOptions>
+      </AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

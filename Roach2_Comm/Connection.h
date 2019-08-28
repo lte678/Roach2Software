@@ -12,7 +12,7 @@
 enum CONNECTION_TYPES {
 	RS422 = 0,
 	ROCKET_SIGNALS = 1,
-	UART = 2,
+	UART_LINK = 2,
 	ETHERNET = 3
 };
 

@@ -70,16 +70,9 @@
     <ProjectReference Include="..\Roach2_Comm\Roach2_Comm.vcxproj">
       <Project>{63d90ca3-9ae2-4e88-86c7-4f8c119762c6}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Roach2_Control\Roach2_Control.vcxproj">
-      <Project>{3a5f7cf7-e7a7-4a72-9d0d-fcb86063f826}</Project>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FSM_OBC.cpp" />
     <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="FSM_OBC.h" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

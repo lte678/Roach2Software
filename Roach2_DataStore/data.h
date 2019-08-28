@@ -15,8 +15,8 @@
 #include <iostream>
 #include "serialization.h"
 
-enum SENSOR_TYPES {
-	TEMP 0,
+/*enum SENSOR_TYPES {
+	TEMP_SENSOR 0,
 	IMU 1,
 	LASERDIST_0 2,
 	LASERDIST_1 3,
@@ -29,7 +29,7 @@ enum SENSOR_TYPES {
 	CPU_TEMP 10,
 	CPU_LOAD 11,
 	RAM_USAGE 12
-};
+};*/
 
 class Data {
     /*

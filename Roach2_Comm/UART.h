@@ -9,16 +9,26 @@
 #ifndef UART_HEADER_FILE
 #define UART_HEADER_FILE
 
-#include <wiringSerial.h>
+#include <stdio.h>
+#include <string.h>
+ // Linux headers
+#include <fcntl.h> // Contains file controls like O_RDWR
+#include <errno.h> // Error integer and strerror() function
+#include <termios.h> // Contains POSIX terminal control definitions
+#include <unistd.h> // write(), read(), close()
+#include <unistd.h>
+#include "..//Roach2_DataStore/data.h"
+
 #include "Connection.h"
-#include "../Roach2_DataStore/data.h"
 
 class UART :
 	public Connection
 {
 private:
-	char* port;
+	char* port = "/dev/ttyS2";
+	struct termios tty;
 	int baud;
+	int serial_port;
 	int numberPackagesReceived;
 	int numberPackagesReceivedInvalid;
 	int numberPackagesSend;
@@ -34,6 +44,7 @@ public:
 	void sendData(Data *data, int count);
 	Data* getData(void);
 	int getNumberReceived();
+	int whichConnection();
 };
 
 #endif

@@ -10,6 +10,51 @@
 
 UART::UART()
 {
+	// Try to open serial port
+	// Normally: /dev/ttyUSB0 or similar
+	serial_port = open(this->port, O_RDWR);
+
+	// Check if open was done
+	// Check also that use is in dialout group: sudo adduser $USER dialout
+	if (serial_port < 0) {
+		// Error occured
+		printf("Error %i from open: %s\n", errno, strerror(errno));
+	}
+	else {
+		// Configure serial port
+		memset(&tty, 0, sizeof(tty));
+		if (tcgetattr(serial_port, &tty) == 0) {
+			// No error, config loaded
+			tty.c_cflag &= ~PARENB; // No parity: clear parity bit
+			tty.c_cflag &= ~CSTOPB; // One stop bit
+			tty.c_cflag |= CS8; // 8bits per byte
+			tty.c_cflag |= CRTSCTS; // No hardware flow control
+			tty.c_cflag |= CREAD | CLOCAL; // disable modem specific signals and acitve data reading (CREAD)
+			tty.c_lflag &= ~ICANON; // Disable canonical mode to prevent to miss some bytes with special meaning (possibly)
+			tty.c_lflag &= ~ECHONL; // Disable echo functionality
+			tty.c_lflag &= ~ISIG; // Don't interpret any special characters
+			tty.c_iflag &= ~(IXON | IXOFF | IXANY); // Disable software flow control
+			tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL); // Disable special handling of received bytes
+			tty.c_oflag &= ~OPOST; // Disable output signal handling
+			tty.c_oflag &= ~ONLCR; // Disable output conversion of newline signal
+			tty.c_cc[VTIME] = 10;    // Wait for up to 1s (10 deciseconds), returning as soon as any data is received.
+			tty.c_cc[VMIN] = 0;
+			cfsetispeed(&tty, B115200); // Baudrate input
+			cfsetospeed(&tty, B115200); // Baudrate output
+			// Save tty settings, also checking for error
+			if (tcsetattr(serial_port, TCSANOW, &tty) != 0) {
+				// Error occured
+			}
+			char* msg = "TEST MESSAGE 1";
+			while (true) {
+				write(serial_port, msg, sizeof(msg));
+				sleep(1);
+			}
+		}
+		else {
+			// Configuration load failed
+		}
+	}
 }
 
 
@@ -26,7 +71,6 @@ void UART::sendData(Data * data, int count)
 {
 	this->dataToSend = data;
 	numberDataToSend = count;
-	this->send();
 }
 
 /**
@@ -46,4 +90,9 @@ Data * UART::getData(void)
 int UART::getNumberReceived()
 {
 	return this->numberDataReceived;
+}
+
+int UART::whichConnection()
+{
+	return CONNECTION_TYPES::UART_LINK;
 }
