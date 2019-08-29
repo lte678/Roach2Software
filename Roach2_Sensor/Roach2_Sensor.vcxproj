@@ -75,6 +75,22 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
+    <ClCompile Include="adc.cpp" />
+    <ClCompile Include="ARM_Systeminfo.cpp" />
+    <ClCompile Include="imu.cpp" />
+    <ClCompile Include="Roach2_Sensor_Sensor.cpp" />
+    <ClCompile Include="rotEnc.cpp" />
+    <ClCompile Include="Sensor.cpp" />
+    <ClCompile Include="temp.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="adc.h" />
+    <ClInclude Include="ARM_Systeminfo.h" />
+    <ClInclude Include="imu_neu.h" />
+    <ClInclude Include="Roach2_Sensor_Sensor.h" />
+    <ClInclude Include="rotEnc.h" />
+    <ClInclude Include="Sensor.h" />
+    <ClInclude Include="Temp.h" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

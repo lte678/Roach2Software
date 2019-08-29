@@ -15,21 +15,73 @@
 #include <iostream>
 #include "serialization.h"
 
-/*enum SENSOR_TYPES {
-	TEMP_SENSOR 0,
-	IMU 1,
-	LASERDIST_0 2,
-	LASERDIST_1 3,
-	LASERDIST_2 4,
-	LASERDIST_3 5,
-	LASERDIST_4 6,
-	LASERDIST_5 7,
-	ADC 8,
-	ROT_ENC 9,
-	CPU_TEMP 10,
-	CPU_LOAD 11,
-	RAM_USAGE 12
-};*/
+enum SENSOR_TYPES {
+	TEMP_SENSOR = 0,
+	IMU = 1,
+	LASERDIST_0 = 2,
+	LASERDIST_1 = 3,
+	LASERDIST_2 = 4,
+	LASERDIST_3 = 5,
+	LASERDIST_4 = 6,
+	LASERDIST_5 = 7,
+	ADC = 8,
+	ROT_ENC = 9,
+	CPU_TEMP = 10,
+	CPU_LOAD = 11,
+	RAM_USAGE = 12
+};
+
+enum IMU_FIELD_TYPES {
+	ACCELERATION_X = 0,
+	ACCELERATION_Y = 1,
+	ACCELERATION_Z = 2,
+	MAG_X = 3,
+	MAG_Y = 4,
+	MAG_Z = 5,
+	GYR_X = 6,
+	GYR_Y = 7,
+	GYR_Z = 8,
+	imu_temp = 9
+};
+
+/**
+ * @brief Converts string imu_field_name to integer code
+ * @param imu_field_name string field name
+ * @return int according to enum IMU_FIELD_TYPES
+*/
+static IMU_FIELD_TYPES convert_imu_field(char* imu_field_name) {
+	if (imu_field_name == "ACCELERATION_X") {
+		return ACCELERATION_X;
+	}
+	else if (imu_field_name == "ACCELERATION_Y") {
+		return ACCELERATION_Y;
+	}
+	else if (imu_field_name == "ACCELERATION_Z") {
+		return ACCELERATION_Z;
+	}
+	else if (imu_field_name == "MAG_X") {
+		return MAG_X;
+	}
+	else if (imu_field_name == "MAG_Y") {
+		return MAG_Y;
+	}
+	else if (imu_field_name == "MAG_Z") {
+		return MAG_Z;
+	}
+	else if (imu_field_name == "GYR_X") {
+		return GYR_X;
+	}
+	else if (imu_field_name == "GYR_Y") {
+		return GYR_Y;
+	}
+	else if (imu_field_name == "GYR_Z") {
+		return GYR_Z;
+	}
+	else if (imu_field_name == "imu_temp") {
+		return imu_temp;
+	}
+
+}
 
 class Data {
     /*
@@ -77,6 +129,8 @@ class Data {
 
         // pretty print
         void print();
+
+		char* convert_to_serial();
 
 };
 

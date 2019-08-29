@@ -36,6 +36,8 @@ private:
 	Data* dataReceived;
 	int numberDataToSend;
 	int numberDataReceived;
+	bool send_ongoing;
+	bool receive_ongoing;
 	void send(void);
 	void receive(void);
 public:

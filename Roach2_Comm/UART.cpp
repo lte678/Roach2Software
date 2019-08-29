@@ -8,6 +8,28 @@
 
 #include "UART.h"
 
+/**
+ * @brief Send data according to our protocol
+*/
+void UART::send(void)
+{
+	if (this->send_ongoing) {
+		// Wait until previous send operation done
+	}
+	else {
+		// Send next data
+		// Convert into frame structure
+		this->dataToSend->
+	}
+}
+
+/**
+ * @brief Receive data from serial port according to our protocol
+*/
+void UART::receive(void)
+{
+}
+
 UART::UART()
 {
 	// Try to open serial port
