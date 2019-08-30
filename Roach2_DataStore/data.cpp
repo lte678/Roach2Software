@@ -126,8 +126,8 @@ void Data::print(){
     std::cout << std::endl;
 }
 
-char* Data::convert_to_serial() {
-	char* packages_struct;
+long* Data::convert_to_serial() {
+	long* packages_struct;
 	packages_struct = new char[8];
 	// For sensor data: sensor_id => 4bit, sensor_sub_type => 4bit, data => 56bit, MSB first (sensor_id)
 	if (std::stoi(this->id) == SENSOR_TYPES::TEMP_SENSOR) {
@@ -140,5 +140,9 @@ char* Data::convert_to_serial() {
 
 	}
 	return packages_struct;
+}
+
+int Data::convert_to_serial_array_length() {
+	return this->values.size();
 }
 

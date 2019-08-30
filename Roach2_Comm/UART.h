@@ -21,6 +21,8 @@
 
 #include "Connection.h"
 
+#define CRC16 0x8005 // CRC16 polynom
+
 class UART :
 	public Connection
 {
@@ -32,6 +34,10 @@ private:
 	int numberPackagesReceived;
 	int numberPackagesReceivedInvalid;
 	int numberPackagesSend;
+	long* tx_frames;
+	long* rx_frames;
+	int frame_counter_tx;
+	int frame_counter_rx;
 	Data* dataToSend;
 	Data* dataReceived;
 	int numberDataToSend;
@@ -40,6 +46,7 @@ private:
 	bool receive_ongoing;
 	void send(void);
 	void receive(void);
+	uint16_t calc_crc(const uint8_t* data, uint16_t size);
 public:
 	UART();
 	~UART();

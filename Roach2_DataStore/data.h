@@ -130,7 +130,8 @@ class Data {
         // pretty print
         void print();
 
-		char* convert_to_serial();
+		long* convert_to_serial();
+		int convert_to_serial_array_length();
 
 };
 
