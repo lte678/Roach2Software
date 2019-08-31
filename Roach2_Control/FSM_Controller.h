@@ -9,37 +9,36 @@
 #ifndef FSM_CONTROLLER_HEADER
 #define FSM_CONTROLLER_HEADER
 
-#include "../Roach2_DataStore/database.h"
+#include "../Roach2_DataStore/data.h"
 #include "../Roach2_Comm/ReceiveHandler.h"
 
-enum FSM_STATES_RCU {
-	IDLE,
-	STANDBY,
-	DRIVE_FORWARD
+enum class FSM_STATES_RCU {
+	IDLE = 0,
+	STANDBY = 1,
+	DRIVE_FORWARD = 2 
 };
 
-enum FSM_STATES_OBC {
-	IDLE,
-	EXPERIMENT
+enum class FSM_STATES_OBC {
+	IDLE = 0,
+	EXPERIMENT = 1
 };
 
-enum REBOOT_TARGET {
-	RCU,
-	OBC
+enum class REBOOT_TARGET {
+	RCU = 0,
+	OBC = 1
 };
 
-class FSM_Controller : ReceiveHandler
+class FSM_Controller
 {
 protected:
 	int currentState;
 	int lastState;
 	int time;
-	Sensor* sensors;
-	Actuator* actuators;
-	Database* data;
-	Connection* connections;
+	//Sensor* sensors;
+	//Actuator* actuators;
+	//Database* data;
 	bool isSimMode;
-	Data* logs;
+	Data_super* logs;
 protected:
 	void pollSensors(void);
 	void triggerActuators(void);
@@ -48,10 +47,6 @@ protected:
 	void disableSimMode(void);
 public:
 	virtual void run(void) = 0;
-	void packageReceivedEthernet();
-	void packageReceivedRexus();
-	void rocketSignalReceived();
-	void packageReceivedUART();
 };
 
 #endif

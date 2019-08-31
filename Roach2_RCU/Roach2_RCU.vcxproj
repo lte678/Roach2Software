@@ -52,8 +52,10 @@
       </LibraryDependencies>
     </Link>
     <RemotePostBuildEvent>
-      <Command>gpio export 17 out</Command>
-      <Message>export pin 17 using the gpio utility so that we can execute the blink program without sudo</Message>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
     </RemotePostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
@@ -72,7 +74,27 @@
   <ItemGroup>
     <ClInclude Include="FSM_RCU.h" />
   </ItemGroup>
-  <ItemDefinitionGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Roach2_Comm\Roach2_Comm.vcxproj">
+      <Project>{63d90ca3-9ae2-4e88-86c7-4f8c119762c6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Roach2_Control\Roach2_Control.vcxproj">
+      <Project>{3a5f7cf7-e7a7-4a72-9d0d-fcb86063f826}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Roach2_DataStore\Roach2_DataStore.vcxproj">
+      <Project>{f2dac19d-c6f3-4b98-89df-257a207661f9}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <ClCompile>
+      <AdditionalOptions>
+      </AdditionalOptions>
+    </ClCompile>
+    <Link />
+    <Link>
+      <VerboseOutput>false</VerboseOutput>
+    </Link>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

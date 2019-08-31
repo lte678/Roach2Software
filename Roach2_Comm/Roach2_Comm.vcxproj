@@ -47,6 +47,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -83,13 +84,23 @@
     <ClInclude Include="UART.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="UART.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Roach2_DataStore\Roach2_DataStore.vcxproj">
+      <Project>{f2dac19d-c6f3-4b98-89df-257a207661f9}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <Link>
       <AdditionalOptions>-lpthread</AdditionalOptions>
     </Link>
+    <ClCompile />
+    <ClCompile>
+      <ShowIncludes>true</ShowIncludes>
+      <AdditionalOptions>
+      </AdditionalOptions>
+    </ClCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

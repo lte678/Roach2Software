@@ -17,7 +17,7 @@
 #include <termios.h> // Contains POSIX terminal control definitions
 #include <unistd.h> // write(), read(), close()
 #include <unistd.h>
-#include "..//Roach2_DataStore/data.h"
+#include "../Roach2_DataStore/data.h"
 
 #include "Connection.h"
 
@@ -34,26 +34,28 @@ private:
 	int numberPackagesReceived;
 	int numberPackagesReceivedInvalid;
 	int numberPackagesSend;
-	long* tx_frames;
-	long* rx_frames;
+	uint64_t* tx_frames;
+	uint64_t* rx_frames;
 	int frame_counter_tx;
 	int frame_counter_rx;
-	Data* dataToSend;
-	Data* dataReceived;
+	Data_super* dataToSend;
+	Data_super* dataReceived;
+	char* rx_buffer;
+	uint rx_buffer_counter;
 	int numberDataToSend;
 	int numberDataReceived;
 	bool send_ongoing;
 	bool receive_ongoing;
 	void send(void);
-	void receive(void);
 	uint16_t calc_crc(const uint8_t* data, uint16_t size);
 public:
 	UART();
 	~UART();
-	void sendData(Data *data, int count);
-	Data* getData(void);
+	void sendData(Data_super*data, int count);
+	Data_super* getData(void);
 	int getNumberReceived();
 	int whichConnection();
+	void receive(void);
 };
 
 #endif

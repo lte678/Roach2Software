@@ -6,6 +6,7 @@
  * */
 
 #include "serialization.h"
+#include <string.h>
 
 template <typename T>
 std::string serializeInteger(const T integer){

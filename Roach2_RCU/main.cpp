@@ -1,5 +1,6 @@
-int main(void)
-{
+#include "FSM_RCU.h"
 
-	return 0;
+int main(int argc, char** argv) {
+	FSM_RCU controller = FSM_RCU();
+
 }

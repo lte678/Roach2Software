@@ -126,11 +126,13 @@ void Data::print(){
     std::cout << std::endl;
 }
 
-long* Data::convert_to_serial() {
-	long* packages_struct;
-	packages_struct = new char[8];
+uint64_t* Data::convert_to_serial() {
+	uint64_t* packages_struct;
+	packages_struct = new uint64_t[1];
+	packages_struct[0] = 1;
 	// For sensor data: sensor_id => 4bit, sensor_sub_type => 4bit, data => 56bit, MSB first (sensor_id)
-	if (std::stoi(this->id) == SENSOR_TYPES::TEMP_SENSOR) {
+	
+	/*if (std::stoi(this->id) == SENSOR_TYPES::TEMP_SENSOR) {
 		packages_struct[0] = (std::stoi(this->id) << 4); // imu sensor has no subtypes
 	}
 	else if (std::stoi(this->id) == SENSOR_TYPES::CPU_LOAD) {
@@ -138,7 +140,7 @@ long* Data::convert_to_serial() {
 	}
 	else if (std::stoi(this->id) == SENSOR_TYPES::CPU_TEMP) {
 
-	}
+	}*/
 	return packages_struct;
 }
 

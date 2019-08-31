@@ -7,6 +7,7 @@
  **/
 
 #include "UART.h"
+#include "../Roach2_DataStore/data_simple.h"
 
 /**
  * @brief Send data according to our protocol
@@ -23,15 +24,17 @@ void UART::send(void)
 		this->send_ongoing = true;
 		// Convert into frame structure:
 		// 64bit data, 16bit CRC, 4bit frame number, 4bit data length
-		long* tx_data = this->dataToSend->convert_to_serial();
+
+		// Check whether Data_simple is used instead of Data
+		uint64_t* tx_data = this->dataToSend->convert_to_serial();
 		int data_length = this->dataToSend->convert_to_serial_array_length();
-		this->tx_frames = new long[data_length]; // each frame consists of 11 bytes
+		this->tx_frames = new uint64_t[data_length]; // each frame consists of 11 bytes
 		for (int i = 0; i < data_length; i++) {
 			this->tx_frames[i] = tx_data[i];
 		}
 			 
 		// write to UART
-		long buffer_data;
+		uint64_t buffer_data;
 		u_int16_t crc;
 		uint8_t header_data;
 		for (int i = 0; i < data_length; i++) {
@@ -45,11 +48,15 @@ void UART::send(void)
 			uint8_t* crc_data = (uint8_t*)& buffer_data;
 			crc = this->calc_crc(crc_data, 8);
 
+			// UART transmission are LSB first, this must be handled by the receiver
 			write(this->serial_port, &header_data, sizeof(header_data));
 			write(this->serial_port, &buffer_data, sizeof(buffer_data));
 			write(this->serial_port, &crc, sizeof(crc));
 			this->frame_counter_tx++;
 		}
+
+		// Free memory
+		delete this->dataToSend;
 	}
 }
 
@@ -116,10 +123,71 @@ uint16_t UART::calc_crc(const uint8_t * data, uint16_t size)
 */
 void UART::receive(void)
 {
+	uint16_t crc;
+	uint frame_nr;
+	uint frame_length;
+	uint64_t data;
+
+
+	uint8_t read_buf[11]; // one frame is 88bits long
+	memset(&read_buf, '\0', sizeof(read_buf));
+
+	// Read, this call maybe blocking the thread, depending configuration (VMIN and VTIME)
+	int n = read(this->serial_port, &read_buf, sizeof(read_buf));
+
+	// Copy to internal buffer if no complete frame received
+	if (n > 0) {
+		for (int i = 0; i < n; i++) {
+			this->rx_buffer[this->rx_buffer_counter + i] = read_buf[i];
+		}
+		this->rx_buffer_counter += n;
+	}
+
+	// Frame parser
+	if (this->rx_buffer_counter == 11) {
+		// Parse into command structure
+		if (this->frame_counter_rx == 0) {
+			// New data received
+			// Read structure
+			frame_nr = (this->rx_buffer[0] & 0xF0);
+			frame_length = (this->rx_buffer[0] & 0x0F);
+			
+			for (int i = 0; i < 8; i++) {
+				data = (data << 8) | this->rx_buffer[1 + i];
+			}
+			crc = (this->rx_buffer[9] << 8);
+			crc = crc + this->rx_buffer[10];
+
+			this->numberDataReceived++;
+			this->numberPackagesReceived++;
+			
+			this->rx_buffer_counter = 0;
+
+			// Notify listed receive handlers
+			int counter_handlers = 0;
+			ReceiveHandler** handler = this->getRegisteredEventHandler(counter_handlers);
+			for (int i = 0; i < counter_handlers; i++) {
+				handler[i]->packageReceivedUART(data, 1);
+			}
+		}
+		else {
+			// Some parts missing
+		}
+	}
 }
 
 UART::UART()
 {
+	// Init
+	this->numberDataReceived = 0;
+	this->numberPackagesReceived = 0;
+	this->numberPackagesReceivedInvalid = 0;
+	this->numberPackagesSend = 0;
+	this->send_ongoing = false;
+	this->receive_ongoing = false;
+
+	this->initEventHandlerArray(); // Required to use event handlers
+
 	// Try to open serial port
 	// Normally: /dev/ttyUSB0 or similar
 	serial_port = open(this->port, O_RDWR);
@@ -147,18 +215,18 @@ UART::UART()
 			tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL); // Disable special handling of received bytes
 			tty.c_oflag &= ~OPOST; // Disable output signal handling
 			tty.c_oflag &= ~ONLCR; // Disable output conversion of newline signal
-			tty.c_cc[VTIME] = 10;    // Wait for up to 1s (10 deciseconds), returning as soon as any data is received.
+			tty.c_cc[VTIME] = 1;    // Wait for up to 0.1s (1 deciseconds), returning as soon as any data is received.
 			tty.c_cc[VMIN] = 0;
 			cfsetispeed(&tty, B115200); // Baudrate input
 			cfsetospeed(&tty, B115200); // Baudrate output
+
+			// RX internal buffer
+			this->rx_buffer = new char[11];
+			this->rx_buffer_counter = 0;
+
 			// Save tty settings, also checking for error
 			if (tcsetattr(serial_port, TCSANOW, &tty) != 0) {
 				// Error occured
-			}
-			char* msg = "TEST MESSAGE 1";
-			while (true) {
-				write(serial_port, msg, sizeof(msg));
-				sleep(1);
 			}
 		}
 		else {
@@ -177,17 +245,18 @@ UART::~UART()
  * @param data pointer to Data objects to send
  * @param int number of Data objects passed to this function
 */
-void UART::sendData(Data * data, int count)
+void UART::sendData(Data_super* data, int count)
 {
 	this->dataToSend = data;
 	numberDataToSend = count;
+	this->send();
 }
 
 /**
  * @brief Returns the received data. If new data is received afterwards, the system will return the new data.
  * @return pointer to the received data
 */
-Data * UART::getData(void)
+Data_super* UART::getData(void)
 {
 	this->numberDataReceived = 0;
 	return this->dataReceived;

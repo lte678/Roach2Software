@@ -5,14 +5,20 @@
  * @author Christian Mollière
  * @copyright KSat Stuttgart e.V. Roach2 software team
  * */
-
+#ifdef NOT_USED
 #include "lib/database.h"
 #include "lib/data.h"
 #include <vector>
 #include <string>
 #include <iostream>
+#endif
 
-int main() {
+int main(int argc, char** argv) {
+}
+
+#ifdef NOT_USED
+
+int main2() {
     /* Hello guys.
      * This is a short example on how to use the ROACH2 database.
      * Please look at the source for more detailed descriptions of the functions.
@@ -132,3 +138,4 @@ int main() {
 
     return 0;
 }
+#endif

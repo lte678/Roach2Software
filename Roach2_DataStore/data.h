@@ -11,9 +11,11 @@
 #define DATA_H
 
 #include <vector>
+#include "Data_super.h"
 #include <string>
 #include <iostream>
 #include "serialization.h"
+#include <string.h>
 
 enum SENSOR_TYPES {
 	TEMP_SENSOR = 0,
@@ -50,40 +52,40 @@ enum IMU_FIELD_TYPES {
  * @return int according to enum IMU_FIELD_TYPES
 */
 static IMU_FIELD_TYPES convert_imu_field(char* imu_field_name) {
-	if (imu_field_name == "ACCELERATION_X") {
+	if (strcmp(imu_field_name, "ACCELERATION_X") == 0) {
 		return ACCELERATION_X;
 	}
-	else if (imu_field_name == "ACCELERATION_Y") {
+	else if (strcmp(imu_field_name, "ACCELERATION_Y")) {
 		return ACCELERATION_Y;
 	}
-	else if (imu_field_name == "ACCELERATION_Z") {
+	else if (strcmp(imu_field_name, "ACCELERATION_Z")) {
 		return ACCELERATION_Z;
 	}
-	else if (imu_field_name == "MAG_X") {
+	else if (strcmp(imu_field_name, "MAG_X")) {
 		return MAG_X;
 	}
-	else if (imu_field_name == "MAG_Y") {
+	else if (strcmp(imu_field_name, "MAG_Y")) {
 		return MAG_Y;
 	}
-	else if (imu_field_name == "MAG_Z") {
+	else if (strcmp(imu_field_name, "MAG_Z")) {
 		return MAG_Z;
 	}
-	else if (imu_field_name == "GYR_X") {
+	else if (strcmp(imu_field_name, "GYR_X")) {
 		return GYR_X;
 	}
-	else if (imu_field_name == "GYR_Y") {
+	else if (strcmp(imu_field_name, "GYR_Y")) {
 		return GYR_Y;
 	}
-	else if (imu_field_name == "GYR_Z") {
+	else if (strcmp(imu_field_name, "GYR_Z")) {
 		return GYR_Z;
 	}
-	else if (imu_field_name == "imu_temp") {
+	else if (strcmp(imu_field_name, "imu_temp")) {
 		return imu_temp;
 	}
 
 }
 
-class Data {
+class Data : Data_super {
     /*
      * @brief Data Structure used for communication and data saving. Every
      * instance can contain one value per column
@@ -130,7 +132,7 @@ class Data {
         // pretty print
         void print();
 
-		long* convert_to_serial();
+		uint64_t* convert_to_serial();
 		int convert_to_serial_array_length();
 
 };

@@ -36,18 +36,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="data.cpp" />
-    <ClCompile Include="database.cpp" />
+    <ClCompile Include="data_simple.cpp" />
+    <ClCompile Include="Data_super.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="serialization.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="data.h" />
-    <ClInclude Include="database.h" />
+    <ClInclude Include="data_simple.h" />
+    <ClInclude Include="Data_super.h" />
     <ClInclude Include="serialization.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SQLite\SQLite.vcxproj">
-      <Project>{160ce38d-814e-43b5-89a7-f92ab5207df8}</Project>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{f2dac19d-c6f3-4b98-89df-257a207661f9}</ProjectGuid>
@@ -62,6 +60,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>

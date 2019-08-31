@@ -9,6 +9,12 @@
 #ifndef RECEIVE_HANDLER_HEADER
 #define RECEIVE_HANDLER_HEADER
 
+// Definition of REXUS signals
+enum class REXUS_SIGNALS {
+	LO = 0,
+	SODS = 1,
+	SOE = 2
+};
 
 class ReceiveHandler
 {
@@ -20,7 +26,7 @@ public:
 	/* 
 	 * @brief Function called when data was received from the Rexus service module link
 	 **/
-	virtual void packageReceivedRexus() = 0;
+	virtual void packageReceivedRexus(uint64_t message, int msg_length) = 0;
 	/*
 	 * @brief Function called when a rocket signal was detected
 	**/
@@ -28,7 +34,7 @@ public:
 	/*
 	 * @brief Function called when data from the UART port was received 
 	 **/
-	virtual void packageReceivedUART() = 0;
+	virtual void packageReceivedUART(uint64_t message, int msg_length) = 0;
 };
 
 #endif
