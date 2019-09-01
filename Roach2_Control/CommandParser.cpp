@@ -11,7 +11,7 @@ parse_command_type CommandParser::parse(uint32_t command)
 	parse_command_type result;
 
 	// Command type is MSB byte
-	uint8_t msb = ((command & 0xFF00000000) >> 24);
+	uint8_t msb = ((command & 0xFF000000) >> 28);
 
 	// Command number
 	uint32_t nr = command & 0x00FFFFFF;

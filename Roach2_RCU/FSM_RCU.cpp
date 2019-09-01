@@ -108,13 +108,12 @@ void FSM_RCU::packageReceivedUART(uint64_t message, int msg_length)
 		case (int)COMMANDS_DEBUG::rcu_next_state:
 			if (this->currentState == (int)FSM_STATES_RCU::IDLE) {
 				this->currentState = (int)FSM_STATES_RCU::STANDBY;
-			}
-			if (this->currentState == (int)FSM_STATES_RCU::STANDBY) {
+			} else if (this->currentState == (int)FSM_STATES_RCU::STANDBY) {
 				this->currentState = (int)FSM_STATES_RCU::DRIVE_FORWARD;
 			}
 
 			// Send current state back
-			send_data = new Data_simple(cmd, this->currentState);
+			send_data = new Data_simple(cmd, (uint32_t)this->currentState);
 			this->debug_link->sendData(send_data, 1);
 		break;
 
@@ -122,13 +121,12 @@ void FSM_RCU::packageReceivedUART(uint64_t message, int msg_length)
 		case (int)COMMANDS_DEBUG::rcu_prev_state:
 			if (this->currentState == (int)FSM_STATES_RCU::STANDBY) {
 				this->currentState = (int)FSM_STATES_RCU::IDLE;
-			}
-			if (this->currentState == (int)FSM_STATES_RCU::DRIVE_FORWARD) {
+			} else if (this->currentState == (int)FSM_STATES_RCU::DRIVE_FORWARD) {
 				this->currentState = (int)FSM_STATES_RCU::STANDBY;
 			}
 
 			// Send current state back
-			send_data = new Data_simple(cmd, this->currentState);
+			send_data = new Data_simple(cmd, (uint32_t)this->currentState);
 			this->debug_link->sendData(send_data, 1);
 		break;
 
