@@ -54,7 +54,7 @@ void FSM_RCU::packageReceivedUART(uint64_t message, int msg_length)
 		// RCU alive check
 		case (int)COMMANDS_OPERATIONAL::rcu_check_alive:
 			// Check alive => RCU is alive
-			// Send lone 1 in upper word (32bit) and current time in lower word
+			// Send command back and 1 in parameter section
 			send_data = new Data_simple(cmd, 1);
 			this->debug_link->sendData(send_data, 1);
 		break;

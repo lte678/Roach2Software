@@ -54,8 +54,10 @@ void UART::send(void)
 			write(this->serial_port, &crc, sizeof(crc));
 			this->frame_counter_tx++;
 		}
+		this->send_ongoing = false;
 
 		// Free memory
+		delete tx_data;
 		delete this->dataToSend;
 	}
 }
@@ -144,7 +146,7 @@ void UART::receive(void)
 	}
 
 	// Frame parser
-	if (this->rx_buffer_counter == 11) {
+	if (this->rx_buffer_counter >= 11) {
 		// Parse into command structure
 		if (this->frame_counter_rx == 0) {
 			// New data received
@@ -196,7 +198,7 @@ UART::UART()
 	// Check also that use is in dialout group: sudo adduser $USER dialout
 	if (serial_port < 0) {
 		// Error occured
-		printf("Error %i from open: %s\n", errno, strerror(errno));
+		//printf("Error %i from open: %s\n", errno, strerror(errno));
 	}
 	else {
 		// Configure serial port
@@ -217,8 +219,8 @@ UART::UART()
 			tty.c_oflag &= ~ONLCR; // Disable output conversion of newline signal
 			tty.c_cc[VTIME] = 1;    // Wait for up to 0.1s (1 deciseconds), returning as soon as any data is received.
 			tty.c_cc[VMIN] = 0;
-			cfsetispeed(&tty, B115200); // Baudrate input
-			cfsetospeed(&tty, B115200); // Baudrate output
+			cfsetispeed(&tty, B9600); // Baudrate input
+			cfsetospeed(&tty, B9600); // Baudrate output
 
 			// RX internal buffer
 			this->rx_buffer = new char[11];
