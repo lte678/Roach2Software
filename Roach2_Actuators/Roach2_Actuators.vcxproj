@@ -69,6 +69,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
@@ -76,6 +77,18 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
+    <ClCompile Include="RocketSignals.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="RocketSignals.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Roach2_Control\Roach2_Control.vcxproj">
+      <Project>{3a5f7cf7-e7a7-4a72-9d0d-fcb86063f826}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Roach2_DataStore\Roach2_DataStore.vcxproj">
+      <Project>{f2dac19d-c6f3-4b98-89df-257a207661f9}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

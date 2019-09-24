@@ -1,8 +1,8 @@
 #ifndef ROCKET_SIGNALS_HEADER_FILE
 #define ROCKET_SIGNALS_HEADER_FILE
 
-#include "Connection.h"
-#include "ReceiveHandler.h"
+#include "../Roach2_Comm/ReceiveHandler.h"
+#include "../Roach2_Comm/Connection.h"
 #include <wiringPi>
 
 class RocketSignals :

@@ -69,6 +69,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
@@ -76,24 +77,21 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
-    <ClCompile Include="adc.cpp" />
-    <ClCompile Include="ARM_Systeminfo.cpp" />
     <ClCompile Include="imu.cpp" />
     <ClCompile Include="Roach2_Sensor_Sensor.cpp" />
-    <ClCompile Include="rotEnc.cpp" />
-    <ClCompile Include="Sensor.cpp" />
-    <ClCompile Include="temp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="adc.h" />
-    <ClInclude Include="ARM_Systeminfo.h" />
     <ClInclude Include="imu_neu.h" />
     <ClInclude Include="Roach2_Sensor_Sensor.h" />
-    <ClInclude Include="rotEnc.h" />
-    <ClInclude Include="Sensor.h" />
-    <ClInclude Include="Temp.h" />
   </ItemGroup>
-  <ItemDefinitionGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <ClCompile>
+      <AdditionalOptions>-lwiringPi %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>-lwiringPi %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

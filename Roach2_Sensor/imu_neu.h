@@ -7,6 +7,7 @@
 #define IMU_TEST_BNO055_H
 
 #include "../Roach2_DataStore/data.h"
+#include "Roach2_Sensor_Sensor.h"
 #include <wiringPiI2C.h>
 #include <bitset>
 #include <iostream>
@@ -193,19 +194,19 @@ enum BNO055REGISTERt1
 	GyrAMSet = 0x1F, /* Gyr Any Motion Threshhold */
 };
 
-enum BNO055SETTINGS 
+enum BNO055SETTINGS
 {
 	AccSettings = 0b00011111, /* Wenn NDOF, dann unnötig da automatisch*/
 	GyrSettings = 0b00000000,
 	MagSettings = 0b00011111,
 	UnitSettings = 0b00000000, /*m/s^2 , mT, DPS, Degrees, Quat units, °C, outputformat Windows. Change first bit to 1 for android definition */
 
-}
+};
 
 /* ##################################################################################### */
 /* 2. Class Definition */
 
-class BNO055_IMU {
+class BNO055_IMU : Sensor {
     /* Sensor class for BNO055 */
     private:
         int deviceHandle = 0;

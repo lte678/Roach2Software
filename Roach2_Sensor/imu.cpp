@@ -10,7 +10,7 @@
 
 BNO055_IMU::BNO055_IMU()
 {
-	this->deviceHandle = i2cConnect(BNO055_DEVICE_ID); // Get file/I2C handle
+	this->deviceHandle = this->i2cConnect(BNO055_DEVICE_ID); // Get file/I2C handle
 	if (this->deviceHandle == -1)
 	{
 		std::cout << "IMU: Connection failed!" << std::endl;
@@ -21,7 +21,7 @@ BNO055_IMU::BNO055_IMU()
 	}
 	else
 	{
-		std::cout << "IMU: not online! Performing reset.." << std:endl;
+		std::cout << "IMU: not online! Performing reset.." << std::endl;
 		this->reset();
 	}
 }
@@ -120,7 +120,7 @@ void BNO055_IMU::update()
 
 int BNO055_IMU::changeSign(int measurement)
 {
-	if (measurement >> 15) != 0
+	if ((measurement >> 15) != 0)
 	{
 		int signchange = 0b1000000000000000;
 		measurement = measurement | signchange;
