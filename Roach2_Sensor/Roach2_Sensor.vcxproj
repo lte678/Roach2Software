@@ -77,12 +77,16 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
+    <ClCompile Include="adc.cpp" />
     <ClCompile Include="imu.cpp" />
     <ClCompile Include="Roach2_Sensor_Sensor.cpp" />
+    <ClCompile Include="temp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="adc.h" />
     <ClInclude Include="imu_neu.h" />
     <ClInclude Include="Roach2_Sensor_Sensor.h" />
+    <ClInclude Include="Temp.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>

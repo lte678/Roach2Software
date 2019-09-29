@@ -5,8 +5,8 @@
 *
 * @copyright KSat Stuttgart e.V. Roach2 software team
 */
-#pragma once
-
+#ifndef Sensor_H
+#define Sensor_H
 #include "..//Roach2_DataStore/data.h"
 #include "wiringPiSPI.h"
 #include "wiringPiI2C.h"
@@ -30,6 +30,7 @@ class Sensor
 		virtual int getI2CAddr() = 0;
 	// I2C sensor functions are placed here to avoid redefining them for most sensors
 	protected:
+		int deviceHandle;
 		int write8(int reg, int data);
 		int read8(int reg);
 		int write16(int reg, int data);
@@ -39,3 +40,5 @@ class Sensor
 		int simpleRead();
 		int simpleWrite(int data);
 };
+
+#endif //Sensor_H
