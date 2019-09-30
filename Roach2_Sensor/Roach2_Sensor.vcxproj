@@ -77,8 +77,10 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <LibraryPath>-lwiringPi</LibraryPath>
-    <IncludePath>$(LinuxIncludePath)\wiringPi\2.32</IncludePath>
+    <LibraryPath>
+    </LibraryPath>
+    <IncludePath>
+    </IncludePath>
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="adc.cpp" />
@@ -103,6 +105,11 @@
     </ClCompile>
     <Link>
       <AdditionalOptions>-lwiringPi %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <Link>
+      <AdditionalOptions>-lwiringPi</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
