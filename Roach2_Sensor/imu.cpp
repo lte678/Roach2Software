@@ -135,7 +135,7 @@ int BNO055_IMU::changeSign(int measurement)
 	}
 }
 
-*Data BNO055_IMU::getData()
+Data* BNO055_IMU::getData()
 {
 	data_ptr->addValue("ACCELERATION_X", this->acc[0]);
 	data_ptr->addValue("ACCELERATION_Y", this->acc[1]);
@@ -154,7 +154,7 @@ int BNO055_IMU::changeSign(int measurement)
 	data_ptr->addValue("EULER_P", this->rot[1]);
 	data_ptr->addValue("EULER_H", this->rot[2]);
 	data_ptr->addValue("imu_temp", this->temp);
-	return 
+	return data_ptr;
 }
 
 int BNO055_IMU::getI2CAddr()
@@ -167,7 +167,8 @@ int BNO055_IMU::getI2CAddr()
 void BNO055_IMU::reset()
 {
 	/* Resets BNO055 device */
-	if (this->is_online()) this->write8(SYS_TRIGGER_ADDR, 0x00);
+	if (this->is_online())
+		this->write8(SYS_TRIGGER_ADDR, 0x00);
 }
 
 int BNO055_IMU::calibrate() 

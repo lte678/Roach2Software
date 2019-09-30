@@ -8,10 +8,11 @@
 * @copyright KSat Stuttgart e.V. Roach2 software team
 */
 
-#ifndef ADC_MCP3428
-#define ADC_MCP3428
+#ifndef ADC_MCP3428_HEADER
+#define ADC_MCP3428_HEADER
+
 #include "Roach2_Sensor_Sensor.h"
-#include "..//Roach2_DataStore/data.h"
+#include "../Roach2_DataStore/data.h"
 #include <wiringPiI2C.h>
 #include <bitset>
 #include <iostream>

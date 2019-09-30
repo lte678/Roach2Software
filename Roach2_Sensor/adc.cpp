@@ -10,10 +10,10 @@
 // TODO: INIT, UPDATE, GETDATA
 ADC_MCP3428::ADC_MCP3428()
 {
-	this->deviceHandle = i2cConnect(MCP3428_DEVICE_ID); // Get file/I2C handle
-	if (read8(this->deviceHandle, MCP3428_DEVICE_ID) != 0x00) 
+	this->deviceHandle = this->i2cConnect(MCP3428_DEVICE_ID); // Get file/I2C handle
+	if (read8(MCP3428_DEVICE_ID) != 0x00) 
 	{
-		std::cout << "ADC: Connection failed!"
+		std::cout << "ADC: Connection failed!";
 	}
 }
 
@@ -31,16 +31,16 @@ void ADC_MCP3428::update()
 	measurement = simpleRead();
 
 	measurement = measurement >> 5;
-	if (measurement >> 15) != 0
+	if ((measurement >> 15) != 0)
 	{
 		int signchange = 0b1000000000000000;
 		measurement = measurement | signchange;
-		measurement = binaryToDecimal(measurement)
-		measurement = measurement * -1
+		measurement = binaryToDecimal(measurement);
+		measurement = measurement * -1;
 	}
 	else
 	{
-		measurement = binaryToDecimal(measurement)
+		measurement = binaryToDecimal(measurement);
 	}
 	measurement = measurement * 0.0625;
 	/*hier wird measurement in float umgewandelt in mV*/
@@ -49,8 +49,8 @@ void ADC_MCP3428::update()
 	this->data_obj->addValue("ADC", measurement);
 }
 
-	*Data ADC_MCP3428::getData() {
-		return 
+Data* ADC_MCP3428::getData() {
+	return this->data_obj;
 			/*Effekt der eigenerhitzung wird vernachlässigt*/
 }
 

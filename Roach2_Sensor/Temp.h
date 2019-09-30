@@ -47,7 +47,7 @@ public:
 	~TEMP_LM75B();
 	void init();
 	void update();
-	Data getData();
+	Data* getData();
 	int getI2CAddr();
 //int logOvertemperature();
 private:

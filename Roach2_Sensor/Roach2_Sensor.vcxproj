@@ -76,6 +76,10 @@
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <LibraryPath>-lwiringPi</LibraryPath>
+    <IncludePath>$(LinuxIncludePath)\wiringPi\2.32</IncludePath>
+  </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="adc.cpp" />
     <ClCompile Include="imu.cpp" />
@@ -87,6 +91,11 @@
     <ClInclude Include="imu_neu.h" />
     <ClInclude Include="Roach2_Sensor_Sensor.h" />
     <ClInclude Include="Temp.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Roach2_DataStore\Roach2_DataStore.vcxproj">
+      <Project>{f2dac19d-c6f3-4b98-89df-257a207661f9}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>
