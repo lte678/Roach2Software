@@ -84,7 +84,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="adc.cpp" />
-    <ClCompile Include="imu.cpp" />
+    <ClCompile Include="imu_neu.cpp" />
     <ClCompile Include="Roach2_Sensor_Sensor.cpp" />
     <ClCompile Include="temp.cpp" />
   </ItemGroup>
