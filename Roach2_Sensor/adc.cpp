@@ -42,11 +42,11 @@ void ADC_MCP3428::update()
 	{
 		measurement = binaryToDecimal(measurement);
 	}
-	measurement = measurement * 0.0625;
+	convertedMeasurement = measurement * 0.0625;
 	/*hier wird measurement in float umgewandelt in mV*/
 
 	this->data_obj = new Data();
-	this->data_obj->addValue("ADC", measurement);
+	this->data_obj->addValue("ADC", convertedMeasurement);
 }
 
 Data* ADC_MCP3428::getData() {

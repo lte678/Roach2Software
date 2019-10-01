@@ -45,6 +45,7 @@ public:
 private:
 	int deviceHandle = 0;
 	int measurement = 0;
+	double convertedMeasurement = 0.0;
 	unsigned long timeStamp = 0;
 	Data* data_obj;
 };
