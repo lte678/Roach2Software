@@ -2,7 +2,11 @@
 
 TEMP_LM75B::TEMP_LM75B()
 {
-	this->deviceHandle=i2cConnect(LM75B_DEVICE_ID); // Get file/I2C handle
+	
+}
+
+TEMP_LM75B::~TEMP_LM75B()
+{
 }
 
 void TEMP_LM75B::init()
@@ -42,8 +46,14 @@ int TEMP_LM75B::getI2CAddr() {
 	return LM75B_DEVICE_ID;
 }
 
+int TEMP_LM75B::getSensorType()
+{
+	return SENSOR_TYPES::TEMP_SENSOR;
+}
+
 void TEMP_LM75B::tempConfig()
 {
+	this->deviceHandle = i2cConnect(LM75B_DEVICE_ID); // Get file/I2C handle
 	write16(TOS_reg, TOS_TEMP);
 	write16(THYST_reg, THYST_TEMP);
 	write8(CONF_reg, CONF_TEMP);

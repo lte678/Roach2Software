@@ -11,6 +11,7 @@
 
 #include "../Roach2_DataStore/data.h"
 #include "../Roach2_Comm/ReceiveHandler.h"
+#include "../Roach2_Sensor/Roach2_Sensor_Sensor.h"
 
 enum class FSM_STATES_RCU {
 	IDLE = 0,
@@ -34,7 +35,10 @@ protected:
 	int currentState;
 	int lastState;
 	int time;
-	//Sensor* sensors;
+	Sensor* sensors;
+	int numberSensors;
+	int numberActuators;
+	int numberData;
 	//Actuator* actuators;
 	//Database* data;
 	bool isSimMode;
@@ -45,6 +49,7 @@ protected:
 	void saveData(void);
 	void enableSimMode(void);
 	void disableSimMode(void);
+	Data* readSensor(int sensorId);
 public:
 	virtual void run(void) = 0;
 };

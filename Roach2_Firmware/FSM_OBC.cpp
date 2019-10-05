@@ -22,7 +22,9 @@ FSM_OBC::FSM_OBC()
 	//this->data = new Database();
 
 	// Sensor
-	BNO055_IMU* imu = new BNO055_IMU();
+	this->sensors = new TEMP_LM75B[20];
+	this->numberSensors = 1;
+	this->sensors[0] = TEMP_LM75B();
 
 	// System start time
 	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
@@ -141,6 +143,14 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 		break;
 		case (int)COMMANDS_DEBUG::obc_read_sensor:
 			// Read the sensor with the given sensor id
+			Data* data = this->readSensor(para);
+			
+			if (data == nullptr) {
+				send_data = new Data_simple(cmd, -1);
+			}
+			else {
+				send_data = new Data_simple(cmd, data->convert_to_serial());
+			}
 		break;
 		case (int)COMMANDS_DEBUG::obc_sensor_acq_off:
 			// Switch sensor acquisiton off
@@ -169,12 +179,15 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 
 void FSM_OBC::rocketSignalReceived(int signal_source)
 {
+	int i = 0;
 }
 
-void FSM_OBC::packageRecievedREXUS(uint64_t message, int msg_length)
+void FSM_OBC::packageReceivedRexus(uint64_t message, int msg_length)
 {
+	int i = 0;
 }
 
 void FSM_OBC::packageReceivedEthernet()
 {
+	int i = 0;
 }

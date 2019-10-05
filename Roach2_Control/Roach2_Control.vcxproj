@@ -91,6 +91,9 @@
     <ProjectReference Include="..\Roach2_DataStore\Roach2_DataStore.vcxproj">
       <Project>{f2dac19d-c6f3-4b98-89df-257a207661f9}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Roach2_Sensor\Roach2_Sensor.vcxproj">
+      <Project>{7046de7b-2b66-4b52-a291-d712025d0f0d}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -41,6 +41,7 @@ public:
 	void update();
 	Data* getData();
 	int getI2CAddr();
+	int getSensorType();
 	//int logOvertemperature();
 private:
 	int deviceHandle = 0;

@@ -49,6 +49,7 @@ public:
 	void update();
 	Data* getData();
 	int getI2CAddr();
+	int getSensorType();
 //int logOvertemperature();
 private:
 	void tempConfig(); // Separate config function, to be called in the init()

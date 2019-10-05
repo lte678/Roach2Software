@@ -27,6 +27,11 @@ class Sensor
 		virtual void update() = 0;
 		virtual Data* getData() = 0;
 		virtual int getI2CAddr() = 0;
+		/**
+		* @brief Returns the sensor identifier number (see SENSOR_TYPES in data.h from datastore project)
+		* @return int sensor identifier
+		*/
+		virtual int getSensorType() = 0;
 	// I2C sensor functions are placed here to avoid redefining them for most sensors
 	protected:
 		int deviceHandle;

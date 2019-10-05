@@ -58,3 +58,8 @@ int ADC_MCP3428::getI2CAddr() {
 	return MCP3428_DEVICE_ID;
 }
 
+int ADC_MCP3428::getSensorType()
+{
+	return SENSOR_TYPES::ADC;
+}
+

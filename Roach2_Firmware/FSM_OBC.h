@@ -15,7 +15,7 @@
 #include "../Roach2_DataStore/data_simple.h"
 #include "../Roach2_Control/CommandParser.h"
 #include "../Roach2_Comm/UART.h"
-#include "../Roach2_Sensor/imu_neu.h"
+#include "../Roach2_Sensor/Temp.h"
 #include <chrono>
 
 class FSM_OBC :
@@ -31,7 +31,7 @@ public:
 	void triggerActuators(void);
 	void packageReceivedUART(uint64_t message, int msg_length);
 	void rocketSignalReceived(int signal_source);
-	void packageRecievedREXUS(uint64_t message, int msg_length);
+	void packageReceivedRexus(uint64_t message, int msg_length);
 	void packageReceivedEthernet();
 };
 
