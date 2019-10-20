@@ -22,9 +22,9 @@ FSM_OBC::FSM_OBC()
 	//this->data = new Database();
 
 	// Sensor
-	this->sensors = new TEMP_LM75B[20];
-	this->numberSensors = 1;
-	this->sensors[0] = TEMP_LM75B();
+	this->sensors[0] = ARM_Systeminfo();
+	this->sensors[0].init();
+	this->sensors[0].update();
 
 	// System start time
 	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
@@ -142,14 +142,16 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 			// Switch RCU/rover on
 		break;
 		case (int)COMMANDS_DEBUG::obc_read_sensor:
-			// Read the sensor with the given sensor id
-			Data* data = this->readSensor(para);
-			
-			if (data == nullptr) {
-				send_data = new Data_simple(cmd, -1);
-			}
-			else {
-				send_data = new Data_simple(cmd, data->convert_to_serial());
+			{
+				// Read the sensor with the given sensor id
+				Data* data = this->readSensor(para);
+
+				if (data == nullptr) {
+					send_data = new Data_simple(cmd, -1);
+				}
+				else {
+
+				}
 			}
 		break;
 		case (int)COMMANDS_DEBUG::obc_sensor_acq_off:

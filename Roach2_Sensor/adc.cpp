@@ -46,7 +46,8 @@ void ADC_MCP3428::update()
 	/*hier wird measurement in float umgewandelt in mV*/
 
 	this->data_obj = new Data();
-	this->data_obj->addValue("ADC", convertedMeasurement);
+	std::string name = "ADC";
+	this->data_obj->addValue(name, convertedMeasurement);
 }
 
 Data* ADC_MCP3428::getData() {

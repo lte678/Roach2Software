@@ -12,10 +12,10 @@
 #include "../Roach2_Control/FSM_Controller.h"
 #include "../Roach2_Comm/ReceiveHandler.h"
 #include "../Roach2_DataStore/data.h"
-#include "../Roach2_DataStore/data_simple.h"
+#include "../Roach2_DataStore/Data_simple.h"
 #include "../Roach2_Control/CommandParser.h"
 #include "../Roach2_Comm/UART.h"
-#include "../Roach2_Sensor/Temp.h"
+#include "../Roach2_Sensor/ARM_Systeminfo.h"
 #include <chrono>
 
 class FSM_OBC :

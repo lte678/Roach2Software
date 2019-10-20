@@ -15,6 +15,7 @@
 #include <bitset>
 #include <iostream>
 #include <chrono>
+#include <string>
 
 /* ##################################################################################### */
 /* 0. Hard coded settings  */

@@ -7,7 +7,6 @@
  **/
 
 #include "UART.h"
-#include "../Roach2_DataStore/data_simple.h"
 
 /**
  * @brief Send data according to our protocol
@@ -42,7 +41,7 @@ void UART::send(void)
 
 			// Create current header section
 			header_data = data_length;
-			header_data += ((uint8_t)this->frame_counter_rx << 4); // Shift to upper 4bits
+			header_data += ((uint8_t)this->frame_counter_tx << 4); // Shift to upper 4bits
 
 			// Calc CRC
 			uint8_t* crc_data = (uint8_t*)& buffer_data;
@@ -122,6 +121,7 @@ uint16_t UART::calc_crc(const uint8_t * data, uint16_t size)
 
 /**
  * @brief Receive data from serial port according to our protocol
+ * This function cannot run in parallel to the main thread and is therefore replaced by run(data_ref).
 */
 void UART::receive(void)
 {

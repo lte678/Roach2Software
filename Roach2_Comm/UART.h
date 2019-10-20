@@ -18,8 +18,17 @@
 #include <unistd.h> // write(), read(), close()
 #include <unistd.h>
 #include "../Roach2_DataStore/data.h"
+#include "../Roach2_DataStore/Data_simple.h"
+
+// Threading related
+#include <thread>
+#include <deque>
+#include <mutex>
+#include <chrono>
+#include <condition_variable>
 
 #include "Connection.h"
+#include <mutex>
 
 #define CRC16 0x8005 // CRC16 polynom
 
@@ -27,6 +36,8 @@ class UART :
 	public Connection
 {
 private:
+	const int max_number_packages_send_at_once = 1000; // Max number of packages to send at once
+	const int rx_loop_wait = 1; // Time to wait after each check of RX buffer
 	char* port = "/dev/ttyS2";
 	struct termios tty;
 	int baud;
@@ -48,6 +59,10 @@ private:
 	bool receive_ongoing;
 	void send(void);
 	uint16_t calc_crc(const uint8_t* data, uint16_t size);
+	void run(void);
+
+
+	void receive(Data_super &data_ref);
 public:
 	UART();
 	~UART();

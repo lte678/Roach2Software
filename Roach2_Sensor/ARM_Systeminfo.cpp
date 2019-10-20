@@ -39,7 +39,7 @@ void ARM_Systeminfo::update()
 		&lastTotalSys, &lastTotalIdle);
 	fclose(file);
 	double percent;
-	FILE* file;
+
 	unsigned long long totalUser, totalUserLow, totalSys, totalIdle, total;
 
 	file = fopen("/proc/stat", "r");
@@ -82,4 +82,9 @@ Data* ARM_Systeminfo::getData()
 int ARM_Systeminfo::getI2CAddr()
 {
 	return 0;
+}
+
+int ARM_Systeminfo::getSensorType()
+{
+	return SENSOR_TYPES::CPU_LOAD;
 }

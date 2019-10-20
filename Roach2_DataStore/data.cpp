@@ -136,7 +136,7 @@ uint64_t* Data::convert_to_serial() {
 		packages_struct[0] = (std::stoi(this->id) << 4); // imu sensor has no subtypes
 	}
 	else if (std::stoi(this->id) == SENSOR_TYPES::CPU_LOAD) {
-		packages_struct[0] = (std::stoi(this- << 4); // cpu load has no subtypes
+		//packages_struct[0] = (std::stoi(this- < 4); // cpu load has no subtypes
 	}
 	else if (std::stoi(this->id) == SENSOR_TYPES::CPU_TEMP) {
 
