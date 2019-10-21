@@ -9,6 +9,7 @@
 
 #ifndef TEMP_LM75B_H
 #define TEMP_LM75B_H
+
 #include "Roach2_Sensor_Sensor.h"
 #include <wiringPiI2C.h>
 #include <bitset>

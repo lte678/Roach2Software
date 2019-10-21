@@ -28,9 +28,7 @@ enum SENSOR_TYPES {
 	LASERDIST_5 = 7,
 	ADC = 8,
 	ROT_ENC = 9,
-	CPU_TEMP = 10,
-	CPU_LOAD = 11,
-	RAM_USAGE = 12
+	SYS_INFO = 10
 };
 
 enum IMU_FIELD_TYPES {
@@ -85,14 +83,14 @@ static IMU_FIELD_TYPES convert_imu_field(char* imu_field_name) {
 
 }
 
-class Data : Data_super {
+class Data : public Data_super {
     /*
      * @brief Data Structure used for communication and data saving. Every
      * instance can contain one value per column
      * */
 
     private:
-        std::string id;                         // id of Data object
+        int id;                         // id of Data object
         unsigned long time;                     // timestamp
         std::vector<std::string> columnNames;   // names of data columns
         std::vector<double> values;             // data to hold
@@ -100,14 +98,14 @@ class Data : Data_super {
     public:
         // constructors
         Data();
-        Data(std::string id,
+        Data(int id,
              unsigned long time,
              std::vector<std::string> columnNames,
              std::vector<double> values);
 
         // set & get
         void setId(int id);
-        std::string getId();
+        int getId();
 
         void setTime(const unsigned long time);
         long getTime();
