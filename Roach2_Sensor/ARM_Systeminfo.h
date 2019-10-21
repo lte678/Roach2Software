@@ -6,6 +6,7 @@
 #include "sys/sysinfo.h"
 #include "../Roach2_DataStore/data.h"
 #include "../Roach2_DataStore/Data_simple.h"
+#include <unistd.h>
 
 /* @file ARM_Systeminfo.h
  * @date 29.08.2019

@@ -1,4 +1,5 @@
 #include "ARM_Systeminfo.h"
+#include <fcntl.h>
 
 void ARM_Systeminfo::init()
 {
@@ -12,6 +13,7 @@ void ARM_Systeminfo::update()
 {
 	// Create new data object
 	this->data_obj = new Data();
+	this->data_obj->setId((int)SENSOR_TYPES::SYS_INFO);
 
 	// See: https://stackoverflow.com/questions/63166/how-to-determine-cpu-and-memory-consumption-from-inside-a-process
 
@@ -32,40 +34,31 @@ void ARM_Systeminfo::update()
 	this->data_obj->addValue("MEM_TOTAL", totalPhysMem);
 	this->data_obj->addValue("MEM_USED", physMemUsed);
 
-	// CPU usage
-	unsigned long long lastTotalUser, lastTotalUserLow, lastTotalSys, lastTotalIdle;
-	FILE* file = fopen("/proc/stat", "r");
-	fscanf(file, "cpu %llu %llu %llu %llu", &lastTotalUser, &lastTotalUserLow,
-		&lastTotalSys, &lastTotalIdle);
-	fclose(file);
-	double percent;
+	int FileHandler;
+	char FileBuffer[1024];
+	float load;
 
-	unsigned long long totalUser, totalUserLow, totalSys, totalIdle, total;
-
-	file = fopen("/proc/stat", "r");
-	fscanf(file, "cpu %llu %llu %llu %llu", &totalUser, &totalUserLow,
-		&totalSys, &totalIdle);
-	fclose(file);
-
-	if (totalUser < lastTotalUser || totalUserLow < lastTotalUserLow ||
-		totalSys < lastTotalSys || totalIdle < lastTotalIdle) {
-		//Overflow detection. Just skip this value.
-		percent = -1.0;
-	}
-	else {
-		total = (totalUser - lastTotalUser) + (totalUserLow - lastTotalUserLow) +
-			(totalSys - lastTotalSys);
-		percent = total;
-		total += (totalIdle - lastTotalIdle);
-		percent /= total;
-		percent *= 100;
-	}
-	lastTotalUser = totalUser;
-	lastTotalUserLow = totalUserLow;
-	lastTotalSys = totalSys;
-	lastTotalIdle = totalIdle;
+	// Source https://www.raspberrypi.org/forums/viewtopic.php?t=64835 https://linuxwiki.de/proc/loadavg
+	// Interpretation: as we have 4 cores => 4 is full load, any value below is meaning that the system is not
+	// fully used. Values above 4 would indicate overload (not possible for CPU to execute all tasks in the defined time)
+	FileHandler = open("/proc/loadavg", O_RDONLY);
+	read(FileHandler, FileBuffer, sizeof(FileBuffer) - 1);
+	sscanf(FileBuffer, "%f", &load);
+	close(FileHandler);
+	int percent = (int)(load * 100);
 
 	this->data_obj->addValue("CPU_USAGE", percent);
+
+	// CPU temperature, value is in /sys/devices/virtual/thermal/thermal_zone0/temp => Nano Pi Neo Air has one temperature sensor there (thermal_zone0)
+	int fd;
+	float temp;
+	char buffer[6];
+	fd = open("/sys/devices/virtual/thermal/thermal_zone0/temp", O_RDONLY);
+	read(fd, buffer, sizeof(buffer) - 1);
+	sscanf(buffer, "%f", &temp);
+	close(fd);
+
+	this->data_obj->addValue("TEMP", temp);
 }
 
 /**
@@ -86,5 +79,5 @@ int ARM_Systeminfo::getI2CAddr()
 
 int ARM_Systeminfo::getSensorType()
 {
-	return SENSOR_TYPES::CPU_LOAD;
+	return SENSOR_TYPES::SYS_INFO;
 }

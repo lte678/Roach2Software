@@ -22,9 +22,13 @@ FSM_OBC::FSM_OBC()
 	//this->data = new Database();
 
 	// Sensor
-	this->sensors[0] = ARM_Systeminfo();
-	this->sensors[0].init();
-	this->sensors[0].update();
+	ARM_Systeminfo *info = new ARM_Systeminfo();
+	info->init();
+	info->update();
+
+	// Add all of them to sensor array (this is possible even that Sensor itself is abstract)
+	this->sensors = {info};
+	this->numberSensors = 1;
 
 	// System start time
 	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
@@ -148,9 +152,10 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 
 				if (data == nullptr) {
 					send_data = new Data_simple(cmd, -1);
+					this->debugLink->sendData(send_data, 1);
 				}
 				else {
-
+					this->debugLink->sendData(data, 1);
 				}
 			}
 		break;
