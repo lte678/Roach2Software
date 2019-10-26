@@ -79,10 +79,12 @@
   <ItemGroup>
     <ClInclude Include="CommandParser.h" />
     <ClInclude Include="FSM_Controller.h" />
+    <ClInclude Include="Sensor_Manager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CommandParser.cpp" />
     <ClCompile Include="FSM_Controller.cpp" />
+    <ClCompile Include="Sensor_Manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Roach2_Comm\Roach2_Comm.vcxproj">
