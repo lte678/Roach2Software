@@ -8,12 +8,21 @@
 #ifndef Sensor_H
 #define Sensor_H
 #include "../Roach2_DataStore/data.h"
-#include "wiringPiSPI.h"
-#include "wiringPiI2C.h"
+//#include "wiringPiSPI.h"
+#include <wiringPiI2C.h>
+//#include <wiringPi.h>
 #include <bitset>
 #include <iostream>
 #include <chrono>
-
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <linux/i2c.h>
+#include <linux/i2c-dev.h>
 class Sensor
 {
 	/**

@@ -12,6 +12,8 @@
 BNO055_IMU::BNO055_IMU()
 {
 	deviceHandle = this->i2cConnect(BNO055_DEVICE_ID); // Get file/I2C handle
+	std::cout << "BNO055 ctor device handle: " << this->deviceHandle << " " << deviceHandle << std::endl;
+
 	if (this->deviceHandle == -1)
 	{
 		std::cout << "IMU: Connection failed!" << std::endl;
@@ -27,10 +29,12 @@ BNO055_IMU::BNO055_IMU()
 	}
 }
 
-bool BNO055_IMU::is_online() 
+bool BNO055_IMU::is_online()
 {
 	/* Checks if BNO055 is online by reading the chip id register */
-	if (this->read8(CHIP_ID_ADDR) == 0xA0) {
+	int ret = (this->read8(CHIP_ID_ADDR));
+	std::cout << "Is online: Should be 160 -> " << ret << std::endl;
+	if(ret == 0xA0) {
 		return true;
 	}
 	else {
@@ -40,9 +44,12 @@ bool BNO055_IMU::is_online()
 void BNO055_IMU::init() //performs all settings possible
 {
 	this->config();
-	this->calibrate();
+	//this->calibrate();
 }
-
+int BNO055_IMU::getSensorType()
+{
+	return 0; //test
+}
 void BNO055_IMU::update()
 {
 	this->measurement = ((this->read8(ACCEL_DATA_X_MSB_ADDR) << 8) + this->read8(ACCEL_DATA_X_LSB_ADDR)); /*Get Acceleration. 100LSB = 1m/s^2*/
@@ -137,6 +144,7 @@ int BNO055_IMU::changeSign(int measurement)
 
 Data* BNO055_IMU::getData()
 {
+	Data* data_ptr = new Data();
 	data_ptr->addValue("ACCELERATION_X", this->acc[0]);
 	data_ptr->addValue("ACCELERATION_Y", this->acc[1]);
 	data_ptr->addValue("ACCELERATION_Z", this->acc[2]);

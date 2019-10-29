@@ -9,23 +9,31 @@ Sensor::~Sensor(){
 }
 
 int Sensor::write8(int reg, int data){
-	return wiringPiI2CWriteReg8(this->deviceHandle, reg, data);
+	int w8 = wiringPiI2CWriteReg8(this->deviceHandle, reg, data);
+	return w8;//
 }
 
 int Sensor::read8(int reg){
-	return wiringPiI2CReadReg8(this->deviceHandle, reg);
+	//int readAcht = 0;  I2C_SMBUS_READ_BYTE_DATA(this->deviceHandle, (u_int8_t)reg);
+	//std::cout << "read8 device handle: " << this->deviceHandle << std::endl;
+	int res = wiringPiI2CReadReg8(this->deviceHandle, reg);
+	return res;//readAcht;
 }
 
 int Sensor::write16(int reg, int data){
-	return wiringPiI2CWriteReg16(this->deviceHandle, reg, data);
+	int w16 = wiringPiI2CWriteReg16(this->deviceHandle, reg, data);
+	return w16;// 
 }
 
 int Sensor::read16(int reg){
-	return wiringPiI2CReadReg16(this->deviceHandle, reg);
+	int r16 = wiringPiI2CReadReg16(this->deviceHandle, reg);
+	return r16;// 
 }
 
-int Sensor::i2cConnect(int dev){
-	return wiringPiI2CSetup(dev);
+int Sensor::i2cConnect(const int dev){
+	int fd = 0;// open("/dev/i2c-0", O_RDWR);
+//	int con = ioctl(fd, I2C_SLAVE, dev);
+	return wiringPiI2CSetup(dev);//fd 
 }
 int Sensor::binaryToDecimal(int number)
 {
@@ -51,10 +59,12 @@ int Sensor::binaryToDecimal(int number)
 
 int Sensor::simpleRead()
 {
-	return wiringPiI2CRead(this->deviceHandle);
+	int simpRead = wiringPiI2CRead(this->deviceHandle);// i2c_smbus_read_byte(this->deviceHandle);
+	return simpRead; //
 }
 
 int Sensor::simpleWrite(int data)
 {
-	return wiringPiI2CWrite(this->deviceHandle, data);
+	int sW = wiringPiI2CWrite(this->deviceHandle, data);
+	return sW;// 
 }

@@ -7,6 +7,7 @@
  * */
 
 #include "FSM_OBC.h"
+//#include <wiringPi.h>
 
 FSM_OBC::FSM_OBC()
 {
@@ -25,6 +26,19 @@ FSM_OBC::FSM_OBC()
 	ARM_Systeminfo *info = new ARM_Systeminfo();
 	info->init();
 	info->update();
+	//test
+	//wiringPiSetup();
+	TEMP_LM75B* temp = new TEMP_LM75B();
+	temp->init();
+	temp->update();
+	temp->getData();
+	BNO055_IMU* imu = new BNO055_IMU();
+	
+	imu->init();
+	//imu->calibrate();
+	imu->update();
+	imu->getData();
+	
 
 	// Add all of them to sensor array (this is possible even that Sensor itself is abstract)
 	this->sensors = {info};

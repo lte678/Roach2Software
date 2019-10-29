@@ -27,7 +27,7 @@ class BNO055_IMU : public Sensor {
     private:
 		const long CALIBRATION_TIMEOUT_SECONDS = 60;
 		const int BNO055_DEVICE_ID = 0x28;
-        int deviceHandle = 0;
+        //int deviceHandle = 0;
 		int measurement;
 		double convertedMeasurement = 0.0;
 		double acc[3];
@@ -235,7 +235,7 @@ class BNO055_IMU : public Sensor {
 	int calibrate();
 
 	void update();
-
+	int getSensorType();
 	//int initialize(bool force_calibration, BNO055_OPERATION_MODES_t mode);
 
 	void config();

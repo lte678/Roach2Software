@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.421
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29409.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Roach2_OBC", "Roach2_Firmware\Roach2_Firmware.vcxproj", "{3F0BF7B1-3D15-490D-A32C-88796D67460D}"
 EndProject
@@ -22,6 +22,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Roach2_Control", "Roach2_Control\Roach2_Control.vcxproj", "{3A5F7CF7-E7A7-4A72-9D0D-FCB86063F826}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SQLite", "SQLite\SQLite.vcxproj", "{160CE38D-814E-43B5-89A7-F92AB5207DF8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "I2CTest", "I2CTest\I2CTest.vcxproj", "{20D34084-D0A5-47C5-9126-035B10BDCDEC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -187,6 +189,22 @@ Global
 		{160CE38D-814E-43B5-89A7-F92AB5207DF8}.Release|x64.Build.0 = Release|x64
 		{160CE38D-814E-43B5-89A7-F92AB5207DF8}.Release|x86.ActiveCfg = Release|x86
 		{160CE38D-814E-43B5-89A7-F92AB5207DF8}.Release|x86.Build.0 = Release|x86
+		{20D34084-D0A5-47C5-9126-035B10BDCDEC}.Debug|ARM.ActiveCfg = Debug|ARM
+		{20D34084-D0A5-47C5-9126-035B10BDCDEC}.Debug|ARM.Build.0 = Debug|ARM
+		{20D34084-D0A5-47C5-9126-035B10BDCDEC}.Debug|ARM.Deploy.0 = Debug|ARM
+		{20D34084-D0A5-47C5-9126-035B10BDCDEC}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{20D34084-D0A5-47C5-9126-035B10BDCDEC}.Debug|ARM64.Build.0 = Debug|ARM64
+		{20D34084-D0A5-47C5-9126-035B10BDCDEC}.Debug|ARM64.Deploy.0 = Debug|ARM64
+		{20D34084-D0A5-47C5-9126-035B10BDCDEC}.Debug|x64.ActiveCfg = Debug|ARM
+		{20D34084-D0A5-47C5-9126-035B10BDCDEC}.Debug|x86.ActiveCfg = Debug|ARM
+		{20D34084-D0A5-47C5-9126-035B10BDCDEC}.Release|ARM.ActiveCfg = Release|ARM
+		{20D34084-D0A5-47C5-9126-035B10BDCDEC}.Release|ARM.Build.0 = Release|ARM
+		{20D34084-D0A5-47C5-9126-035B10BDCDEC}.Release|ARM.Deploy.0 = Release|ARM
+		{20D34084-D0A5-47C5-9126-035B10BDCDEC}.Release|ARM64.ActiveCfg = Release|ARM64
+		{20D34084-D0A5-47C5-9126-035B10BDCDEC}.Release|ARM64.Build.0 = Release|ARM64
+		{20D34084-D0A5-47C5-9126-035B10BDCDEC}.Release|ARM64.Deploy.0 = Release|ARM64
+		{20D34084-D0A5-47C5-9126-035B10BDCDEC}.Release|x64.ActiveCfg = Release|ARM
+		{20D34084-D0A5-47C5-9126-035B10BDCDEC}.Release|x86.ActiveCfg = Release|ARM
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

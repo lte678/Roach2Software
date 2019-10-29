@@ -54,7 +54,7 @@ public:
 //int logOvertemperature();
 private:
 	void tempConfig(); // Separate config function, to be called in the init()
-	int deviceHandle = 0;
+	//int deviceHandle = 0;
 	int measurement = 0;
 	double convertedMeasurement = 0.0;
 	unsigned long timeStamp = 0;

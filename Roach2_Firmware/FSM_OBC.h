@@ -17,6 +17,7 @@
 #include "../Roach2_Comm/UART.h"
 #include "../Roach2_Sensor/ARM_Systeminfo.h"
 #include "../Roach2_Sensor/Temp.h"
+#include "../Roach2_Sensor/imu_neu.h"
 #include <chrono>
 
 class FSM_OBC :
