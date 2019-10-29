@@ -52,8 +52,6 @@ FSM_OBC::FSM_OBC()
 		// Receive UART link data
 		this->debugLink->receive();
 
-		// Request sensor reading from all connected sensors
-
 		// FSM control
 		this->run();
 

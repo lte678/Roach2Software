@@ -38,7 +38,7 @@ class UART :
 private:
 	const int max_number_packages_send_at_once = 1000; // Max number of packages to send at once
 	const int rx_loop_wait = 1; // Time to wait after each check of RX buffer
-	char* port = "/dev/ttyS2";
+	char* port = "/dev/ttyS1";
 	struct termios tty;
 	int baud;
 	int serial_port;
