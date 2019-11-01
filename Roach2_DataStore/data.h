@@ -131,6 +131,7 @@ class Data : public Data_super {
         void print();
 
 		uint64_t* convert_to_serial();
+		uint64_t to_binary(double value);
 		int convert_to_serial_array_length();
 
 };

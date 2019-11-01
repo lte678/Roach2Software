@@ -154,13 +154,13 @@ Data* BNO055_IMU::getData()
 	data_ptr->addValue("GYR_X", this->gyr[0]);
 	data_ptr->addValue("GYR_Y", this->gyr[1]);
 	data_ptr->addValue("GYR_Z", this->gyr[2]);
-	data_ptr->addValue("QUAT_W", this->quat[0]);
-	data_ptr->addValue("QUAT_X", this->quat[1]);
-	data_ptr->addValue("QUAT_Y", this->quat[2]);
-	data_ptr->addValue("QUAT_Z", this->quat[3]);
-	data_ptr->addValue("EULER_R", this->rot[0]);
-	data_ptr->addValue("EULER_P", this->rot[1]);
-	data_ptr->addValue("EULER_H", this->rot[2]);
+	//data_ptr->addValue("QUAT_W", this->quat[0]);
+	//data_ptr->addValue("QUAT_X", this->quat[1]);
+	//data_ptr->addValue("QUAT_Y", this->quat[2]);
+	//data_ptr->addValue("QUAT_Z", this->quat[3]);
+	//data_ptr->addValue("EULER_R", this->rot[0]);
+	//data_ptr->addValue("EULER_P", this->rot[1]);
+	//data_ptr->addValue("EULER_H", this->rot[2]);
 	data_ptr->addValue("imu_temp", this->temp);
 	return data_ptr;
 }

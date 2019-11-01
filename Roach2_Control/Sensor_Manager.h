@@ -28,8 +28,8 @@ public:
 	void run(void);
 	void stop(void);
 	// Access to loaded sensor data
-	bool getData(Data* data_ptr, SENSOR_TYPES sensor_id);
-	bool getData(Data* data_ptr);
+	bool getData(Data** data_ptr, SENSOR_TYPES sensor_id);
+	bool getData(Data** data_ptr);
 	void setUpdateRate(int update_rate);
 };
 

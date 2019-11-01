@@ -8,14 +8,6 @@
 #include "FSM_Controller.h"
 
 
-/*
-* @brief Function called to request sensor (polling mechanism)
-*/
-void FSM_Controller::pollSensors()
-{
-
-}
-
 void FSM_Controller::triggerActuators()
 {
 }
@@ -48,13 +40,16 @@ Data* FSM_Controller::readSensor(int sensorId)
 	Data* data = nullptr;
 
 	// Load data from corresponding sensor
-	bool res = this->sensor_manager->getData(data, (SENSOR_TYPES)sensorId);
+	bool res;
+	do {
+		res = this->sensor_manager->getData(&data, (SENSOR_TYPES)sensorId);
+	} while (!res);
 
 	// Update sensor
 	if (res) {
-		return nullptr;
+		return data;
 	}
 	else {
-		return data;
+		return nullptr;
 	}
 }

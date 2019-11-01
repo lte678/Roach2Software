@@ -50,7 +50,6 @@ void Sensor_Manager::run(void)
 		// Update all sensors
 		for (int i = 0; i < this->number_sensors; i++) {
 			this->sensors[i]->update();
-			printf("Updated sensor! \n");
 			Data* data = this->sensors[i]->getData();
 			this->loaded_data.push_back(data);
 		}
@@ -65,14 +64,14 @@ void Sensor_Manager::stop(void)
 	this->stop_bit.store(true);
 }
 
-bool Sensor_Manager::getData(Data* data_ptr, SENSOR_TYPES sensor_id)
+bool Sensor_Manager::getData(Data** data_ptr, SENSOR_TYPES sensor_id)
 {
 	// Need to get access to lock
 	if (this->lock_data_access.try_lock()) {
 		// Load sensor value
 		for (int i = 0; i < this->loaded_data.size(); i++) {
 			if (this->loaded_data[i]->getId() == (int)sensor_id) {
-				data_ptr = this->loaded_data[i];
+				*data_ptr = this->loaded_data[i];
 				this->lock_data_access.unlock();
 				return true;
 			}
@@ -89,10 +88,12 @@ bool Sensor_Manager::getData(Data* data_ptr, SENSOR_TYPES sensor_id)
 
 /**
  * @brief Returns the latest element of the loaded data from all active sensors, if no data is available, return false
- * @param data_ptr: Pointer which will hold the address of the last data object if available 
+ * @param data_ptr: Pointer which will hold the address of the last data object if available (note the address to the pointer is passed)
+ *					This is required as pointer are passed as copy of the pointer value, so any change to the pointer itself is not valid
+ *					outside of the function.
  * @return true if data found and returned, false otherwise
 */
-bool Sensor_Manager::getData(Data* data_ptr)
+bool Sensor_Manager::getData(Data** data_ptr)
 {
 	bool res = false;
 
@@ -102,7 +103,7 @@ bool Sensor_Manager::getData(Data* data_ptr)
 	// Return last data object
 	if (this->loaded_data.size() > 0) {
 		res = true;
-		data_ptr = this->loaded_data.back();
+		*data_ptr = this->loaded_data.back();
 		this->loaded_data.pop_back();
 	}
 	

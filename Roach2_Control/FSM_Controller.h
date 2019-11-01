@@ -47,7 +47,6 @@ protected:
 	bool isSimMode;
 	Data_super* logs;
 protected:
-	void pollSensors(void);
 	void triggerActuators(void);
 	void saveData(void);
 	void enableSimMode(void);
