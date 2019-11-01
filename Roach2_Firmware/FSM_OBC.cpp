@@ -22,27 +22,10 @@ FSM_OBC::FSM_OBC()
 	// Database system
 	//this->data = new Database();
 
-	// Sensor
-	ARM_Systeminfo *info = new ARM_Systeminfo();
-	info->init();
-	info->update();
-	//test
-	//wiringPiSetup();
-	TEMP_LM75B* temp = new TEMP_LM75B();
-	temp->init();
-	temp->update();
-	temp->getData();
-	BNO055_IMU* imu = new BNO055_IMU();
-	
-	imu->init();
-	//imu->calibrate();
-	imu->update();
-	imu->getData();
-	
-
-	// Add all of them to sensor array (this is possible even that Sensor itself is abstract)
-	this->sensors = {info};
-	this->numberSensors = 1;
+	// Sensor handling
+	this->sensor_manager = new Sensor_Manager(true, false);
+	this->sensor_manager->setUpdateRate(10); // 10Hz update rate
+	this->sensor_thread = std::thread(&Sensor_Manager::run, this->sensor_manager);
 
 	// System start time
 	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
@@ -54,7 +37,6 @@ FSM_OBC::FSM_OBC()
 
 		// FSM control
 		this->run();
-
 		
 	}
 }

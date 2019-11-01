@@ -10,8 +10,10 @@
 #define FSM_CONTROLLER_HEADER
 
 #include "../Roach2_DataStore/data.h"
+#include <thread>
 #include "../Roach2_Comm/ReceiveHandler.h"
 #include "../Roach2_Sensor/Roach2_Sensor_Sensor.h"
+#include "Sensor_Manager.h"
 
 enum class FSM_STATES_RCU {
 	IDLE = 0,
@@ -35,7 +37,8 @@ protected:
 	int currentState;
 	int lastState;
 	int time;
-	Sensor* sensors;
+	Sensor_Manager* sensor_manager;
+	std::thread sensor_thread;
 	int numberSensors;
 	int numberActuators;
 	int numberData;

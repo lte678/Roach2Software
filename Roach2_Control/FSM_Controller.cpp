@@ -45,21 +45,16 @@ void FSM_Controller::disableSimMode(void)
 
 Data* FSM_Controller::readSensor(int sensorId)
 {
-	Sensor* sens = nullptr;
+	Data* data = nullptr;
 
 	// Load data from corresponding sensor
-	for (int i = 0; i < this->numberSensors; i++) {
-		if (this->sensors[i].getSensorType() == sensorId) {
-			sens = &this->sensors[i];
-		}
-	}
+	bool res = this->sensor_manager->getData(data, (SENSOR_TYPES)sensorId);
 
 	// Update sensor
-	if (sens == nullptr) {
+	if (res) {
 		return nullptr;
 	}
 	else {
-		sens->update();
-		return sens->getData();
+		return data;
 	}
 }
