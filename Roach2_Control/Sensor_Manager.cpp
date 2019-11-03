@@ -15,13 +15,13 @@ Sensor_Manager::Sensor_Manager(bool obc, bool rcu)
 		*/
 		ARM_Systeminfo* info = new ARM_Systeminfo();
 		info->init();
-		/*
+		
 		TEMP_LM75B *temp = new TEMP_LM75B();
 		temp->init();
 
 		BNO055_IMU *imu = new BNO055_IMU();
 		imu->init();
-		*/
+
 		this->sensors = {info};
 		this->number_sensors = 1;
 	}

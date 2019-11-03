@@ -2,7 +2,7 @@
 
 TEMP_LM75B::TEMP_LM75B()
 {
-	
+	this->convertedMeasurement = 0;
 }
 
 TEMP_LM75B::~TEMP_LM75B()

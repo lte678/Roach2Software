@@ -11,14 +11,17 @@
 
 #include <stdio.h>
 #include <string.h>
+
  // Linux headers
 #include <fcntl.h> // Contains file controls like O_RDWR
 #include <errno.h> // Error integer and strerror() function
 #include <termios.h> // Contains POSIX terminal control definitions
 #include <unistd.h> // write(), read(), close()
 #include <unistd.h>
+
 #include "../Roach2_DataStore/data.h"
 #include "../Roach2_DataStore/Data_simple.h"
+#include "Connection.h"
 
 // Threading related
 #include <thread>
@@ -26,9 +29,8 @@
 #include <mutex>
 #include <chrono>
 #include <condition_variable>
-
-#include "Connection.h"
-#include <mutex>
+#include <atomic>
+#include <math.h>
 
 #define CRC16 0x8005 // CRC16 polynom
 
@@ -59,13 +61,10 @@ private:
 	bool receive_ongoing;
 	void send(void);
 	uint16_t calc_crc(const uint8_t* data, uint16_t size);
-	void run(void);
-
-
-	void receive(Data_super &data_ref);
 public:
 	UART();
 	~UART();
+	void run();
 	void sendData(Data_super*data, int count);
 	Data_super* getData(void);
 	int getNumberReceived();

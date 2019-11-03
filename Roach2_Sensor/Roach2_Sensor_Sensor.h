@@ -23,6 +23,10 @@
 #include <fcntl.h>
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
+
+// Important: The following define disables actual sensor usage!!
+// Disable it in operation usage!!!
+
 class Sensor
 {
 	/**
