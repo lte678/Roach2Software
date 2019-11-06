@@ -13,6 +13,7 @@
 #include <thread>
 #include "../Roach2_Comm/ReceiveHandler.h"
 #include "../Roach2_Sensor/Roach2_Sensor_Sensor.h"
+#include "../Roach2_Comm/UART.h"
 #include "Sensor_Manager.h"
 
 enum class FSM_STATES_RCU {
@@ -38,7 +39,9 @@ protected:
 	int lastState;
 	int time;
 	Sensor_Manager* sensor_manager;
+	std::thread debugLink_thread;
 	std::thread sensor_thread;
+	UART* debugLink;
 	int numberSensors;
 	int numberActuators;
 	int numberData;
@@ -52,6 +55,7 @@ protected:
 	void enableSimMode(void);
 	void disableSimMode(void);
 	Data* readSensor(int sensorId);
+	void initThreads();
 public:
 	virtual void run(void) = 0;
 };

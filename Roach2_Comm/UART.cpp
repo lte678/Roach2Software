@@ -25,8 +25,9 @@ void UART::send(void)
 		// 64bit data, 16bit CRC, 4bit frame number, 4bit data length
 
 		// Check whether Data_simple is used instead of Data
-		uint64_t* tx_data = this->dataToSend->convert_to_serial();
-		int data_length = this->dataToSend->convert_to_serial_array_length();
+		Data_super* dataToSend = this->send_queue.front();
+		uint64_t* tx_data = dataToSend->convert_to_serial();
+		int data_length = dataToSend->convert_to_serial_array_length();
 		this->tx_frames = new uint64_t[data_length]; // each frame consists of 11 bytes
 		for (int i = 0; i < data_length; i++) {
 			this->tx_frames[i] = tx_data[i];
@@ -57,7 +58,7 @@ void UART::send(void)
 
 		// Free memory
 		delete tx_data;
-		delete this->dataToSend;
+		this->send_queue.pop();
 	}
 }
 
@@ -165,17 +166,43 @@ void UART::receive(void)
 			
 			this->rx_buffer_counter = 0;
 
-			// Notify listed receive handlers
-			int counter_handlers = 0;
-			ReceiveHandler** handler = this->getRegisteredEventHandler(counter_handlers);
-			for (int i = 0; i < counter_handlers; i++) {
-				handler[i]->packageReceivedUART(data, 1);
-			}
+			// Split incoming message
+			uint32_t cmd = ((data & 0xFFFFFFFF00000000) >> 32);
+			uint32_t para = (data & 0x00000000FFFFFFFF);
+
+			Data_simple* data_obj = new Data_simple(cmd, para);
+			this->receive_queue.push(data_obj);
 		}
 		else {
 			// Some parts missing
 		}
 	}
+}
+
+/**
+ * @brief Stops the running communication thread
+*/
+void UART::stop_thread()
+{
+	this->stop_bit.store(true);
+}
+
+/**
+ * @brief Checks if data was received
+ * @return true if data was received, otherwise false (also in case the receive queue is used by the communication thread)
+*/
+bool UART::isData_received()
+{
+	// Try to get access
+	bool result = this->lock_receive_queue.try_lock();
+	if (result) {
+		// got lock
+		result = !this->receive_queue.empty();
+
+		// release lock
+		this->lock_receive_queue.unlock();
+	}
+	return result;
 }
 
 UART::UART()
@@ -242,26 +269,78 @@ UART::~UART()
 {
 }
 
+void UART::run()
+{
+	// Init
+
+	// Main loop
+	while (!this->stop_bit.load()) {
+		// Check if data was received
+		this->lock_receive_queue.lock();
+		this->receive();
+		this->lock_receive_queue.unlock();
+
+		// Check if data to send
+		this->lock_send_queue.lock();
+		
+		while (!this->send_queue.empty()) {
+			this->send();
+		}
+
+		// Wait for 100us => thus we would reach around 10Kpackages/s, even more depending on the UART buffer size
+		usleep(100);
+
+		this->lock_send_queue.unlock();
+	}
+}
+
 /**
  * @brief Puts the given data to the list of data to send and transmits the data afterwards. If some data is already in the queue, this data will be lost!
+ *		  Note: Access is blocking on send queue!
  * @param data pointer to Data objects to send
  * @param int number of Data objects passed to this function
 */
-void UART::sendData(Data_super* data, int count)
+void UART::sendData(Data_super** data, int count)
 {
-	this->dataToSend = data;
-	numberDataToSend = count;
-	this->send();
+	// Acquire lock
+	this->lock_send_queue.lock();
+
+	// Add pointer to send queue
+	for (int i = 0; i < count; i++) {
+		this->send_queue.push(data[i]);
+	}
+
+	this->lock_send_queue.unlock();
 }
 
 /**
  * @brief Returns the received data. If new data is received afterwards, the system will return the new data.
- * @return pointer to the received data
+ *        Non-Blocking access!
+ * @return pointer to the received data or nullptr if no lock could be acquired or no data is available
 */
-Data_super* UART::getData(void)
+Data_simple* UART::getData(void)
 {
-	this->numberDataReceived = 0;
-	return this->dataReceived;
+	bool res = this->lock_receive_queue.try_lock();
+
+	// Try to load from queue if lock could be acquired
+	if (res) {
+		Data_simple* copy;
+		if (!this->receive_queue.empty()) {
+			copy = this->receive_queue.front();
+			this->receive_queue.pop();
+		}
+		else {
+			// No data available
+			copy = nullptr;
+		}
+		// Release lock
+		this->lock_receive_queue.unlock();
+		return copy;
+	}
+	else {
+		// No lock acquired
+		return nullptr;
+	}
 }
 
 /**

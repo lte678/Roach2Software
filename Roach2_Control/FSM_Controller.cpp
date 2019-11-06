@@ -53,3 +53,16 @@ Data* FSM_Controller::readSensor(int sensorId)
 		return nullptr;
 	}
 }
+
+void FSM_Controller::initThreads()
+{
+	// Sensor handling
+	this->sensor_manager = new Sensor_Manager(true, false);
+	this->sensor_manager->setUpdateRate(10); // 10Hz update rate
+	this->sensor_thread = std::thread(&Sensor_Manager::run, this->sensor_manager);
+
+	// UART communication (debug link)
+	this->debugLink = new UART(); // Will open UART port, must be connected afterwards from PC
+	this->debugLink->addEventHandler(this);
+	this->debugLink_thread = std::thread(&UART::run(), this->debugLink);
+}

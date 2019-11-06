@@ -19,6 +19,8 @@
 #include <unistd.h> // write(), read(), close()
 #include <unistd.h>
 
+#include <queue>
+
 #include "../Roach2_DataStore/data.h"
 #include "../Roach2_DataStore/Data_simple.h"
 #include "Connection.h"
@@ -27,6 +29,7 @@
 #include <thread>
 #include <deque>
 #include <mutex>
+#include <semaphore.h>
 #include <chrono>
 #include <condition_variable>
 #include <atomic>
@@ -38,6 +41,13 @@ class UART :
 	public Connection
 {
 private:
+	// Thread related
+	std::atomic<bool> stop_bit;
+	std::mutex lock_send_queue;
+	std::mutex lock_receive_queue;
+	std::queue<Data_super*> send_queue;
+	std::queue<Data_simple*> receive_queue;
+
 	const int max_number_packages_send_at_once = 1000; // Max number of packages to send at once
 	const int rx_loop_wait = 1; // Time to wait after each check of RX buffer
 	char* port = "/dev/ttyS1";
@@ -65,11 +75,13 @@ public:
 	UART();
 	~UART();
 	void run();
-	void sendData(Data_super*data, int count);
-	Data_super* getData(void);
+	void sendData(Data_super** data, int count);
+	Data_simple* getData(void);
 	int getNumberReceived();
 	int whichConnection();
 	void receive(void);
+	void stop_thread();
+	bool isData_received();
 };
 
 #endif

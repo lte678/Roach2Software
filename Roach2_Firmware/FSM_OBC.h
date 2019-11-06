@@ -25,7 +25,6 @@ class FSM_OBC :
 	public ReceiveHandler
 {
 private:
-	UART* debugLink;
 public:
 	FSM_OBC();
 	~FSM_OBC();

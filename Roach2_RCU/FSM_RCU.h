@@ -14,7 +14,6 @@ class FSM_RCU :
 	public ReceiveHandler
 {
 private:
-	UART* debug_link;
 public:
 	FSM_RCU();
 	~FSM_RCU();

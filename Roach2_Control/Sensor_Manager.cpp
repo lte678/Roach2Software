@@ -3,6 +3,7 @@
 Sensor_Manager::Sensor_Manager(bool obc, bool rcu)
 {
 	this->update_rate = 1;
+	this->sensor_values_loaded = 0; // Reset counter
 
 	// Create all sensors
 	if (obc) {
@@ -22,8 +23,8 @@ Sensor_Manager::Sensor_Manager(bool obc, bool rcu)
 		BNO055_IMU *imu = new BNO055_IMU();
 		imu->init();
 
-		this->sensors = {info};
-		this->number_sensors = 1;
+		this->sensors = {info, temp, imu};
+		this->number_sensors = 3;
 	}
 	else if (rcu) {
 		/**
@@ -33,6 +34,9 @@ Sensor_Manager::Sensor_Manager(bool obc, bool rcu)
 	}
 }
 
+/** 
+ * @brief Sensor main loop running in separate run, this function should be called by std::thread
+*/
 void Sensor_Manager::run(void)
 {
 	// Init sensor loop
@@ -52,6 +56,7 @@ void Sensor_Manager::run(void)
 			this->sensors[i]->update();
 			Data* data = this->sensors[i]->getData();
 			this->loaded_data.push_back(data);
+			this->sensor_values_loaded++;
 		}
 
 		// Leave critical area
@@ -59,6 +64,9 @@ void Sensor_Manager::run(void)
 	}
 }
 
+/**
+ * @brief Stops the sensor manager thread. This sets the stop which terminates the thread main loop.
+*/
 void Sensor_Manager::stop(void)
 {
 	this->stop_bit.store(true);
@@ -87,7 +95,8 @@ bool Sensor_Manager::getData(Data** data_ptr, SENSOR_TYPES sensor_id)
 }
 
 /**
- * @brief Returns the latest element of the loaded data from all active sensors, if no data is available, return false
+ * @brief Returns the latest element of the loaded data from all active sensors, if no data is available, return false.
+ *		  Function is blocking on call!
  * @param data_ptr: Pointer which will hold the address of the last data object if available (note the address to the pointer is passed)
  *					This is required as pointer are passed as copy of the pointer value, so any change to the pointer itself is not valid
  *					outside of the function.
@@ -120,4 +129,24 @@ bool Sensor_Manager::getData(Data** data_ptr)
 void Sensor_Manager::setUpdateRate(int update_rate)
 {
 	this->update_rate = update_rate;
+}
+
+/**
+ * @brief Returns the number of sensor values loaded upto the current moment
+ *		  Function is blocking on call!
+ * @return int number of loaded sensor values
+*/
+int Sensor_Manager::getStatNumberSensorValuesLoaded(void)
+{
+	int res = 0;
+
+	// Acquire lock
+	this->lock_data_access.lock();
+	
+	res = this->sensor_values_loaded;
+
+	// Release lock
+	this->lock_data_access.unlock();
+
+	return res;
 }
