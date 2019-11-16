@@ -4,8 +4,10 @@
     <ClInclude Include="ReceiveHandler.h" />
     <ClInclude Include="Connection.h" />
     <ClInclude Include="UART.h" />
+    <ClInclude Include="RocketSignals.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="UART.cpp" />
+    <ClCompile Include="RocketSignals.cpp" />
   </ItemGroup>
 </Project>

@@ -15,6 +15,9 @@ FSM_OBC::FSM_OBC()
 	this->currentState = (int)FSM_STATES_OBC::IDLE;
 	this->lastState = -1;
 
+	// Init vars
+	std::vector<Data*> sensor_data;
+
 	// Init tasks running in separate threads (communication, sensors)
 	this->initThreads();
 
@@ -31,6 +34,15 @@ FSM_OBC::FSM_OBC()
 
 		// FSM control
 		this->run();
+
+		// Load all available sensor data
+		this->sensor_manager->getData(&sensor_data);
+		for (int i = 0; i < sensor_data.size(); i++) {
+			//delete sensor_data[i];
+		}
+		sensor_data.clear();
+
+		usleep(100); // Main loop running with 100kHz
 	}
 }
 

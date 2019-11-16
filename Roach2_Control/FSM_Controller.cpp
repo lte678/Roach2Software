@@ -63,6 +63,9 @@ void FSM_Controller::initThreads()
 
 	// UART communication (debug link)
 	this->debugLink = new UART(); // Will open UART port, must be connected afterwards from PC
-	this->debugLink->addEventHandler(this);
-	this->debugLink_thread = std::thread(&UART::run(), this->debugLink);
+	this->debugLink_thread = std::thread(&UART::run, this->debugLink);
+
+	// Rocket signals from RXSM
+	this->rocket_signals = new RocketSignals();
+	this->rocket_signals_capture_thread = std::thread(&RocketSignals::run, this->rocket_signals);
 }

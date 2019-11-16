@@ -30,7 +30,7 @@ public:
 	void stop(void);
 	// Access to loaded sensor data
 	bool getData(Data** data_ptr, SENSOR_TYPES sensor_id);
-	bool getData(Data** data_ptr);
+	bool getData(std::vector<Data*> *available_Data);
 	void setUpdateRate(int update_rate);
 	int getStatNumberSensorValuesLoaded(void);
 };

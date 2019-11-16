@@ -77,12 +77,6 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
-    <ClCompile Include="RocketSignals.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="RocketSignals.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Roach2_Control\Roach2_Control.vcxproj">
       <Project>{3a5f7cf7-e7a7-4a72-9d0d-fcb86063f826}</Project>
     </ProjectReference>

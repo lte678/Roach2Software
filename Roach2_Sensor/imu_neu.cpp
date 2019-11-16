@@ -25,7 +25,6 @@ BNO055_IMU::BNO055_IMU()
 	else
 	{
 		std::cout << "IMU: not online! Performing reset.." << std::endl;
-		this->reset();
 	}
 }
 
@@ -33,7 +32,6 @@ bool BNO055_IMU::is_online()
 {
 	/* Checks if BNO055 is online by reading the chip id register */
 	int ret = (this->read8(CHIP_ID_ADDR));
-	std::cout << "Is online: Should be 160 -> " << ret << std::endl;
 	if(ret == 0xA0) {
 		return true;
 	}
@@ -48,7 +46,7 @@ void BNO055_IMU::init() //performs all settings possible
 }
 int BNO055_IMU::getSensorType()
 {
-	return 0; //test
+	return SENSOR_TYPES::IMU; //test
 }
 void BNO055_IMU::update()
 {

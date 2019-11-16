@@ -21,10 +21,10 @@ Sensor_Manager::Sensor_Manager(bool obc, bool rcu)
 		temp->init();
 
 		BNO055_IMU *imu = new BNO055_IMU();
-		imu->init();
+		//imu->init();
 
 		this->sensors = {info, temp, imu};
-		this->number_sensors = 3;
+		this->number_sensors = 1;
 	}
 	else if (rcu) {
 		/**
@@ -97,12 +97,12 @@ bool Sensor_Manager::getData(Data** data_ptr, SENSOR_TYPES sensor_id)
 /**
  * @brief Returns the latest element of the loaded data from all active sensors, if no data is available, return false.
  *		  Function is blocking on call!
- * @param data_ptr: Pointer which will hold the address of the last data object if available (note the address to the pointer is passed)
+ * @param available_Data: Pointer which will hold the address of the last data object if available (note the address to the pointer is passed)
  *					This is required as pointer are passed as copy of the pointer value, so any change to the pointer itself is not valid
  *					outside of the function.
  * @return true if data found and returned, false otherwise
 */
-bool Sensor_Manager::getData(Data** data_ptr)
+bool Sensor_Manager::getData(std::vector<Data*> *available_Data)
 {
 	bool res = false;
 
@@ -110,9 +110,9 @@ bool Sensor_Manager::getData(Data** data_ptr)
 	this->lock_data_access.lock();
 
 	// Return last data object
-	if (this->loaded_data.size() > 0) {
+	while (this->loaded_data.size() > 0) {
 		res = true;
-		*data_ptr = this->loaded_data.back();
+		available_Data->push_back(this->loaded_data.back());
 		this->loaded_data.pop_back();
 	}
 	

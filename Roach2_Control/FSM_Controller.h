@@ -13,6 +13,7 @@
 #include <thread>
 #include "../Roach2_Comm/ReceiveHandler.h"
 #include "../Roach2_Sensor/Roach2_Sensor_Sensor.h"
+#include "../Roach2_Comm/RocketSignals.h"
 #include "../Roach2_Comm/UART.h"
 #include "Sensor_Manager.h"
 
@@ -39,8 +40,10 @@ protected:
 	int lastState;
 	int time;
 	Sensor_Manager* sensor_manager;
+	RocketSignals* rocket_signals;
 	std::thread debugLink_thread;
 	std::thread sensor_thread;
+	std::thread rocket_signals_capture_thread;
 	UART* debugLink;
 	int numberSensors;
 	int numberActuators;

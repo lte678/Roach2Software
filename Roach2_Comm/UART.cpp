@@ -59,6 +59,7 @@ void UART::send(void)
 		// Free memory
 		delete tx_data;
 		this->send_queue.pop();
+		delete dataToSend;
 	}
 }
 
@@ -281,16 +282,18 @@ void UART::run()
 		this->lock_receive_queue.unlock();
 
 		// Check if data to send
+		// Acquire lock
 		this->lock_send_queue.lock();
 		
 		while (!this->send_queue.empty()) {
 			this->send();
 		}
 
+		// Release lock
+		this->lock_send_queue.unlock();
+
 		// Wait for 100us => thus we would reach around 10Kpackages/s, even more depending on the UART buffer size
 		usleep(100);
-
-		this->lock_send_queue.unlock();
 	}
 }
 
