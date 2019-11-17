@@ -23,11 +23,13 @@ bool RocketSignals::checkGpio()
 	int buffer = 0;
 
 	// Check GPIO status, 0 = false, 1 = true (or any other value beside 0) (see https://www.kernel.org/doc/html/v4.17/driver-api/gpio/legacy.html#sysfs-interface-for-userspace-optional)
+	this->access_limit.lock();
 
 	// Check SODS
+	// Note, the "value" is a text (ASCII) literal, so false = 0 = 48, true = 1 = 49
 	if (this->fd_sods != -1) {
 		read(this->fd_sods, &buffer, 1);
-		if (buffer != 0) {
+		if (buffer != 48) {
 			// Pin set to high
 			new_sods = true;
 		}
@@ -36,7 +38,7 @@ bool RocketSignals::checkGpio()
 	// Check SOE
 	if (this->fd_soe != -1) {
 		read(this->fd_soe, &buffer, 1);
-		if (buffer != 0) {
+		if (buffer != 48) {
 			// Pin set to high
 			new_soe = true;
 		}
@@ -45,7 +47,7 @@ bool RocketSignals::checkGpio()
 	// Check LO
 	if (this->fd_lo != -1) {
 		read(this->fd_lo, &buffer, 1);
-		if (buffer != 0) {
+		if (buffer != 48) {
 			// Pin set to high
 			new_lo = true;
 		}
@@ -61,6 +63,21 @@ bool RocketSignals::checkGpio()
 	if (this->lo != new_lo) {
 		changed = true;
 	}
+
+	// Write back
+	this->soe = new_soe;
+	this->sods = new_sods;
+	this->lo = new_lo;
+
+	this->access_limit.unlock();
+
+	// We need to read the same line always, so close the file handlers at the end to reset the read function
+	close(this->fd_sods);
+	close(this->fd_soe);
+	close(this->fd_lo);
+	this->fd_sods = open("/sys/class/gpio/gpio67/value", O_RDONLY);
+	this->fd_soe = open("/sys/class/gpio/gpio66/value", O_RDONLY);
+	this->fd_lo = open("/sys/class/gpio/gpio65/value", O_RDONLY);
 
 	return changed;
 }
@@ -108,8 +125,8 @@ void RocketSignals::initGpio()
 
 		// Open GPIOs for later usage, read only
 		this->fd_sods = open("/sys/class/gpio/gpio67/value", O_RDONLY);
-		this->fd_soe = open("sys/class/gpio/gpio66/value", O_RDONLY);
-		this->fd_lo = open("sys/class/gpio/gpio65/value", O_RDONLY);
+		this->fd_soe = open("/sys/class/gpio/gpio66/value", O_RDONLY);
+		this->fd_lo = open("/sys/class/gpio/gpio65/value", O_RDONLY);
 	}
 	else {
 		// Error!
@@ -146,7 +163,11 @@ void RocketSignals::run()
 	this->initGpio();
 
 	while (running.load()) {
-		this->changed.store(this->checkGpio());
+		bool res = this->checkGpio();
+		// Only store if something changed
+		if (res) {
+			this->changed.store(res);
+		}
 
 		usleep(10); // 10us sleep => effective capture frequency upto 100kHz (depending on Linux)
 	}
@@ -165,5 +186,28 @@ void RocketSignals::stop()
 */
 bool RocketSignals::signalChanged()
 {
-	return this->changed.load();
+	bool buffer = this->changed.load();
+	this->changed.store(false);
+	return buffer;
+}
+
+/**
+ * @brief Returns the rocket signals (three element array: 0=SODS, 1=SOE, 2=LO)
+ * @return boolean array of length 3 with the current signal logic levels
+*/
+bool* RocketSignals::getRocketSignals()
+{
+	static bool result[3];
+
+	// Get lock
+	this->access_limit.lock();
+
+	result[0] = this->sods;
+	result[1] = this->soe;
+	result[2] = this->lo;
+
+	// Release lock
+	this->access_limit.unlock();
+
+	return result;
 }

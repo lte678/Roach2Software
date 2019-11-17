@@ -60,12 +60,14 @@ void FSM_Controller::initThreads()
 	this->sensor_manager = new Sensor_Manager(true, false);
 	this->sensor_manager->setUpdateRate(10); // 10Hz update rate
 	this->sensor_thread = std::thread(&Sensor_Manager::run, this->sensor_manager);
-
-	// UART communication (debug link)
-	this->debugLink = new UART(); // Will open UART port, must be connected afterwards from PC
-	this->debugLink_thread = std::thread(&UART::run, this->debugLink);
-
+	
 	// Rocket signals from RXSM
 	this->rocket_signals = new RocketSignals();
 	this->rocket_signals_capture_thread = std::thread(&RocketSignals::run, this->rocket_signals);
+	
+	// UART communication (debug link)
+	//this->debugLink = new UART(); // Will open UART port, must be connected afterwards from PC
+	//this->debugLink_thread = std::thread(&UART::run, this->debugLink);
+
+	
 }

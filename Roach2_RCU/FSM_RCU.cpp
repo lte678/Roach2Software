@@ -199,10 +199,9 @@ void FSM_RCU::run(void)
 				// Check if selftest done
 			break;
 			case (int)FSM_STATES_RCU::STANDBY:
-				this->pollSensors();
+				
 			break;
 			case (int)FSM_STATES_RCU::DRIVE_FORWARD:
-				this->pollSensors();
 				this->triggerActuators();
 			break;
 		}

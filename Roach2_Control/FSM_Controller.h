@@ -25,7 +25,7 @@ enum class FSM_STATES_RCU {
 
 enum class FSM_STATES_OBC {
 	IDLE = 0,
-	EXPERIMENT = 1
+	EXPERIMENT = 1,
 };
 
 enum class REBOOT_TARGET {

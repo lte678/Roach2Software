@@ -29,6 +29,7 @@ private:
 	int fd_lo;
 	std::atomic<bool> changed;
 	std::atomic<bool> running;
+	std::mutex access_limit;
 	ReceiveHandler *handler;
 	void initGpio();
 	bool checkGpio();
@@ -38,6 +39,7 @@ public:
 	void run();
 	void stop();
 	bool signalChanged();
+	bool* getRocketSignals();
 };
 
 #endif

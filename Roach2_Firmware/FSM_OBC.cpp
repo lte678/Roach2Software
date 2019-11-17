@@ -27,10 +27,12 @@ FSM_OBC::FSM_OBC()
 	// System main loop
 	while (1) {
 		// Receive UART link data
+		/*
 		Data_simple* data = this->debugLink->getData();
 		if (data != nullptr) {
 			this->packageReceivedUART(*(data->convert_to_serial()), data->convert_to_serial_array_length());
 		}
+		*/
 
 		// FSM control
 		this->run();
@@ -41,6 +43,11 @@ FSM_OBC::FSM_OBC()
 			//delete sensor_data[i];
 		}
 		sensor_data.clear();
+
+		// RXSM signals
+		if (this->rocket_signals->signalChanged()) {
+			this->rocketSignalReceived((int)REXUS_SIGNALS::ALL);
+		}
 
 		usleep(100); // Main loop running with 100kHz
 	}
@@ -66,6 +73,7 @@ void FSM_OBC::run() {
 				// Switch RCU to state DRIVE_FORWARD
 			break;
 		}
+		this->lastState = this->currentState; // Update last state variable for change detection
 	} else {
 		// No state change, only execute contionous tasks
 		switch (this->currentState) {
@@ -186,7 +194,44 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 
 void FSM_OBC::rocketSignalReceived(int signal_source)
 {
-	int i = 0;
+	// Load the signal levels
+	bool* signal_levels = this->rocket_signals->getRocketSignals(); // 0=SODS, 1=SOE, 2=LO
+	
+	// Decision: are we on the launch pad or in air: LO=0 => launch pad, LO=1 => in air
+	// For RCU: make sure that commands to change state are only send once!
+	if (signal_levels[2]) {
+		// In air
+		// Follow normal FSM, only one state change possible
+		if (this->currentState == (int)FSM_STATES_OBC::IDLE && signal_levels[0]) {
+			this->currentState = (int)FSM_STATES_OBC::EXPERIMENT; // Switch to experiment state
+
+			// Switch RCU from IDLE to STANDBY
+			if (this->currentRCUState != FSM_STATES_RCU::STANDBY) {
+				// Send standby command
+			}
+			this->currentRCUState = FSM_STATES_RCU::STANDBY;
+		}
+		
+		// Switch RCU from STANDBY to DRIVE_FORWARD if SOE given
+		if (this->currentRCUState == FSM_STATES_RCU::STANDBY && signal_levels[1]) {
+			if (this->currentRCUState != FSM_STATES_RCU::DRIVE_FORWARD) {
+				// Send drive forward command
+			}
+			this->currentRCUState = FSM_STATES_RCU::DRIVE_FORWARD;
+		}
+
+		// Switch RCU from DRIVE FORWARD to STANDBY if SOE was deasserted
+		if (this->currentRCUState == FSM_STATES_RCU::DRIVE_FORWARD && !signal_levels[1]) {
+			if (this->currentRCUState != FSM_STATES_RCU::STANDBY) {
+				// Send standby command
+			}
+			this->currentRCUState = FSM_STATES_RCU::STANDBY;
+		}
+	}
+	else {
+		// On launch pad, before lift off
+
+	}
 }
 
 void FSM_OBC::packageReceivedRexus(uint64_t message, int msg_length)

@@ -13,7 +13,8 @@
 enum class REXUS_SIGNALS {
 	LO = 0,
 	SODS = 1,
-	SOE = 2
+	SOE = 2,
+	ALL = 3
 };
 
 class ReceiveHandler

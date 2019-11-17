@@ -25,6 +25,7 @@ class FSM_OBC :
 	public ReceiveHandler
 {
 private:
+	FSM_STATES_RCU currentRCUState;
 public:
 	FSM_OBC();
 	~FSM_OBC();
