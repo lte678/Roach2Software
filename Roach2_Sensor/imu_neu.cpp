@@ -48,7 +48,7 @@ void BNO055_IMU::init() //performs all settings possible
 }
 int BNO055_IMU::getSensorType()
 {
-	return 0; //test
+	return SENSOR_TYPES::IMU;; //test
 }
 void BNO055_IMU::update()
 {

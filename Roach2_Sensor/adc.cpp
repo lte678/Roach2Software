@@ -23,35 +23,52 @@ ADC_MCP3428::~ADC_MCP3428()
 
 void ADC_MCP3428::init()
 {
-	simpleWrite(CONF_ADC);
+	simpleWrite(CONF_ADC1);
+	adress[0] = CONF_ADC1;
+	adress[1] = CONF_ADC2;
+	adress[2] = CONF_ADC3;
+	adress[3] = CONF_ADC4;
 }
 
 void ADC_MCP3428::update()
 {
-	measurement = simpleRead();
-
-	measurement = measurement >> 5;
-	if ((measurement >> 15) != 0)
+	ilauf = 0
+	while (ilauf<=3)
 	{
-		int signchange = 0b1000000000000000;
-		measurement = measurement | signchange;
-		measurement = binaryToDecimal(measurement);
-		measurement = measurement * -1;
-	}
-	else
-	{
-		measurement = binaryToDecimal(measurement);
-	}
-	convertedMeasurement = measurement * 0.0625;
-	/*hier wird measurement in float umgewandelt in mV*/
+		measurement[ilauf] = simpleRead();
 
+
+		measurement[ilauf] = measurement[ilauf] >> 5;
+		if ((measurement[ilauf] >> 15) != 0)
+		{
+			int signchange = 0b1000000000000000;
+			measurement[ilauf] = measurement[ilauf] | signchange;
+			measurement[ilauf] = binaryToDecimal(measurement[ilauf]);
+			measurement[ilauf] = measurement[ilauf] * -1;
+		}
+		else
+		{
+			measurement[ilauf] = binaryToDecimal(measurement[ilauf]);
+		}
+		convertedMeasurement[ilauf] = measurement[ilauf] * 0.0625;
+		/*hier wird measurement in float umgewandelt in mV*/
+		ilauf++
+		simpleWrite(adress[ilauf]);
+	}
 	this->data_obj = new Data();
-	std::string name = "ADC";
-	this->data_obj->addValue(name, convertedMeasurement);
+	std::string name = "ADC-CH1";
+	this->data_obj->addValue(name, convertedMeasurement[0]);
+	std::string name = "ADC-CH2";
+	this->data_obj->addValue(name, convertedMeasurement[1]);
+	std::string name = "ADC-CH3";
+	this->data_obj->addValue(name, convertedMeasurement[2]);
+	std::string name = "ADC-CH4";
+	this->data_obj->addValue(name, convertedMeasurement[3]);
+	simpleWrite(CONF_ADC1);
 }
 
 Data* ADC_MCP3428::getData() {
-	return this->data_obj;
+	return this->data_obj1;
 			/*Effekt der eigenerhitzung wird vernachlässigt*/
 }
 

@@ -19,13 +19,15 @@
 
 /* ##################################################################################### */
 /* 0. Hard coded settings  */
-const long CALIBRATION_TIMEOUT_SECONDS = 60;
 const int MCP3428_DEVICE_ID = 0x68; // in Schaltplan schauen
 
 /* ##################################################################################### */
 /* 1. Enumerations */
 enum Setting {
-	CONF_ADC = 0b10011000 /*CH1, 15 sps, conti, x1 gain*/
+	CONF_ADC1 = 0b10011000, /*CH1, 15 sps, conti, x1 gain*/
+	CONF_ADC2 = 0b10111000, /*CH2, 15 sps, conti, x1 gain*/
+    CONF_ADC3 = 0b11011000, /*CH3, 15 sps, conti, x1 gain*/
+	CONF_ADC4 = 0b11111000 /*CH4, 15 sps, conti, x1 gain*/
 };
 //SCHREIB HIER MEHR REIN
 
@@ -45,9 +47,10 @@ public:
 	int getSensorType();
 	//int logOvertemperature();
 private:
-	int deviceHandle = 0;
-	int measurement = 0;
-	double convertedMeasurement = 0.0;
+	int measurement[4] = {};
+	int ilauf = 1;
+	int adress[4];
+	double convertedMeasurement[4] = {};
 	unsigned long timeStamp = 0;
 	Data* data_obj;
 };

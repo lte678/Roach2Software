@@ -1,43 +1,55 @@
-/**
-* @file adc.cpp
-* 22-08-2019
-* @brief the overview of the class
-*
-* @copyright KSat Stuttgart e.V. Roach2 software team
-*/
-#include "rotEnc.h"
-#include "Roach2_Sensor_Sensor.h"
-// TODO: INIT, UPDATE, GETDATA
-rotEnc_LS7366R::rotEnc_LS7366R()
+#include "Temp.h"
+
+ROT_AS5601::ROT_AS5601()
 {
-	this->deviceHandle = wiringPiSPISetup(LS7366R_CHANNEL, speed); // Get file/I2C handle
-	if (this->deviceHandle) == -1)
-	{
-		stdout << "rotEnc: Connection failed!"
-	}
+	this->convertedMeasurement = 0;
 }
 
-void rotEnc_LS7366R::init()
+ROT_AS5601::~ROT_AS5601()
+{
+}
+
+void ROT_AS5601::init()
 {
 	//TODO more init, or merge init and tempConfig
 	this->tempConfig();
 }
 
-void rotEnc_LS7366R::update()
+void ROT_AS5601::update()
 {
-//	int wiringPiSPIDataRW(int channel, unsigned char *data, int length)
+	measurement[0] = ((read8(RAW1_reg)<< 8) + read8(RAW2_reg)); /*masking?*/
+  
+	//measurement = measurement >> 5;
+	
+	measurement[0] = binaryToDecimal(measurement[0]);
+
+	measurement[1] = ((read8(ANG_reg) << 8) + read8(ANG2_reg)); /*masking?*/
+
+	measurement[1] = binaryToDecimal(measurement[1]);
 }
 
-Data rotEnc_LS7366R::getdata() {
-	return measurement;
+Data* ROT_AS5601::getData() {
+	Data* data_ptr = new Data();
+	data_ptr->addValue("ROTRAW", measurement[0]);
+	data_ptr->addValue("ROT", measurement[1]);
+	return data_ptr;
 	/*Effekt der eigenerhitzung wird vernachlässigt*/
 }
 
-int rotEnc_LS7366R::getI2CAddr() {
-//	return MCP3428_DEVICE_ID;
+int ROT_AS5601::getI2CAddr() {
+	return AS5601_DEVICE_ID;
 }
 
-void rotEnc_LS7366R::tempConfig()
+int ROT_AS5601::getSensorType()
 {
-//	simpleWrite(CONF_ADC);
+	return SENSOR_TYPES::ROT_ENC;
 }
+
+void ROT_AS5601::tempConfig()
+{
+	this->deviceHandle = i2cConnect(LM75B_DEVICE_ID); // Get file/I2C handle
+	write16(TOS_reg, TOS_TEMP);
+	write16(THYST_reg, THYST_TEMP);
+	write8(CONF_reg, CONF_TEMP);
+}
+
