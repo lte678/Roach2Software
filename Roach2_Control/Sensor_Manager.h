@@ -22,6 +22,7 @@ private:
 	std::vector<Data*> loaded_data;
 	int update_rate; // Update rate in Hz
 	std::mutex lock_data_access; // Mutex to prohibit problems with access data from multiple threads
+	int sensor_values_loaded;
 public:
 	Sensor_Manager(bool obc, bool rcu);
 	// Threading related
@@ -31,6 +32,7 @@ public:
 	bool getData(Data** data_ptr, SENSOR_TYPES sensor_id);
 	bool getData(Data** data_ptr);
 	void setUpdateRate(int update_rate);
+	int getStatNumberSensorValuesLoaded(void);
 };
 
 #endif

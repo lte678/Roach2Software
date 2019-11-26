@@ -31,9 +31,9 @@ int Sensor::read16(int reg){
 }
 
 int Sensor::i2cConnect(const int dev){
-	int fd = 0;// open("/dev/i2c-0", O_RDWR);
-//	int con = ioctl(fd, I2C_SLAVE, dev);
-	return wiringPiI2CSetup(dev);//fd 
+	int fd = open("/dev/i2c-0", O_RDWR);
+	int con = ioctl(fd, I2C_SLAVE, dev);
+	return fd;
 }
 int Sensor::binaryToDecimal(int number)
 {

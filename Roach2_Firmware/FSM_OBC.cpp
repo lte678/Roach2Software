@@ -12,20 +12,11 @@
 FSM_OBC::FSM_OBC()
 {
 	// Init state and trigger selftest through run method
-	this->currentState = (int)FSM_STATES_RCU::IDLE;
+	this->currentState = (int)FSM_STATES_OBC::IDLE;
 	this->lastState = -1;
 
-	// Init comm links
-	this->debugLink = new UART(); // Will open UART port, must be connected afterwards from PC
-	this->debugLink->addEventHandler(this);
-
-	// Database system
-	//this->data = new Database();
-
-	// Sensor handling
-	this->sensor_manager = new Sensor_Manager(true, false);
-	this->sensor_manager->setUpdateRate(10); // 10Hz update rate
-	this->sensor_thread = std::thread(&Sensor_Manager::run, this->sensor_manager);
+	// Init tasks running in separate threads (communication, sensors)
+	this->initThreads();
 
 	// System start time
 	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
@@ -33,11 +24,13 @@ FSM_OBC::FSM_OBC()
 	// System main loop
 	while (1) {
 		// Receive UART link data
-		this->debugLink->receive();
+		Data_simple* data = this->debugLink->getData();
+		if (data != nullptr) {
+			this->packageReceivedUART(*(data->convert_to_serial()), data->convert_to_serial_array_length());
+		}
 
 		// FSM control
 		this->run();
-		
 	}
 }
 
@@ -84,7 +77,7 @@ void FSM_OBC::triggerActuators(void)
 */
 void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 {
-	Data_simple* send_data;
+	Data_super* send_data[1];
 
 	// Parse commands
 	uint32_t cmd = ((message & 0xFFFFFFFF00000000) >> 32);
@@ -96,13 +89,13 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 	switch ((int)res.op) {
 		case (int)COMMANDS_OPERATIONAL::obc_check_alive:
 			// Check alive command => send command back + 1 in parameter section
-			send_data = new Data_simple(cmd, 1);
+			send_data[0] = new Data_simple(cmd, 1);
 			this->debugLink->sendData(send_data, 1);
 		break;
 		case (int)COMMANDS_OPERATIONAL::obc_restart_rover:
 			// Restart rover
 			// Confirm operation and restart
-			send_data = new Data_simple(cmd, 1);
+			send_data[0] = new Data_simple(cmd, 1);
 			this->debugLink->sendData(send_data, 1);
 		break;
 	}
@@ -121,7 +114,7 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 				this->currentState = (int)FSM_STATES_OBC::EXPERIMENT;
 			}
 			// Send new state number back
-			send_data = new Data_simple(cmd, this->currentState);
+			send_data[0] = new Data_simple(cmd, this->currentState);
 			this->debugLink->sendData(send_data, 1);
 		break;
 		case (int)COMMANDS_DEBUG::obc_prev_state:
@@ -130,7 +123,7 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 				this->currentState = (int)FSM_STATES_OBC::IDLE;
 			}
 			// Send new state number back
-			send_data = new Data_simple(cmd, this->currentState);
+			send_data[0] = new Data_simple(cmd, this->currentState);
 			this->debugLink->sendData(send_data, 1);
 		break;
 		case (int)COMMANDS_DEBUG::obc_rcu_off:
@@ -142,10 +135,11 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 		case (int)COMMANDS_DEBUG::obc_read_sensor:
 			{
 				// Read the sensor with the given sensor id
-				Data* data = this->readSensor(para);
+				Data_super* data[1];
+				data[0] = this->readSensor(para);
 
 				if (data == nullptr) {
-					send_data = new Data_simple(cmd, -1);
+					send_data[0] = new Data_simple(cmd, -1);
 					this->debugLink->sendData(send_data, 1);
 				}
 				else {
