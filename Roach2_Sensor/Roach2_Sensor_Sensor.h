@@ -7,6 +7,7 @@
 */
 #ifndef Sensor_H
 #define Sensor_H
+
 #include "../Roach2_DataStore/data.h"
 //#include "wiringPiSPI.h"
 #include <wiringPiI2C.h>

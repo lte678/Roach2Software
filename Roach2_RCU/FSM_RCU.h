@@ -2,7 +2,7 @@
 #define HEADER_FSM_RCU
 
 #include "../Roach2_Control/FSM_Controller.h"
-#include "../Roach2_DataStore/data_simple.h"
+#include "../Roach2_DataStore/Data_simple.h"
 #include "../Roach2_Comm/ReceiveHandler.h"
 #include "../Roach2_DataStore/data.h"
 #include "../Roach2_Control/CommandParser.h"

@@ -20,11 +20,14 @@ Sensor_Manager::Sensor_Manager(bool obc, bool rcu)
 		TEMP_LM75B *temp = new TEMP_LM75B();
 		temp->init();
 
+		ADC_MCP3428* adc = new ADC_MCP3428();
+		adc->init();
+
 		BNO055_IMU *imu = new BNO055_IMU();
 		//imu->init();
 
-		this->sensors = {info, temp, imu};
-		this->number_sensors = 1;
+		this->sensors = {info, adc, imu};
+		this->number_sensors = 2;
 	}
 	else if (rcu) {
 		/**

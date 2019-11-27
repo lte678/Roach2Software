@@ -11,6 +11,7 @@
 #include "../Roach2_DataStore/data.h"
 #include "../Roach2_Sensor/Temp.h"
 #include "../Roach2_Sensor/ARM_Systeminfo.h"
+#include "../Roach2_Sensor/adc.h"
 
 
 class Sensor_Manager

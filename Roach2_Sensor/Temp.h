@@ -23,7 +23,7 @@ const int LM75B_DEVICE_ID = 0x48; // in Schaltplan schauen
 
 /* ##################################################################################### */
 /* 1. Enumerations */
-enum Setting {
+enum Setting_Temp {
 	CONF_TEMP = 0b00000000, /*Standard einstellung*/
 	TOS_TEMP = 0b1101001000000000, /*210 -> 105°C*, only 9 are significant*/
 	THYST_TEMP = 0b1100100000000000 ,/*200 -> 100°C ... dummyvalue ;)*/
@@ -51,10 +51,8 @@ public:
 	Data* getData();
 	int getI2CAddr();
 	int getSensorType();
-//int logOvertemperature();
 private:
 	void tempConfig(); // Separate config function, to be called in the init()
-	//int deviceHandle = 0;
 	int measurement = 0;
 	double convertedMeasurement = 0.0;
 	unsigned long timeStamp = 0;
