@@ -16,6 +16,8 @@ private:
 	int fd_gopro1;
 	int fd_gopro2;
 	int fd_camsupply;
+	int fd_lights1;
+	int fd_lights2;
 protected:
 
 };
