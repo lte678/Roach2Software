@@ -77,12 +77,14 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
-    <ProjectReference Include="..\Roach2_Control\Roach2_Control.vcxproj">
-      <Project>{3a5f7cf7-e7a7-4a72-9d0d-fcb86063f826}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Roach2_DataStore\Roach2_DataStore.vcxproj">
-      <Project>{f2dac19d-c6f3-4b98-89df-257a207661f9}</Project>
-    </ProjectReference>
+    <ClInclude Include="Actuator.h" />
+    <ClInclude Include="Roach2_Actuators_Actuartor_GoPro.h" />
+    <ClInclude Include="Roach2_Actuators_Actuator_HV.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Actuator.cpp" />
+    <ClCompile Include="Roach2_Actuators_Actuator_GoPro.cpp" />
+    <ClCompile Include="Roach2_Actuators_Actuator_HV.cpp" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
