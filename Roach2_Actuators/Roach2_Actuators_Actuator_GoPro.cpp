@@ -76,6 +76,8 @@ Actuator_GoPro::~Actuator_GoPro()
 	close(this->fd_gopro1);
 	close(this->fd_gopro2);
 	close(this->fd_camsupply);
+	close(this->fd_lights1);
+	close(this->fd_lights2);
 
 	// Unexport GPIO pins
 	int fd_0 = open("/sys/class/gpio/unexport", O_WRONLY);
