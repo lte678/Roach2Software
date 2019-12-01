@@ -8,6 +8,7 @@
 #include "../Roach2_Control/CommandParser.h"
 #include "../Roach2_Comm/UART.h"
 #include <chrono>
+#include <string>
 
 class FSM_RCU :
 	public FSM_Controller,

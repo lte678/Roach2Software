@@ -54,10 +54,19 @@ Data* FSM_Controller::readSensor(int sensorId)
 	}
 }
 
-void FSM_Controller::initThreads()
+void FSM_Controller::initThreads(REBOOT_TARGET target)
 {
 	// Sensor handling
-	this->sensor_manager = new Sensor_Manager(true, false);
+	if (target == REBOOT_TARGET::OBC) 
+	{
+		// OBC
+		this->sensor_manager = new Sensor_Manager(true, false);
+	}
+	else 
+	{
+		// RCU
+		this->sensor_manager = new Sensor_Manager(false, true);
+	}
 	this->sensor_manager->setUpdateRate(10); // 10Hz update rate
 	this->sensor_thread = std::thread(&Sensor_Manager::run, this->sensor_manager);
 	
@@ -69,5 +78,20 @@ void FSM_Controller::initThreads()
 	//this->debugLink = new UART(); // Will open UART port, must be connected afterwards from PC
 	//this->debugLink_thread = std::thread(&UART::run, this->debugLink);
 
+	// Ethernet links: server
+	this->eth_server = new EthernetServer();
+	this->eth_server_thread = std::thread(&EthernetServer::run, this->eth_server);
+
+	// Ethernet links: client
+	if (target == REBOOT_TARGET::OBC) {
+		// OBC connects to RCU
+		this->eth_client = new EthernetClient("192.168.100.100");
+		this->eth_client_thread = std::thread(&EthernetClient::run, this->eth_client);
+	}
+	else {
+		// RCU connects to OBC
+		this->eth_client = new EthernetClient("192.168.100.101");
+		this->eth_client_thread = std::thread(&EthernetClient::run, this->eth_client);
+	}
 	
 }

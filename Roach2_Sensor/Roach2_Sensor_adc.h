@@ -23,7 +23,7 @@ const int MCP3428_DEVICE_ID = 0x68; // in Schaltplan schauen
 
 /* ##################################################################################### */
 /* 1. Enumerations */
-enum Setting {
+enum Setting_Adc {
 	CONF_ADC1 = 0b10011000, /*CH1, 15 sps, conti, x1 gain*/
 	CONF_ADC2 = 0b10111000, /*CH2, 15 sps, conti, x1 gain*/
     CONF_ADC3 = 0b11011000, /*CH3, 15 sps, conti, x1 gain*/

@@ -13,6 +13,8 @@
 #include <thread>
 #include "../Roach2_Comm/ReceiveHandler.h"
 #include "../Roach2_Sensor/Roach2_Sensor_Sensor.h"
+#include "../Roach2_Comm/EthernetClient.h"
+#include "../Roach2_Comm/EthernetServer.h"
 #include "../Roach2_Comm/RocketSignals.h"
 #include "../Roach2_Comm/UART.h"
 #include "Sensor_Manager.h"
@@ -41,6 +43,10 @@ protected:
 	int time;
 	Sensor_Manager* sensor_manager;
 	RocketSignals* rocket_signals;
+	EthernetClient* eth_client;
+	EthernetServer* eth_server;
+	std::thread eth_client_thread;
+	std::thread eth_server_thread;
 	std::thread debugLink_thread;
 	std::thread sensor_thread;
 	std::thread rocket_signals_capture_thread;
@@ -48,8 +54,6 @@ protected:
 	int numberSensors;
 	int numberActuators;
 	int numberData;
-	//Actuator* actuators;
-	//Database* data;
 	bool isSimMode;
 	Data_super* logs;
 protected:
@@ -58,7 +62,7 @@ protected:
 	void enableSimMode(void);
 	void disableSimMode(void);
 	Data* readSensor(int sensorId);
-	void initThreads();
+	void initThreads(REBOOT_TARGET target);
 public:
 	virtual void run(void) = 0;
 };

@@ -19,13 +19,18 @@ FSM_OBC::FSM_OBC()
 	std::vector<Data*> sensor_data;
 
 	// Init tasks running in separate threads (communication, sensors)
-	this->initThreads();
+	this->initThreads(REBOOT_TARGET::OBC);
 
 	// System start time
 	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
 
 	// System main loop
 	while (1) {
+		Data_super* data_msg = new Data_simple(std::string("OBC"));
+
+		this->eth_client->send(data_msg);
+		sleep(2);
+
 		// Receive UART link data
 		/*
 		Data_simple* data = this->debugLink->getData();

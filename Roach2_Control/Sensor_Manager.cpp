@@ -5,6 +5,9 @@ Sensor_Manager::Sensor_Manager(bool obc, bool rcu)
 	this->update_rate = 1;
 	this->sensor_values_loaded = 0; // Reset counter
 
+	// Create and open logging file
+	this->logging_stream = new std::ofstream(this->filename_logging);
+
 	// Create all sensors
 	if (obc) {
 		/**
@@ -27,13 +30,27 @@ Sensor_Manager::Sensor_Manager(bool obc, bool rcu)
 		//imu->init();
 
 		this->sensors = {info, adc, imu};
-		this->number_sensors = 2;
+		this->number_sensors = 1;
 	}
 	else if (rcu) {
 		/**
 		 * RCU sensor list:
 		 * 
 		*/
+		ARM_Systeminfo* info = new ARM_Systeminfo();
+		info->init();
+
+		TEMP_LM75B* temp = new TEMP_LM75B();
+		temp->init();
+
+		ADC_MCP3428* adc = new ADC_MCP3428();
+		adc->init();
+
+		BNO055_IMU* imu = new BNO055_IMU();
+		//imu->init();
+
+		this->sensors = { info, adc, imu };
+		this->number_sensors = 1;
 	}
 }
 
@@ -55,16 +72,28 @@ void Sensor_Manager::run(void)
 		this->lock_data_access.lock();
 
 		// Update all sensors
+
+		unsigned int time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
+
 		for (int i = 0; i < this->number_sensors; i++) {
 			this->sensors[i]->update();
 			Data* data = this->sensors[i]->getData();
 			this->loaded_data.push_back(data);
 			this->sensor_values_loaded++;
+			
+			// Log
+			std::string text = data->serializeLogging();
+			*(this->logging_stream) << "TIME:" << time << ":";
+			*(this->logging_stream) << text << std::endl;
 		}
+		
+		// Store to csv file for logging		
 
 		// Leave critical area
 		this->lock_data_access.unlock();
 	}
+
+	this->logging_stream->close();
 }
 
 /**

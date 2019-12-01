@@ -8,6 +8,8 @@
     <ClInclude Include="clientsock.h" />
     <ClInclude Include="serversock.h" />
     <ClInclude Include="socket.h" />
+    <ClInclude Include="EthernetServer.h" />
+    <ClInclude Include="EthernetClient.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="UART.cpp" />
@@ -15,5 +17,7 @@
     <ClCompile Include="clientsock.cpp" />
     <ClCompile Include="serversock.cpp" />
     <ClCompile Include="socket.cpp" />
+    <ClCompile Include="EthernetServer.cpp" />
+    <ClCompile Include="EthernetClient.cpp" />
   </ItemGroup>
 </Project>

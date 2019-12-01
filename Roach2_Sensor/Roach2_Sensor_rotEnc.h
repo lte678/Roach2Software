@@ -22,7 +22,7 @@ const int AS5601_DEVICE_ID = 0x36; // in Schaltplan schauen
 
 /* ##################################################################################### */
 /* 1. Enumerations */
-enum Setting {
+enum Setting_Rot {
 	CONF_ROT = 0b00000000, /*Standard einstellung*/
 };
 //SCHREIB HIER MEHR REIN

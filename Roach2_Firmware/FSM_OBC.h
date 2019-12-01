@@ -12,6 +12,7 @@
 #include "../Roach2_Control/FSM_Controller.h"
 #include "../Roach2_Comm/ReceiveHandler.h"
 #include "../Roach2_DataStore/data.h"
+#include "../Roach2_DataStore/Data_super.h"
 #include "../Roach2_DataStore/Data_simple.h"
 #include "../Roach2_Control/CommandParser.h"
 #include "../Roach2_Comm/UART.h"
@@ -19,6 +20,7 @@
 #include "../Roach2_Sensor/Temp.h"
 #include "../Roach2_Sensor/imu_neu.h"
 #include <chrono>
+#include <string>
 
 class FSM_OBC :
 	public FSM_Controller,

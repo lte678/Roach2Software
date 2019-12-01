@@ -204,6 +204,27 @@ int Data::convert_to_serial_array_length() {
 	return this->values.size();
 }
 
+std::string Data::get_string_ethernet()
+{
+	return this->serialize();
+}
+
+std::string Data::serializeLogging()
+{
+	std::string result;
+
+	result += "SENSOR";
+	result += std::to_string(this->id);
+
+	for (int i = 0; i < this->columnNames.size(); i++) {
+		result += this->columnNames[i];
+		result += ";";
+		result += std::to_string(this->values[i]);
+	}
+
+	return result;
+}
+
 /**
  * @brief Converts the given double to its binary representation for transmission over UART
  * @return binary representation of double

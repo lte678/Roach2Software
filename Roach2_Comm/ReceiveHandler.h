@@ -9,6 +9,8 @@
 #ifndef RECEIVE_HANDLER_HEADER
 #define RECEIVE_HANDLER_HEADER
 
+#include <cstdint>
+
 // Definition of REXUS signals
 enum class REXUS_SIGNALS {
 	LO = 0,

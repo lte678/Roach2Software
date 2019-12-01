@@ -16,6 +16,7 @@
 #include <iostream>
 #include "serialization.h"
 #include <string.h>
+#include <string.h>
 
 enum SENSOR_TYPES {
 	TEMP_SENSOR = 0,
@@ -133,6 +134,9 @@ class Data : public Data_super {
 		uint64_t* convert_to_serial();
 		uint64_t to_binary(double value);
 		int convert_to_serial_array_length();
+		std::string get_string_ethernet();
+
+		std::string serializeLogging();
 
 };
 
