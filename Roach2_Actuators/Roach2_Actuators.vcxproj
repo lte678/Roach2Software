@@ -77,9 +77,13 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
+    <ClCompile Include="..\Roach2_Sensor\Actuator.cpp" />
+    <ClCompile Include="pwm_pca9658.cpp" />
     <ClCompile Include="RocketSignals.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Roach2_Sensor\Actuator.h" />
+    <ClInclude Include="pwm_pca9658.h" />
     <ClInclude Include="RocketSignals.h" />
   </ItemGroup>
   <ItemGroup>
