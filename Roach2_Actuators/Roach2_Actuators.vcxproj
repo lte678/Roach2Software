@@ -78,15 +78,23 @@
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
     <ClInclude Include="Actuator.h" />
+    <ClInclude Include="pwm_pca9658.h" />
     <ClInclude Include="Roach2_Actuators_Actuartor_GoPro.h" />
     <ClInclude Include="Roach2_Actuators_Actuator_HV.h" />
+    <ClInclude Include="Roach2_Actuators_Actuator_Rover.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Actuator.cpp" />
+    <ClCompile Include="pwm_pca9658.cpp" />
     <ClCompile Include="Roach2_Actuators_Actuator_GoPro.cpp" />
     <ClCompile Include="Roach2_Actuators_Actuator_HV.cpp" />
+    <ClCompile Include="Roach2_Actuators_Actuator_Rover.cpp" />
   </ItemGroup>
-  <ItemDefinitionGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <Link>
+      <AdditionalOptions>-lwiringPi</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

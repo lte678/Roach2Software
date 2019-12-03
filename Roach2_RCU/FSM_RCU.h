@@ -7,6 +7,7 @@
 #include "../Roach2_DataStore/data.h"
 #include "../Roach2_Control/CommandParser.h"
 #include "../Roach2_Comm/UART.h"
+#include "../Roach2_Actuators/pwm_pca9658.h"
 #include <chrono>
 #include <string>
 
@@ -15,6 +16,7 @@ class FSM_RCU :
 	public ReceiveHandler
 {
 private:
+	PWM_PCA985 *pwm;
 public:
 	FSM_RCU();
 	~FSM_RCU();

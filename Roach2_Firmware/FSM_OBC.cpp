@@ -11,33 +11,32 @@
 
 FSM_OBC::FSM_OBC()
 {
+	std::vector<Data*> sensor_data;
+
 	// Init state and trigger selftest through run method
 	this->currentState = (int)FSM_STATES_OBC::IDLE;
 	this->lastState = -1;
 
-	// Init vars
-	std::vector<Data*> sensor_data;
-
 	// Init tasks running in separate threads (communication, sensors)
 	this->initThreads(REBOOT_TARGET::OBC);
+
+	// GoPro control
+	this->enableGoPro = new Actuator_GoPro();
+
+	// Rover control
+	this->enableRoverPower = new Actuator_Rover();
 
 	// System start time
 	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
 
 	// System main loop
 	while (1) {
-		Data_super* data_msg = new Data_simple(std::string("OBC"));
-
-		this->eth_client->send(data_msg);
-		sleep(2);
 
 		// Receive UART link data
-		/*
 		Data_simple* data = this->debugLink->getData();
 		if (data != nullptr) {
 			this->packageReceivedUART(*(data->convert_to_serial()), data->convert_to_serial_array_length());
 		}
-		*/
 
 		// FSM control
 		this->run();
@@ -63,6 +62,9 @@ FSM_OBC::~FSM_OBC()
 {
 }
 void FSM_OBC::run() {
+	// Message to RCU
+	Data_super* msg;
+
 	// Update system time first
 	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
 
@@ -72,10 +74,18 @@ void FSM_OBC::run() {
 	if (this->lastState != this->currentState) {
 		switch (this->currentState) {
 			case (int)FSM_STATES_OBC::IDLE:
-				// Switch RCU to state STANDBY
+				this->enableGoPro->disable();
+
+				// Power on RCU
+
 			break;
 			case (int)FSM_STATES_OBC::EXPERIMENT:
 				// Switch RCU to state DRIVE_FORWARD
+				this->enableGoPro->enable();
+
+				// Switch RCU to state STANDBY
+				msg = new Data_simple("RCU_FSM_STANDBY");
+				this->eth_client->send(msg);
 			break;
 		}
 		this->lastState = this->currentState; // Update last state variable for change detection
@@ -83,6 +93,7 @@ void FSM_OBC::run() {
 		// No state change, only execute contionous tasks
 		switch (this->currentState) {
 			case (int)FSM_STATES_OBC::IDLE:
+
 			break;
 			case (int)FSM_STATES_OBC::EXPERIMENT:
 
@@ -153,9 +164,11 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 		break;
 		case (int)COMMANDS_DEBUG::obc_rcu_off:
 			// Switch RCU/rover off
+			this->enableRoverPower->enable();
 		break;
 		case (int)COMMANDS_DEBUG::obc_rcu_on:
 			// Switch RCU/rover on
+			this->enableRoverPower->disable();
 		break;
 		case (int)COMMANDS_DEBUG::obc_read_sensor:
 			{
@@ -199,6 +212,9 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 
 void FSM_OBC::rocketSignalReceived(int signal_source)
 {
+	// Message to RCU
+	Data_super* msg;
+
 	// Load the signal levels
 	bool* signal_levels = this->rocket_signals->getRocketSignals(); // 0=SODS, 1=SOE, 2=LO
 	
@@ -213,6 +229,8 @@ void FSM_OBC::rocketSignalReceived(int signal_source)
 			// Switch RCU from IDLE to STANDBY
 			if (this->currentRCUState != FSM_STATES_RCU::STANDBY) {
 				// Send standby command
+				msg = new Data_simple("RCU_FSM_STANDBY");
+				this->eth_client->send(msg);
 			}
 			this->currentRCUState = FSM_STATES_RCU::STANDBY;
 		}
@@ -221,6 +239,8 @@ void FSM_OBC::rocketSignalReceived(int signal_source)
 		if (this->currentRCUState == FSM_STATES_RCU::STANDBY && signal_levels[1]) {
 			if (this->currentRCUState != FSM_STATES_RCU::DRIVE_FORWARD) {
 				// Send drive forward command
+				msg = new Data_simple("RCU_FSM_DRIVE_FORWARD");
+				this->eth_client->send(msg);
 			}
 			this->currentRCUState = FSM_STATES_RCU::DRIVE_FORWARD;
 		}
@@ -229,6 +249,8 @@ void FSM_OBC::rocketSignalReceived(int signal_source)
 		if (this->currentRCUState == FSM_STATES_RCU::DRIVE_FORWARD && !signal_levels[1]) {
 			if (this->currentRCUState != FSM_STATES_RCU::STANDBY) {
 				// Send standby command
+				msg = new Data_simple("RCU_FSM_STANDBY");
+				this->eth_client->send(msg);
 			}
 			this->currentRCUState = FSM_STATES_RCU::STANDBY;
 		}
@@ -241,7 +263,7 @@ void FSM_OBC::rocketSignalReceived(int signal_source)
 
 void FSM_OBC::packageReceivedRexus(uint64_t message, int msg_length)
 {
-	int i = 0;
+	this->packageReceivedUART(message, msg_length);
 }
 
 void FSM_OBC::packageReceivedEthernet()

@@ -27,9 +27,9 @@ Sensor_Manager::Sensor_Manager(bool obc, bool rcu)
 		adc->init();
 
 		BNO055_IMU *imu = new BNO055_IMU();
-		//imu->init();
+		imu->init();
 
-		this->sensors = {info, adc, imu};
+		this->sensors = {info, adc, temp};
 		this->number_sensors = 1;
 	}
 	else if (rcu) {
@@ -49,7 +49,7 @@ Sensor_Manager::Sensor_Manager(bool obc, bool rcu)
 		BNO055_IMU* imu = new BNO055_IMU();
 		//imu->init();
 
-		this->sensors = { info, adc, imu };
+		this->sensors = { info, adc, imu, temp};
 		this->number_sensors = 1;
 	}
 }

@@ -70,14 +70,16 @@ void FSM_Controller::initThreads(REBOOT_TARGET target)
 	this->sensor_manager->setUpdateRate(10); // 10Hz update rate
 	this->sensor_thread = std::thread(&Sensor_Manager::run, this->sensor_manager);
 	
-	// Rocket signals from RXSM
-	this->rocket_signals = new RocketSignals();
-	this->rocket_signals_capture_thread = std::thread(&RocketSignals::run, this->rocket_signals);
-	
-	// UART communication (debug link)
-	//this->debugLink = new UART(); // Will open UART port, must be connected afterwards from PC
-	//this->debugLink_thread = std::thread(&UART::run, this->debugLink);
+	if (target == REBOOT_TARGET::OBC) {
+		// Rocket signals from RXSM
+		this->rocket_signals = new RocketSignals();
+		this->rocket_signals_capture_thread = std::thread(&RocketSignals::run, this->rocket_signals);
 
+		// UART communication (debug link)
+		this->debugLink = new UART(); // Will open UART port, must be connected afterwards from PC
+		this->debugLink_thread = std::thread(&UART::run, this->debugLink);
+	}
+	/*
 	// Ethernet links: server
 	this->eth_server = new EthernetServer();
 	this->eth_server_thread = std::thread(&EthernetServer::run, this->eth_server);
@@ -93,5 +95,5 @@ void FSM_Controller::initThreads(REBOOT_TARGET target)
 		this->eth_client = new EthernetClient("192.168.100.101");
 		this->eth_client_thread = std::thread(&EthernetClient::run, this->eth_client);
 	}
-	
+	*/
 }

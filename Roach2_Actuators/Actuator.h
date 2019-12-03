@@ -12,9 +12,10 @@
 enum ACTUATOR_LIST {
 	GOPRO = 0,
 	HV_GEN = 1,
-	ROVER_PG = 2,
+	ROVER_POWER = 2,
 	STATUS_LEDS_OBC = 3,
-	STATUS_LEDS_RCU = 4
+	STATUS_LEDS_RCU = 4,
+	ENGINE_PWM = 5
 };
 
 class Actuator

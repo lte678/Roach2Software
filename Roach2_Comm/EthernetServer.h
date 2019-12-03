@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include <queue>
+#include <vector>
 
 // Threading related
 #include <thread>
@@ -33,6 +34,8 @@ private:
 public:
 	EthernetServer();
 	int whichConnection();
+	bool isDataReceived();
+	std::vector<std::string> getReceivedValues();
 	void run();
 };
 

@@ -67,6 +67,9 @@
     </RemotePostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Roach2_Actuators\Roach2_Actuators.vcxproj">
+      <Project>{981203a2-0fe1-40a4-9f82-622cbc3a5cc7}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Roach2_Comm\Roach2_Comm.vcxproj">
       <Project>{63d90ca3-9ae2-4e88-86c7-4f8c119762c6}</Project>
     </ProjectReference>

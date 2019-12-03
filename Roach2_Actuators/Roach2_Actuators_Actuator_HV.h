@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _Actuator_HV_h_
 #define _Actuator_HV_h_
 

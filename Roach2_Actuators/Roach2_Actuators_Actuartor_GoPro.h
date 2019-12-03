@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _Actuator_GoPro_h_
 #define _Actuator_GoPro_h_
 

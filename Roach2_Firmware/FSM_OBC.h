@@ -9,6 +9,9 @@
 #ifndef HEADER_FSM_OBC
 #define HEADER_FSM_OBC
 
+#include <chrono>
+#include <string>
+
 #include "../Roach2_Control/FSM_Controller.h"
 #include "../Roach2_Comm/ReceiveHandler.h"
 #include "../Roach2_DataStore/data.h"
@@ -19,8 +22,9 @@
 #include "../Roach2_Sensor/ARM_Systeminfo.h"
 #include "../Roach2_Sensor/Temp.h"
 #include "../Roach2_Sensor/imu_neu.h"
-#include <chrono>
-#include <string>
+#include "../Roach2_Actuators/Roach2_Actuators_Actuator_Rover.h"
+#include "../Roach2_Actuators/Roach2_Actuators_Actuartor_GoPro.h"
+
 
 class FSM_OBC :
 	public FSM_Controller,
@@ -28,6 +32,8 @@ class FSM_OBC :
 {
 private:
 	FSM_STATES_RCU currentRCUState;
+	Actuator_GoPro* enableGoPro;
+	Actuator_Rover* enableRoverPower;
 public:
 	FSM_OBC();
 	~FSM_OBC();
