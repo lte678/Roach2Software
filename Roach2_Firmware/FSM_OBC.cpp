@@ -29,7 +29,8 @@ FSM_OBC::FSM_OBC()
 	// GoPro control
 	this->enableGoPro = new Actuator_GoPro();
 
-
+	// We are not in simulation mode by default
+	this->isSimMode = false;
 
 	// System start time
 	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
@@ -45,13 +46,6 @@ FSM_OBC::FSM_OBC()
 
 		// FSM control
 		this->run();
-
-		// Load all available sensor data
-		this->sensor_manager->getData(&sensor_data);
-		for (int i = 0; i < sensor_data.size(); i++) {
-			//delete sensor_data[i];
-		}
-		sensor_data.clear();
 
 		// RXSM signals
 		if (this->rocket_signals->signalChanged()) {
@@ -227,11 +221,8 @@ void FSM_OBC::rocketSignalReceived(int signal_source)
 
 		// Switch RCU from IDLE to STANDBY
 		if (this->currentRCUState != FSM_STATES_RCU::STANDBY) {
-			// Send standby command
-			msg = new Data_simple("RCU_FSM_STANDBY");
-			this->eth_client->send(msg);
+			this->currentRCUState = FSM_STATES_RCU::STANDBY; // Note: Message to RCU is in run() method
 		}
-		this->currentRCUState = FSM_STATES_RCU::STANDBY;
 	}
 		
 	if (this->currentState = (int)FSM_STATES_OBC::EXPERIMENT) {
@@ -245,14 +236,17 @@ void FSM_OBC::rocketSignalReceived(int signal_source)
 			this->currentRCUState = FSM_STATES_RCU::DRIVE_FORWARD;
 		}
 
-		// Switch RCU from DRIVE FORWARD to STANDBY if SOE was deasserted
-		if (this->currentRCUState == FSM_STATES_RCU::DRIVE_FORWARD && !signal_levels[1]) {
-			if (this->currentRCUState != FSM_STATES_RCU::STANDBY) {
-				// Send standby command
-				msg = new Data_simple("RCU_FSM_STANDBY");
-				this->eth_client->send(msg);
+		// Switch back is only possible in simulation mode
+		if (this->isSimMode) {
+			// Switch RCU from DRIVE FORWARD to STANDBY if SOE was deasserted
+			if (this->currentRCUState == FSM_STATES_RCU::DRIVE_FORWARD && !signal_levels[1]) {
+				if (this->currentRCUState != FSM_STATES_RCU::STANDBY) {
+					// Send standby command
+					msg = new Data_simple("RCU_FSM_STANDBY");
+					this->eth_client->send(msg);
+				}
+				this->currentRCUState = FSM_STATES_RCU::STANDBY;
 			}
-			this->currentRCUState = FSM_STATES_RCU::STANDBY;
 		}
 	}
 }

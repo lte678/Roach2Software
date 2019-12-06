@@ -79,6 +79,9 @@ Actuator_GoPro::Actuator_GoPro() : Actuator()
 		this->fd_camsupply = open("/sys/class/gpio/gpio200/value", O_WRONLY);
 		this->fd_lights1 = open("/sys/class/gpio/gpio2/value", O_WRONLY);
 		this->fd_lights2 = open("/sys/class/gpio/gpio3/value", O_WRONLY);
+
+		// GoPro signals are low-active, so set to high
+		this->disable();
 	}
 }
 
@@ -109,11 +112,9 @@ int Actuator_GoPro::getActutator_type()
 
 void Actuator_GoPro::enable()
 {
-	int buffer = 49;
-
 	// Write "1" to output
-	write(this->fd_gopro1, "1", 1);
-	write(this->fd_gopro2, "1", 1);
+	write(this->fd_gopro1, "0", 1);
+	write(this->fd_gopro2, "0", 1);
 	write(this->fd_camsupply, "1", 1);
 	write(this->fd_lights1, "1", 1);
 	write(this->fd_lights2, "1", 1);
@@ -129,18 +130,25 @@ void Actuator_GoPro::enable()
 	this->fd_camsupply = open("/sys/class/gpio/gpio200/value", O_WRONLY);
 	this->fd_lights1 = open("/sys/class/gpio/gpio2/value", O_WRONLY);
 	this->fd_lights2 = open("/sys/class/gpio/gpio3/value", O_WRONLY);
+
+	// Note: GoPro signals are only trigger signals
+	usleep(500 * 1000); // wait 500ms
+	write(this->fd_gopro1, "1", 1);
+	write(this->fd_gopro2, "1", 1);
+	close(this->fd_gopro1);
+	close(this->fd_gopro2);
+	this->fd_gopro1 = open("/sys/class/gpio/gpio0/value", O_WRONLY);
+	this->fd_gopro2 = open("/sys/class/gpio/gpio1/value", O_WRONLY);
 }
 
 void Actuator_GoPro::disable()
 {
-	int buffer = 48;
-
 	// Write "1" to output
-	write(this->fd_gopro1, &buffer, 1);
-	write(this->fd_gopro2, &buffer, 1);
-	write(this->fd_camsupply, &buffer, 1);
-	write(this->fd_lights1, &buffer, 1);
-	write(this->fd_lights2, &buffer, 1);
+	write(this->fd_gopro1, "1", 1);
+	write(this->fd_gopro2, "1", 1);
+	write(this->fd_camsupply, "0", 1);
+	write(this->fd_lights1, "0", 1);
+	write(this->fd_lights2, "0", 1);
 
 	// Reopen device to reset write pointer
 	close(this->fd_gopro1);

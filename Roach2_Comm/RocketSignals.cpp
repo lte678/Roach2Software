@@ -195,7 +195,6 @@ void RocketSignals::run()
 		// Only store if something changed
 		if (res) {
 			this->changed.store(res);
-			sleep(1);
 		}
 		usleep(10); // 10us sleep => effective capture frequency upto 100kHz (depending on Linux)
 	}

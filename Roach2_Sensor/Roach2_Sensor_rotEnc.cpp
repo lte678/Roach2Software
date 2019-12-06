@@ -27,6 +27,7 @@ void ROT_AS5601::update()
 
 Data* ROT_AS5601::getData() {
 	Data* data_ptr = new Data();
+	data_ptr->setId((int)SENSOR_TYPES::ROT_ENC);
 	data_ptr->addValue("ROTRAW", measurement[0]);
 	data_ptr->addValue("ROT", measurement[1]);
 	return data_ptr;

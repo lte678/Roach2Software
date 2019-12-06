@@ -40,17 +40,20 @@ Sensor_Manager::Sensor_Manager(bool obc, bool rcu)
 		ARM_Systeminfo* info = new ARM_Systeminfo();
 		info->init();
 
-		//TEMP_LM75B* temp = new TEMP_LM75B();
-		//temp->init();
+		TEMP_LM75B* temp = new TEMP_LM75B();
+		temp->init();
 
-		//ADC_MCP3428* adc = new ADC_MCP3428();
-		//adc->init();
+		ADC_MCP3428* adc = new ADC_MCP3428();
+		adc->init();
 
-		//BNO055_IMU* imu = new BNO055_IMU();
-		//imu->init();
+		BNO055_IMU* imu = new BNO055_IMU();
+		imu->init();
 
-		this->sensors = { info };
-		this->number_sensors = 2;
+		ROT_AS5601* rot = new ROT_AS5601();
+		rot->init();
+
+		this->sensors = { info, temp, adc, imu, rot };
+		this->number_sensors = 5;
 	}
 }
 
