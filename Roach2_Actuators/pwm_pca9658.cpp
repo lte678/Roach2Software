@@ -19,12 +19,16 @@ void PWM_PCA985::init()
 
 void PWM_PCA985::drive()
 {
-	write8(MOT1_ON_H, 0b00000000); //Bitte checken
-	write8(MOT2_ON_H, 0b00000000);		
+	write8(MOT1_ON_H, 0b00010110); //Bitte checken
+	write8(MOT2_ON_H, 0b00010110);	
+	write8(MOT1_OFF_H, 0b00000000);
+	write8(MOT2_OFF_H, 0b00000000);
 }
 
 void PWM_PCA985::stop()
 {
+	write8(MOT1_ON_H, 0b00000000); //Bitte checken
+	write8(MOT2_ON_H, 0b00000000);
 	write8(MOT1_OFF_H, 0b00010000);
 	write8(MOT2_OFF_H, 0b00010000); //bitte checken
 }
