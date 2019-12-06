@@ -30,8 +30,7 @@ bool RocketSignals::checkGpio()
 	if (this->fd_sods != -1) {
 		read(this->fd_sods, &buffer, 1);
 		if (buffer != 48) {
-			// Pin set to high
-			new_sods = true;
+			this->sig_sods_acc++;
 		}
 	}
 
@@ -39,8 +38,7 @@ bool RocketSignals::checkGpio()
 	if (this->fd_soe != -1) {
 		read(this->fd_soe, &buffer, 1);
 		if (buffer != 48) {
-			// Pin set to high
-			new_soe = true;
+			this->sig_soe_acc++;
 		}
 	}
 
@@ -48,27 +46,54 @@ bool RocketSignals::checkGpio()
 	if (this->fd_lo != -1) {
 		read(this->fd_lo, &buffer, 1);
 		if (buffer != 48) {
-			// Pin set to high
-			new_lo = true;
+			this->sig_lo_acc++;
 		}
 	}
 
-	// Check against last status
-	if (this->sods != new_sods) {
-		changed = true;
+	if (this->sig_counter < this->max_sig_counter) {
+		this->sig_counter++;
 	}
-	if (this->soe != new_soe) {
-		changed = true;
-	}
-	if (this->lo != new_lo) {
-		changed = true;
+	else {
+		// Evaluate accumulator registers
+		double sig_lo = this->sig_lo_acc / (double)this->max_sig_counter;
+		double sig_soe = this->sig_soe_acc / (double)this->max_sig_counter;
+		double sig_sods = this->sig_sods_acc / (double)this->max_sig_counter;
+
+		// Check if "1"
+		if (sig_lo > 0.9) {
+			new_lo = true;
+		}
+		if (sig_soe > 0.9) {
+			new_soe = true;
+		}
+		if (sig_sods > 0.9) {
+			new_sods = true;
+		}
+
+		// Check against last status
+		if (this->sods != new_sods) {
+			changed = true;
+		}
+		if (this->soe != new_soe) {
+			changed = true;
+		}
+		if (this->lo != new_lo) {
+			changed = true;
+		}
+
+		// Write back
+		this->soe = new_soe;
+		this->sods = new_sods;
+		this->lo = new_lo;
+
+		// Reset counter
+		this->sig_counter = 0;
+		this->sig_lo_acc = 0;
+		this->sig_sods_acc = 0;
+		this->sig_soe_acc = 0;
 	}
 
-	// Write back
-	this->soe = new_soe;
-	this->sods = new_sods;
-	this->lo = new_lo;
-
+	// Unlock
 	this->access_limit.unlock();
 
 	// We need to read the same line always, so close the file handlers at the end to reset the read function
@@ -143,7 +168,10 @@ void RocketSignals::initGpio()
  **/
 RocketSignals::RocketSignals()
 {
-
+	this->sig_counter = 0;
+	this->sig_lo_acc = 0;
+	this->sig_sods_acc = 0;
+	this->sig_soe_acc = 0;
 }
 
 /*
@@ -167,8 +195,8 @@ void RocketSignals::run()
 		// Only store if something changed
 		if (res) {
 			this->changed.store(res);
+			sleep(1);
 		}
-
 		usleep(10); // 10us sleep => effective capture frequency upto 100kHz (depending on Linux)
 	}
 }

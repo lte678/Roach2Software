@@ -34,6 +34,7 @@ private:
 public:
 	EthernetClient(std::string ip);
 	int whichConnection();
+	bool isConnected();
 	void run();
 	void send(Data_super *msg);
 };

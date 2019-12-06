@@ -8,6 +8,7 @@
 #include "../Roach2_Control/CommandParser.h"
 #include "../Roach2_Comm/UART.h"
 #include "../Roach2_Actuators/pwm_pca9658.h"
+#include "../Roach2_Actuators/Roach2_Actuators_Actuator_HV.h"
 #include <chrono>
 #include <string>
 
@@ -17,6 +18,7 @@ class FSM_RCU :
 {
 private:
 	PWM_PCA985 *pwm;
+	Actuator_HV *hv;
 public:
 	FSM_RCU();
 	~FSM_RCU();
@@ -26,6 +28,7 @@ public:
 	void rocketSignalReceived(int signal_source);
 	void packageReceivedRexus(uint64_t message, int msg_length);
 	void packageReceivedEthernet();
+	void packageReceivedEthernet_msg(std::string command);
 };
 
 #endif

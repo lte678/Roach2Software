@@ -17,14 +17,19 @@ FSM_OBC::FSM_OBC()
 	this->currentState = (int)FSM_STATES_OBC::IDLE;
 	this->lastState = -1;
 
+	// Rover control
+	this->enableRoverPower = new Actuator_Rover();
+	this->enableRoverPower->enable();
+
+	sleep(40);
+
 	// Init tasks running in separate threads (communication, sensors)
 	this->initThreads(REBOOT_TARGET::OBC);
 
 	// GoPro control
 	this->enableGoPro = new Actuator_GoPro();
 
-	// Rover control
-	this->enableRoverPower = new Actuator_Rover();
+
 
 	// System start time
 	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
@@ -77,13 +82,10 @@ void FSM_OBC::run() {
 				this->enableGoPro->disable();
 
 				// Power on RCU
-
 			break;
 			case (int)FSM_STATES_OBC::EXPERIMENT:
-				// Switch RCU to state DRIVE_FORWARD
 				this->enableGoPro->enable();
 
-				// Switch RCU to state STANDBY
 				msg = new Data_simple("RCU_FSM_STANDBY");
 				this->eth_client->send(msg);
 			break;
@@ -176,7 +178,7 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 				Data_super* data[1];
 				data[0] = this->readSensor(para);
 
-				if (data == nullptr) {
+				if (data[0] == nullptr) {
 					send_data[0] = new Data_simple(cmd, -1);
 					this->debugLink->sendData(send_data, 1);
 				}
@@ -218,23 +220,21 @@ void FSM_OBC::rocketSignalReceived(int signal_source)
 	// Load the signal levels
 	bool* signal_levels = this->rocket_signals->getRocketSignals(); // 0=SODS, 1=SOE, 2=LO
 	
-	// Decision: are we on the launch pad or in air: LO=0 => launch pad, LO=1 => in air
-	// For RCU: make sure that commands to change state are only send once!
-	if (signal_levels[2]) {
-		// In air
-		// Follow normal FSM, only one state change possible
-		if (this->currentState == (int)FSM_STATES_OBC::IDLE && signal_levels[0]) {
-			this->currentState = (int)FSM_STATES_OBC::EXPERIMENT; // Switch to experiment state
+	// In air
+	// Follow normal FSM, only one state change possible
+	if (this->currentState == (int)FSM_STATES_OBC::IDLE && signal_levels[0]) {
+		this->currentState = (int)FSM_STATES_OBC::EXPERIMENT; // Switch to experiment state
 
-			// Switch RCU from IDLE to STANDBY
-			if (this->currentRCUState != FSM_STATES_RCU::STANDBY) {
-				// Send standby command
-				msg = new Data_simple("RCU_FSM_STANDBY");
-				this->eth_client->send(msg);
-			}
-			this->currentRCUState = FSM_STATES_RCU::STANDBY;
+		// Switch RCU from IDLE to STANDBY
+		if (this->currentRCUState != FSM_STATES_RCU::STANDBY) {
+			// Send standby command
+			msg = new Data_simple("RCU_FSM_STANDBY");
+			this->eth_client->send(msg);
 		}
+		this->currentRCUState = FSM_STATES_RCU::STANDBY;
+	}
 		
+	if (this->currentState = (int)FSM_STATES_OBC::EXPERIMENT) {
 		// Switch RCU from STANDBY to DRIVE_FORWARD if SOE given
 		if (this->currentRCUState == FSM_STATES_RCU::STANDBY && signal_levels[1]) {
 			if (this->currentRCUState != FSM_STATES_RCU::DRIVE_FORWARD) {
@@ -254,10 +254,6 @@ void FSM_OBC::rocketSignalReceived(int signal_source)
 			}
 			this->currentRCUState = FSM_STATES_RCU::STANDBY;
 		}
-	}
-	else {
-		// On launch pad, before lift off
-
 	}
 }
 

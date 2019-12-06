@@ -29,8 +29,8 @@ Sensor_Manager::Sensor_Manager(bool obc, bool rcu)
 		BNO055_IMU *imu = new BNO055_IMU();
 		imu->init();
 
-		this->sensors = {info, adc, temp};
-		this->number_sensors = 1;
+		this->sensors = {info, adc, temp, imu};
+		this->number_sensors = 4;
 	}
 	else if (rcu) {
 		/**
@@ -40,17 +40,17 @@ Sensor_Manager::Sensor_Manager(bool obc, bool rcu)
 		ARM_Systeminfo* info = new ARM_Systeminfo();
 		info->init();
 
-		TEMP_LM75B* temp = new TEMP_LM75B();
-		temp->init();
+		//TEMP_LM75B* temp = new TEMP_LM75B();
+		//temp->init();
 
-		ADC_MCP3428* adc = new ADC_MCP3428();
-		adc->init();
+		//ADC_MCP3428* adc = new ADC_MCP3428();
+		//adc->init();
 
-		BNO055_IMU* imu = new BNO055_IMU();
+		//BNO055_IMU* imu = new BNO055_IMU();
 		//imu->init();
 
-		this->sensors = { info, adc, imu, temp};
-		this->number_sensors = 1;
+		this->sensors = { info };
+		this->number_sensors = 2;
 	}
 }
 
@@ -81,13 +81,15 @@ void Sensor_Manager::run(void)
 			this->loaded_data.push_back(data);
 			this->sensor_values_loaded++;
 			
-			// Log
+			// Store to csv file for logging	
 			std::string text = data->serializeLogging();
 			*(this->logging_stream) << "TIME:" << time << ":";
 			*(this->logging_stream) << text << std::endl;
 		}
-		
-		// Store to csv file for logging		
+		// Clear sensor data log if more than 25 elements in memory
+		if (this->loaded_data.size() > 25) {
+			this->loaded_data.clear();
+		}			
 
 		// Leave critical area
 		this->lock_data_access.unlock();
@@ -107,19 +109,21 @@ void Sensor_Manager::stop(void)
 bool Sensor_Manager::getData(Data** data_ptr, SENSOR_TYPES sensor_id)
 {
 	// Need to get access to lock
-	if (this->lock_data_access.try_lock()) {
-		// Load sensor value
-		for (int i = 0; i < this->loaded_data.size(); i++) {
-			if (this->loaded_data[i]->getId() == (int)sensor_id) {
-				*data_ptr = this->loaded_data[i];
-				this->lock_data_access.unlock();
-				return true;
-			}
-		}
+	this->lock_data_access.lock();
 
-		// Unlock
-		this->lock_data_access.unlock();
-		return false; // No data for this sensor found
+	// Load sensor value
+	for (int i = 0; i < this->loaded_data.size(); i++) {
+		if (this->loaded_data[i]->getId() == (int)sensor_id) {
+			*data_ptr = this->loaded_data[i];
+			this->lock_data_access.unlock();
+		}
+	}
+
+	// Unlock
+	this->lock_data_access.unlock();
+
+	if (data_ptr != nullptr) {
+		return true;
 	}
 	else {
 		return false;

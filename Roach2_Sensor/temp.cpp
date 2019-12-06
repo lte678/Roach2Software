@@ -37,6 +37,7 @@ void TEMP_LM75B::update()
 
 Data* TEMP_LM75B::getData() {
 	Data* data_ptr = new Data();
+	data_ptr->setId((int)SENSOR_TYPES::TEMP_SENSOR);
 	data_ptr->addValue("TEMP", convertedMeasurement);
 	return data_ptr;
 		/*Effekt der eigenerhitzung wird vernachlässigt*/

@@ -23,6 +23,17 @@ bool EthernetServer::isDataReceived()
 	return !empty_bit;
 }
 
+bool EthernetServer::isConnected()
+{
+	this->access_receive_queue.lock();
+
+	bool conn_bit = this->connected;
+
+	this->access_receive_queue.unlock();
+
+	return conn_bit;
+}
+
 std::vector<std::string> EthernetServer::getReceivedValues()
 {
 	std::vector<std::string> copied;
@@ -59,8 +70,8 @@ void EthernetServer::run()
 	while (!this->stop_running.load()) {
 		try {
 			new_conn >> message;
-			// Simple output for test
-			cout << "Message received: " << message << "\n";
+
+			cout << "Received message: " << message << "\n";
 
 			this->access_receive_queue.lock();
 

@@ -56,6 +56,7 @@ void ADC_MCP3428::update()
 		simpleWrite(adress[ilauf]);
 	}
 	this->data_obj = new Data();
+	this->data_obj->setId((int)SENSOR_TYPES::ADC);
 	std::string name = "ADC-CH1";
 	this->data_obj->addValue(name, convertedMeasurement[0]);
 	name = "ADC-CH2";

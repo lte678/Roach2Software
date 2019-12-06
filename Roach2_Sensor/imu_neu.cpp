@@ -143,6 +143,7 @@ int BNO055_IMU::changeSign(int measurement)
 Data* BNO055_IMU::getData()
 {
 	Data* data_ptr = new Data();
+	data_ptr->setId((int)SENSOR_TYPES::IMU);
 	data_ptr->addValue("ACCELERATION_X", this->acc[0]);
 	data_ptr->addValue("ACCELERATION_Y", this->acc[1]);
 	data_ptr->addValue("ACCELERATION_Z", this->acc[2]);

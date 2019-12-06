@@ -12,20 +12,32 @@ FSM_RCU::FSM_RCU()
 	// PWM for engine
 	this->pwm = new PWM_PCA985();
 
+	// HV generator control
+	this->hv = new Actuator_HV();
+
 	// System start time
 	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
 
+	this->pwm->enable();
+
 	// System main loop
 	while (1) {
-		Data_super* data_msg = new Data_simple(std::string("RCU"));
-
-		this->eth_client->send(data_msg);
-		sleep(2);
 		
-		// Request sensor reading from all connected sensors
+		// Check if command from OBC incoming
+		if (this->eth_server->isConnected()) {
+			if (this->eth_server->isDataReceived()) {
+				std::vector<std::string> msgs = this->eth_server->getReceivedValues();
+				for (int i = 0; i < msgs.size(); i++) {
+					std::string message = msgs[i];
+					this->packageReceivedEthernet_msg(message);
+				}
+			}
+		}
 
 		// FSM control
 		this->run();
+
+		usleep(100);
 	}
 }
 
@@ -148,6 +160,19 @@ void FSM_RCU::packageReceivedEthernet()
 {
 }
 
+void FSM_RCU::packageReceivedEthernet_msg(std::string command)
+{
+	if (command.compare("RCU_FSM_STANDBY") == 0) {
+		this->currentState = (int)FSM_STATES_RCU::STANDBY;
+	}
+	else if (command.compare("RCU_FSM_DRIVE_FORWARD") == 0) {
+		this->currentState = (int)FSM_STATES_RCU::DRIVE_FORWARD;
+	}
+	else if (command.compare("RCU_FSM_IDLE") == 0) {
+		this->currentState = (int)FSM_STATES_RCU::IDLE;
+	}
+}
+
 void FSM_RCU::run(void) 
 {
 	// Update system time first
@@ -161,12 +186,15 @@ void FSM_RCU::run(void)
 				// Perform selftest
 				// Check if all sensors reported at least one data object
 				this->pwm->disable();
+				this->hv->disable();
 			break;
 			case (int)FSM_STATES_RCU::STANDBY:
 				this->pwm->disable();
+				this->hv->disable();
 			break;
 			case (int)FSM_STATES_RCU::DRIVE_FORWARD:
 				this->pwm->enable();
+				this->hv->enable();
 			break;
 		}
 		this->lastState = this->currentState;
@@ -180,7 +208,7 @@ void FSM_RCU::run(void)
 				
 			break;
 			case (int)FSM_STATES_RCU::DRIVE_FORWARD:
-				this->triggerActuators();
+				
 			break;
 		}
 	}

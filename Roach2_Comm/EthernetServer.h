@@ -35,6 +35,7 @@ public:
 	EthernetServer();
 	int whichConnection();
 	bool isDataReceived();
+	bool isConnected();
 	std::vector<std::string> getReceivedValues();
 	void run();
 };

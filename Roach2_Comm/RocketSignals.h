@@ -33,6 +33,11 @@ private:
 	ReceiveHandler *handler;
 	void initGpio();
 	bool checkGpio();
+	double sig_lo_acc;
+	double sig_sods_acc;
+	double sig_soe_acc;
+	int sig_counter;
+	const int max_sig_counter = 100;
 public:
 	RocketSignals();
 	int whichConnection(void);

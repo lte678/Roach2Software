@@ -12,12 +12,21 @@ int EthernetClient::whichConnection()
 	return CONNECTION_TYPES::ETHERNET;
 }
 
+bool EthernetClient::isConnected()
+{
+	this->access_send_queue.lock();
+
+	bool conn_bit = this->connected;
+
+	this->access_send_queue.unlock();
+
+	return conn_bit;
+}
+
 void EthernetClient::run()
 {
 	// Start thread
 	this->stop_running.store(false);
-
-	std::string msg = "TESTNACHRICHT_12343243242343242343243423243242343 \n";
 
 	// Connected to server
 	while (!connected && !this->stop_running.load()) {
@@ -38,7 +47,9 @@ void EthernetClient::run()
 			this->access_send_queue.lock();
 
 			for (int i = 0; i < this->send_queue.size(); i++) {
-				*(this->socket) << this->send_queue.front();
+				std::string msg = this->send_queue.front();
+				cout << "Send message: " << msg << "\n";
+				*(this->socket) << msg;
 				this->send_queue.pop();
 			}
 

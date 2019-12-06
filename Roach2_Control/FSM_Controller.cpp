@@ -39,11 +39,7 @@ Data* FSM_Controller::readSensor(int sensorId)
 {
 	Data* data = nullptr;
 
-	// Load data from corresponding sensor
-	bool res;
-	do {
-		res = this->sensor_manager->getData(&data, (SENSOR_TYPES)sensorId);
-	} while (!res);
+	bool res = this->sensor_manager->getData(&data, (SENSOR_TYPES)sensorId);
 
 	// Update sensor
 	if (res) {
@@ -79,7 +75,7 @@ void FSM_Controller::initThreads(REBOOT_TARGET target)
 		this->debugLink = new UART(); // Will open UART port, must be connected afterwards from PC
 		this->debugLink_thread = std::thread(&UART::run, this->debugLink);
 	}
-	/*
+	
 	// Ethernet links: server
 	this->eth_server = new EthernetServer();
 	this->eth_server_thread = std::thread(&EthernetServer::run, this->eth_server);
@@ -95,5 +91,4 @@ void FSM_Controller::initThreads(REBOOT_TARGET target)
 		this->eth_client = new EthernetClient("192.168.100.101");
 		this->eth_client_thread = std::thread(&EthernetClient::run, this->eth_client);
 	}
-	*/
 }
