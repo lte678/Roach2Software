@@ -23,6 +23,7 @@ void PWM_PCA985::drive()
 	write8(MOT2_ON_H, 0b00010110);	
 	write8(MOT1_OFF_H, 0b00000000);
 	write8(MOT2_OFF_H, 0b00000000);
+	std::cout << "Setting PWM0 and PWM1 to: Drive!";
 }
 
 void PWM_PCA985::stop()
@@ -31,6 +32,7 @@ void PWM_PCA985::stop()
 	write8(MOT2_ON_H, 0b00000000);
 	write8(MOT1_OFF_H, 0b00010000);
 	write8(MOT2_OFF_H, 0b00010000); //bitte checken
+	std::cout << "Setting PWM0 and PWM1 to: STOP!";
 }
 
 void PWM_PCA985::resetlaser()
