@@ -139,6 +139,7 @@ uint64_t* Data::convert_to_serial() {
 	
 	if (this->id == SENSOR_TYPES::TEMP_SENSOR) {
 		packages_struct[0] = (this->id << 60); // imu sensor has no subtypes
+		packages_struct[0] += (uint64_t)(to_binary(this->values[0]));
 	}
 	else if (this->id == SENSOR_TYPES::SYS_INFO) {
 		packages_struct[0] = ((uint64_t)this->id << 60); // Important, the order of values in std::vector is physMem, pyhsMemUsed, cpuLoad
@@ -196,6 +197,9 @@ uint64_t* Data::convert_to_serial() {
 		packages_struct[9] = ((uint64_t)this->id << 60); // Sensor id
 		packages_struct[9] += ((uint64_t)9 << 56); // Subtype Gyr z
 		packages_struct[9] += (uint64_t)(to_binary(this->values[8]));
+		packages_struct[10] = ((uint64_t)this->id << 60); // Sensor id
+		packages_struct[10] += ((uint64_t)10 << 56); // Subtype calibration status
+		packages_struct[10] += (uint64_t)(to_binary(this->values[10]));
 	}
 	return packages_struct;
 }
@@ -231,7 +235,8 @@ std::string Data::serializeLogging()
 */
 uint64_t Data::to_binary(double value) {
 	uint64_t res;
-	memcpy(&res, &value, sizeof(value));
+	float temp = (float)value;
+	memcpy(&res, &temp, sizeof(temp));
 	return res;
 }
 

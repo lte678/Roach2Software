@@ -207,8 +207,9 @@ void FSM_RCU::run(void)
 				this->hv->disable();
 			break;
 			case (int)FSM_STATES_RCU::DRIVE_FORWARD:
-				this->pwm->enable();
 				this->hv->enable();
+				usleep(500 * 1000); // 500ms wait
+				this->pwm->enable();
 			break;
 		}
 		this->lastState = this->currentState;

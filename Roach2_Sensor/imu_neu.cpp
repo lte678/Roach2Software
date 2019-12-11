@@ -154,6 +154,10 @@ Data* BNO055_IMU::getData()
 	data_ptr->addValue("GYR_Y", this->gyr[1]);
 	data_ptr->addValue("GYR_Z", this->gyr[2]);
 	data_ptr->addValue("imu_temp", this->temp);
+
+	int cali_stat = this->read8(CALIB_STAT_ADDR);
+
+	data_ptr->addValue("Cali_stat", (double)cali_stat);
 	return data_ptr;
 }
 

@@ -17,8 +17,22 @@ void TEMP_LM75B::init()
 
 void TEMP_LM75B::update()
 	{
-	measurement = read16(CONF_TEMP);
+	/*
+	//Signed return value
+	short value;
+
+	value = read16(CONF_TEMP) >> 5;
 	
+	//Sign extend negative numbers
+	if (value & (1 << 10))
+		value |= 0xFC00;
+
+	//Return the temperature in °C
+	convertedMeasurement =  value * 0.125;
+	*/
+	
+	measurement = read16(CONF_TEMP);
+
 	measurement = measurement >> 5;
 	if ((measurement >> 10) != 0)
 	{
@@ -29,7 +43,7 @@ void TEMP_LM75B::update()
 	}
 	else
 	{
-		measurement = binaryToDecimal(measurement);
+		//measurement = binaryToDecimal(measurement);
 	}
 	convertedMeasurement = measurement * 0.125;
 	/*hier wird measurement in float umgewandelt in °C*/

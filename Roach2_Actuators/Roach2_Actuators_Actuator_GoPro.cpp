@@ -155,7 +155,7 @@ void Actuator_GoPro::enable()
 	this->fd_lights2 = open("/sys/class/gpio/gpio3/value", O_WRONLY);
 
 	// Note: GoPro signals are only trigger signals
-	usleep(700 * 1000); // wait 700ms
+	usleep(500 * 1000); // wait 700ms
 
 	// Set GoPro pins to floating
 	// Control direction: set to input
@@ -217,7 +217,7 @@ void Actuator_GoPro::disableGoPro() {
 		close(this->fd_gopro2);
 
 		// Note: GoPro signals are only trigger signals
-		usleep(2000 * 1000); // wait 2500ms
+		usleep(2300 * 1000); // wait 2500ms
 
 		// Set GoPro pins to floating
 		// Control direction: set to input
