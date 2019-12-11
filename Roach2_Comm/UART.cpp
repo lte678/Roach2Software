@@ -247,8 +247,8 @@ UART::UART()
 			tty.c_oflag &= ~ONLCR; // Disable output conversion of newline signal
 			tty.c_cc[VTIME] = 1;    // Wait for up to 0.1s (1 deciseconds), returning as soon as any data is received.
 			tty.c_cc[VMIN] = 0;
-			cfsetispeed(&tty, B9600); // Baudrate input
-			cfsetospeed(&tty, B9600); // Baudrate output
+			cfsetispeed(&tty, B38400); // Baudrate input
+			cfsetospeed(&tty, B38400); // Baudrate output
 
 			// RX internal buffer
 			this->rx_buffer = new char[11];
