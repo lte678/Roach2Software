@@ -34,6 +34,8 @@ private:
 	FSM_STATES_RCU currentRCUState;
 	Actuator_GoPro* enableGoPro;
 	Actuator_Rover* enableRoverPower;
+	bool enableDownstream;
+	void sendRXSMSignalUpdate_Downlink(uint32_t signals_binary);
 public:
 	FSM_OBC();
 	~FSM_OBC();
@@ -43,6 +45,7 @@ public:
 	void rocketSignalReceived(int signal_source);
 	void packageReceivedRexus(uint64_t message, int msg_length);
 	void packageReceivedEthernet();
+	
 };
 
 #endif

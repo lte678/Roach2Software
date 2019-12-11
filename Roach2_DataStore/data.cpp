@@ -165,7 +165,7 @@ uint64_t* Data::convert_to_serial() {
 		
 		packages_struct[0] = ((uint64_t)this->id << 60); // Sensor id
 		packages_struct[0] += ((uint64_t)0 << 56); // Subtype IMU temp
-		packages_struct[0] += (uint64_t)(to_binary(this->values[16]));
+		packages_struct[0] += (uint64_t)(to_binary(this->values[9]));
 
 		packages_struct[1] = ((uint64_t)this->id << 60); // Sensor id
 		packages_struct[1] += ((uint64_t)1 << 56); // Subtype Acc x

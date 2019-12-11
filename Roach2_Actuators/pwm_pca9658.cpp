@@ -17,22 +17,45 @@ void PWM_PCA985::init()
 	write8(PRE_SCALE, (int8_t)temp);
 }
 
+void PWM_PCA985::enableLEDs() {
+	// LEDS on
+	write8(0x2B, 0x10);
+	write8(0x2D, 0x00);
+	write8(0x00, 0x01);
+}
+
+void PWM_PCA985::disableLEDs() {
+	// LEDS off
+	write8(0x2B, 0x00);
+	write8(0x2D, 0x10);
+	write8(0x00, 0x01);
+}
+
 void PWM_PCA985::drive()
 {
-	write8(MOT1_ON_H, 0b00010110); //Bitte checken
+	write8(0x00, 0x01); // Remove stop bit
+	write8(0x07, 0x10);
+	write8(0x09, 0x00);
+
+	/*write8(MOT1_ON_H, 0b00010110); //Bitte checken
 	write8(MOT2_ON_H, 0b00010110);	
 	write8(MOT1_OFF_H, 0b00000000);
 	write8(MOT2_OFF_H, 0b00000000);
 	std::cout << "Setting PWM0 and PWM1 to: Drive!";
+	*/
 }
 
 void PWM_PCA985::stop()
-{
-	write8(MOT1_ON_H, 0b00000000); //Bitte checken
+{ 
+	write8(0x09, 0x10);
+	write8(0x07, 0x00);
+
+	/*write8(MOT1_ON_H, 0b00000000); //Bitte checken
 	write8(MOT2_ON_H, 0b00000000);
 	write8(MOT1_OFF_H, 0b00010000);
 	write8(MOT2_OFF_H, 0b00010000); //bitte checken
 	std::cout << "Setting PWM0 and PWM1 to: STOP!";
+	*/
 }
 
 void PWM_PCA985::resetlaser()

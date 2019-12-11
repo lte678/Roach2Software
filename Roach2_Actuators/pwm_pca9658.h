@@ -29,7 +29,7 @@
 
 /* ##################################################################################### */
 /* 0. Hard coded settings  */
-const int PCA985_DEVICE_ID = 0x40; // in Schaltplan schauen
+const int PCA985_DEVICE_ID = 0x70; // in Schaltplan schauen
 const int PWM_FREQUENCY = 100; //  TESTVALUE!!!! IN Hz
 /* ##################################################################################### */
 
@@ -100,6 +100,8 @@ public:
 	void enable();
 	void disable();
 	int getActutator_type();
+	void enableLEDs();
+	void disableLEDs();
 private:
 	int freq = 0;
 
