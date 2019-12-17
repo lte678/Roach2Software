@@ -26,9 +26,7 @@ bool EthernetServer::isDataReceived()
 bool EthernetServer::isConnected()
 {
 	this->access_receive_queue.lock();
-
 	bool conn_bit = this->connected;
-
 	this->access_receive_queue.unlock();
 
 	return conn_bit;
@@ -37,7 +35,6 @@ bool EthernetServer::isConnected()
 std::vector<std::string> EthernetServer::getReceivedValues()
 {
 	std::vector<std::string> copied;
-
 	this->access_receive_queue.lock();
 
 	// Copies all received string to vector and deletes the queue content
@@ -48,7 +45,6 @@ std::vector<std::string> EthernetServer::getReceivedValues()
 	}
 
 	this->access_receive_queue.unlock();
-
 	return copied;
 }
 
@@ -60,30 +56,57 @@ void EthernetServer::run()
 	// Start thread
 	this->stop_running.store(false);
 
-	// Connect to server, wait unitl connection established or thread stopped
+	// Connect to client, wait unitl connection established or thread stopped
 	while (this->stop_running.load() || !connected) {
-		this->socket->accept(new_conn);
-		this->connected = true;
+		try {
+			this->socket->accept(new_conn);
+			this->access_receive_queue.lock();
+			this->connected = true;
+			this->access_receive_queue.unlock();
+		}
+		catch (SockExcept & e) {
+			this->access_receive_queue.lock();
+			this->connected = false;
+			this->access_receive_queue.unlock();
+		}
 	}
 
 	// Receive data until the end
 	while (!this->stop_running.load()) {
 		try {
 			new_conn >> message;
-
-			cout << "Received message: " << message << "\n";
-
 			this->access_receive_queue.lock();
-
 			this->receive_queue.push(message);
-
 			this->access_receive_queue.unlock();
 		}
 		catch (SockExcept & e) {
-			cout << "Error: " << e.get_SockExcept() << endl;
+			// Some error occurred, try to reconnect
+			this->access_receive_queue.lock();
+			this->connected = false;
+			this->access_receive_queue.unlock();
+
+			try {
+				// First try to close socket in case this is not a loose of connection
+				this->socket->close();
+			}
+			catch (SockExcept & e) {
+				// Connection already close, this is fine, will try to reconnect next
+			}
+
+			// Now try to reconnect (accept incoming connection)
+			while (this->stop_running.load() || !this->connected) {
+				try {
+					this->socket->accept(new_conn);
+					this->access_receive_queue.lock();
+					this->connected = true;
+					this->access_receive_queue.unlock();
+				}
+				catch (SockExcept & e) {
+					this->access_receive_queue.lock();
+					this->connected = false;
+					this->access_receive_queue.unlock();
+				}
+			}
 		}
-
-		usleep(10);
 	}
-
 }

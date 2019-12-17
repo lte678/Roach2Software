@@ -26,7 +26,8 @@
 #include "../Roach2_Sensor/ARM_Systeminfo.h"
 #include "../Roach2_Sensor/Roach2_Sensor_adc.h"
 #include "../Roach2_Sensor/Roach2_Sensor_rotEnc.h"
-
+#include "../Roach2_Sensor/OBC_Systemstatus.h"
+#include "../Roach2_Sensor/RCU_Systemstatus.h"
 
 class Sensor_Manager
 {
@@ -41,7 +42,7 @@ private:
 	char* filename_logging = "log.csv";
 	std::ofstream* logging_stream;
 public:
-	Sensor_Manager(bool obc, bool rcu);
+	Sensor_Manager(bool obc, bool rcu, EthernetClient* client, EthernetServer* server);
 	// Threading related
 	void run(void);
 	void stop(void);

@@ -85,6 +85,8 @@
   <ItemGroup>
     <ClCompile Include="ARM_Systeminfo.cpp" />
     <ClCompile Include="imu_neu.cpp" />
+    <ClCompile Include="OBC_Systemstatus.cpp" />
+    <ClCompile Include="RCU_Systemstatus.cpp" />
     <ClCompile Include="Roach2_Sensor_adc.cpp" />
     <ClCompile Include="Roach2_Sensor_rotEnc.cpp" />
     <ClCompile Include="Roach2_Sensor_Sensor.cpp" />
@@ -93,12 +95,17 @@
   <ItemGroup>
     <ClInclude Include="ARM_Systeminfo.h" />
     <ClInclude Include="imu_neu.h" />
+    <ClInclude Include="OBC_Systemstatus.h" />
+    <ClInclude Include="RCU_Systemstatus.h" />
     <ClInclude Include="Roach2_Sensor_adc.h" />
     <ClInclude Include="Roach2_Sensor_rotEnc.h" />
     <ClInclude Include="Roach2_Sensor_Sensor.h" />
     <ClInclude Include="Temp.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Roach2_Comm\Roach2_Comm.vcxproj">
+      <Project>{63d90ca3-9ae2-4e88-86c7-4f8c119762c6}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Roach2_DataStore\Roach2_DataStore.vcxproj">
       <Project>{f2dac19d-c6f3-4b98-89df-257a207661f9}</Project>
     </ProjectReference>

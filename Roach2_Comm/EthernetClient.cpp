@@ -15,9 +15,7 @@ int EthernetClient::whichConnection()
 bool EthernetClient::isConnected()
 {
 	this->access_send_queue.lock();
-
 	bool conn_bit = this->connected;
-
 	this->access_send_queue.unlock();
 
 	return conn_bit;
@@ -32,33 +30,62 @@ void EthernetClient::run()
 	while (!connected && !this->stop_running.load()) {
 		try {
 			this->socket = new ClientSock(this->ip, this->port_number);
-			connected = true;
+			this->access_send_queue.lock();
+			this->connected = true;
+			this->access_send_queue.unlock();
 		}
 		catch (SockExcept & e) {
-			
+			this->access_send_queue.lock();
+			this->connected = false;
+			this->access_send_queue.unlock();
 		}
 
 		usleep(100);
 	}
 
+	// Send messages to server (server is not expected to return data)
 	while (!this->stop_running.load()) {
 		try {
-
 			this->access_send_queue.lock();
-
 			for (int i = 0; i < this->send_queue.size(); i++) {
 				std::string msg = this->send_queue.front();
-				cout << "Send message: " << msg << "\n";
 				*(this->socket) << msg;
 				this->send_queue.pop();
 			}
-
 			this->access_send_queue.unlock();
 		}
 		catch (SockExcept &e) {
-			cout << "Error: " << e.get_SockExcept() << endl;
-		}
+			// Some error occurred, try to reconnect
+			this->access_send_queue.lock();
+			this->connected = false;
+			this->access_send_queue.unlock();
+			try {
+				// First try to close socket in case this is not a loose of connection
+				this->socket->close();
+			}
+			catch (SockExcept & e) {
+				// Connection already close, this is fine, will try to reconnect next
+			}
 
+			// Delete client socket object
+			delete this->socket;
+
+			// Try to reconnect
+			while (this->stop_running.load() || !this->connected) {
+				try {
+					this->socket = new ClientSock(this->ip, this->port_number);
+					this->access_send_queue.lock();
+					this->connected = true;
+					this->access_send_queue.unlock();
+				}
+				catch (SockExcept & e) {
+					this->access_send_queue.lock();
+					this->connected = false;
+					this->access_send_queue.unlock();
+				}
+				usleep(100);
+			}
+		}
 		usleep(10);
 	}
 }
@@ -66,10 +93,7 @@ void EthernetClient::run()
 
 void EthernetClient::send(Data_super* msg) {
 	this->access_send_queue.lock();
-	
 	std::string msg_string = msg->get_string_ethernet();
-
 	this->send_queue.push(msg_string);
-
 	this->access_send_queue.unlock();
 }

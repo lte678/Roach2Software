@@ -52,20 +52,6 @@ Data* FSM_Controller::readSensor(int sensorId)
 
 void FSM_Controller::initThreads(REBOOT_TARGET target)
 {
-	// Sensor handling
-	if (target == REBOOT_TARGET::OBC) 
-	{
-		// OBC
-		this->sensor_manager = new Sensor_Manager(true, false);
-	}
-	else 
-	{
-		// RCU
-		this->sensor_manager = new Sensor_Manager(false, true);
-	}
-	this->sensor_manager->setUpdateRate(10); // 10Hz update rate
-	this->sensor_thread = std::thread(&Sensor_Manager::run, this->sensor_manager);
-	
 	if (target == REBOOT_TARGET::OBC) {
 		// Rocket signals from RXSM
 		this->rocket_signals = new RocketSignals();
@@ -91,4 +77,18 @@ void FSM_Controller::initThreads(REBOOT_TARGET target)
 		this->eth_client = new EthernetClient("192.168.100.101");
 		this->eth_client_thread = std::thread(&EthernetClient::run, this->eth_client);
 	}
+
+	// Sensor handling
+	if (target == REBOOT_TARGET::OBC)
+	{
+		// OBC
+		this->sensor_manager = new Sensor_Manager(true, false);
+	}
+	else
+	{
+		// RCU
+		this->sensor_manager = new Sensor_Manager(false, true, this->eth_client, this->eth_server);
+	}
+	this->sensor_manager->setUpdateRate(10); // 10Hz update rate
+	this->sensor_thread = std::thread(&Sensor_Manager::run, this->sensor_manager);
 }
