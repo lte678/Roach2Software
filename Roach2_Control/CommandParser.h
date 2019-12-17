@@ -13,7 +13,9 @@ enum class COMMANDS_OPERATIONAL {
 	obc_restart_rover = 7,
 	rcu_touch_down_event = 8,
 	rcu_read_sensor  = 9,
-	NUMBER_ELEMENTS = 10
+	obc_rcu_online = 11,
+	obc_rocket_signal_status = 10,
+	NUMBER_ELEMENTS = 12
 };
 
 enum class COMMANDS_DEBUG {

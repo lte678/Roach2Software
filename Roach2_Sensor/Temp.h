@@ -1,4 +1,4 @@
-#pragma once
+
 /**
 * @file Temp.h
 * 12-08-2019
@@ -7,8 +7,9 @@
 * @copyright KSat Stuttgart e.V. Roach2 software team
 */
 
-#ifndef TEMP_LM75B
+#ifndef TEMP_LM75B_H
 #define TEMP_LM75B_H
+
 #include "Roach2_Sensor_Sensor.h"
 #include <wiringPiI2C.h>
 #include <bitset>
@@ -22,17 +23,17 @@ const int LM75B_DEVICE_ID = 0x48; // in Schaltplan schauen
 
 /* ##################################################################################### */
 /* 1. Enumerations */
-enum Setting {
-	CONF_TEMP = 0b00000000 /*Standard einstellung*/
-	TOS_TEMP = 0b1101001000000000 /*210 -> 105°C*, only 9 are significant*/
-	THYST_TEMP = 0b1100100000000000 /*200 -> 100°C ... dummyvalue ;)*/
+enum Setting_Temp {
+	CONF_TEMP = 0b00000000, /*Standard einstellung*/
+	TOS_TEMP = 0b1101001000000000, /*210 -> 105°C*, only 9 are significant*/
+	THYST_TEMP = 0b1100100000000000 ,/*200 -> 100°C ... dummyvalue ;)*/
 };
 //SCHREIB HIER MEHR REIN
 enum LM758_REGISTER_t {
-	TEMP_reg = 0b00000000 
-	CONF_reg = 0b00000001
-	THYST_reg = 0b00000010
-	TOS_reg =  0b00000011
+	TEMP_reg = 0b00000000 ,
+	CONF_reg = 0b00000001,
+	THYST_reg = 0b00000010,
+	TOS_reg =  0b00000011,
 	/* change the pointer to Temperature, or conf*/
 };
 
@@ -47,13 +48,13 @@ public:
 	~TEMP_LM75B();
 	void init();
 	void update();
-	Data getData();
+	Data* getData();
 	int getI2CAddr();
-//int logOvertemperature();
+	int getSensorType();
 private:
 	void tempConfig(); // Separate config function, to be called in the init()
-	int deviceHandle = 0;
 	int measurement = 0;
+	double convertedMeasurement = 0.0;
 	unsigned long timeStamp = 0;
 };
 

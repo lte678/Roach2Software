@@ -9,11 +9,14 @@
 #ifndef RECEIVE_HANDLER_HEADER
 #define RECEIVE_HANDLER_HEADER
 
+#include <cstdint>
+
 // Definition of REXUS signals
 enum class REXUS_SIGNALS {
 	LO = 0,
 	SODS = 1,
-	SOE = 2
+	SOE = 2,
+	ALL = 3
 };
 
 class ReceiveHandler

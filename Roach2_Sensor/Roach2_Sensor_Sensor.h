@@ -5,15 +5,28 @@
 *
 * @copyright KSat Stuttgart e.V. Roach2 software team
 */
-#pragma once
+#ifndef Sensor_H
+#define Sensor_H
 
-#include "..//Roach2_DataStore/data.h"
-#include "wiringPiSPI.h"
-#include "wiringPiI2C.h"
+#include "../Roach2_DataStore/data.h"
+//#include "wiringPiSPI.h"
+#include <wiringPiI2C.h>
+//#include <wiringPi.h>
 #include <bitset>
 #include <iostream>
 #include <chrono>
-#include "../Roach2_DataStore/data.h"
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <linux/i2c.h>
+#include <linux/i2c-dev.h>
+
+// Important: The following define disables actual sensor usage!!
+// Disable it in operation usage!!!
 
 class Sensor
 {
@@ -28,8 +41,14 @@ class Sensor
 		virtual void update() = 0;
 		virtual Data* getData() = 0;
 		virtual int getI2CAddr() = 0;
+		/**
+		* @brief Returns the sensor identifier number (see SENSOR_TYPES in data.h from datastore project)
+		* @return int sensor identifier
+		*/
+		virtual int getSensorType() = 0;
 	// I2C sensor functions are placed here to avoid redefining them for most sensors
 	protected:
+		int deviceHandle;
 		int write8(int reg, int data);
 		int read8(int reg);
 		int write16(int reg, int data);
@@ -39,3 +58,5 @@ class Sensor
 		int simpleRead();
 		int simpleWrite(int data);
 };
+
+#endif //Sensor_H

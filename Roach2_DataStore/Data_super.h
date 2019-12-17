@@ -2,6 +2,7 @@
 #define DATA_SUPER_HEADER
 
 #include <cstdint>
+#include <string>
 
 
 /**
@@ -12,6 +13,7 @@ class Data_super
 public:
 	virtual uint64_t* convert_to_serial() = 0;
 	virtual int convert_to_serial_array_length() = 0;
+	virtual std::string get_string_ethernet() = 0;
 };
 
 #endif

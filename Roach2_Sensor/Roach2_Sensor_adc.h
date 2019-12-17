@@ -1,8 +1,3 @@
-#pragma once
-
-
-#pragma once
-
 /**
 * @file adc.h
 * 22-08-2019
@@ -11,44 +6,50 @@
 * @copyright KSat Stuttgart e.V. Roach2 software team
 */
 
-#ifndef rotEnc_LS7366R
-#define rotEnc_LS7366R
+#ifndef ADC_MCP3428_HEADER
+#define ADC_MCP3428_HEADER
+
 #include "Roach2_Sensor_Sensor.h"
+#include "../Roach2_DataStore/data.h"
 #include <wiringPiI2C.h>
 #include <bitset>
 #include <iostream>
 #include <chrono>
+#include <string>
 
 /* ##################################################################################### */
 /* 0. Hard coded settings  */
-const long CALIBRATION_TIMEOUT_SECONDS = 60;
-const int LS7366R_CHANNEL = 0; // in Schaltplan schauen
-const int speed = 500000
+const int MCP3428_DEVICE_ID = 0x68; // in Schaltplan schauen
+
 /* ##################################################################################### */
 /* 1. Enumerations */
-enum Setting {
-	CONF_ADC = 0b10011000 /*CH1, 15 sps, conti, x1 gain*/
+enum Setting_Adc {
+	CONF_ADC1 = 0b10011000, /*CH1, 15 sps, conti, x1 gain*/
+	CONF_ADC2 = 0b10111000, /*CH2, 15 sps, conti, x1 gain*/
+    CONF_ADC3 = 0b11011000, /*CH3, 15 sps, conti, x1 gain*/
+	CONF_ADC4 = 0b11111000 /*CH4, 15 sps, conti, x1 gain*/
 };
 //SCHREIB HIER MEHR REIN
 
 /* ##################################################################################### */
 /* 2. Class Definition */
 
-class rotEnc_LS7366R : public Sensor {
-	/* Sensor class for MCP3428 */
-
+class ADC_MCP3428 : public Sensor {
 public:
-	rotEnc_LS7366R();
-	rotEnc_LS7366R();
+	ADC_MCP3428();
+	~ADC_MCP3428();
 	void init();
 	void update();
-	Data getData();
+	Data* getData();
 	int getI2CAddr();
-	//int logOvertemperature();
+	int getSensorType();
 private:
-	int deviceHandle = 0;
-	int measurement = 0;
+	int measurement[4] = {};
+	int ilauf = 1;
+	int adress[4];
+	double convertedMeasurement[4] = {};
 	unsigned long timeStamp = 0;
+	Data* data_obj;
 };
 
 #endif //ADC_MCP3428

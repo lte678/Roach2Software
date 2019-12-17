@@ -76,13 +76,32 @@
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <LibraryPath>
+    </LibraryPath>
+    <IncludePath>
+    </IncludePath>
+  </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="imu.cpp" />
+    <ClCompile Include="ARM_Systeminfo.cpp" />
+    <ClCompile Include="imu_neu.cpp" />
+    <ClCompile Include="Roach2_Sensor_adc.cpp" />
+    <ClCompile Include="Roach2_Sensor_rotEnc.cpp" />
     <ClCompile Include="Roach2_Sensor_Sensor.cpp" />
+    <ClCompile Include="temp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ARM_Systeminfo.h" />
     <ClInclude Include="imu_neu.h" />
+    <ClInclude Include="Roach2_Sensor_adc.h" />
+    <ClInclude Include="Roach2_Sensor_rotEnc.h" />
     <ClInclude Include="Roach2_Sensor_Sensor.h" />
+    <ClInclude Include="Temp.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Roach2_DataStore\Roach2_DataStore.vcxproj">
+      <Project>{f2dac19d-c6f3-4b98-89df-257a207661f9}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>
@@ -90,6 +109,11 @@
     </ClCompile>
     <Link>
       <AdditionalOptions>-lwiringPi %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <Link>
+      <AdditionalOptions>-lwiringPi</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

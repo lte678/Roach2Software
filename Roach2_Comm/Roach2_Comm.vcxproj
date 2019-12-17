@@ -80,11 +80,23 @@
     <SourcePath>C:\Users\burkm\source\repos\Roach2_Firmware\includes\boost_1_66_0\boost;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <ItemGroup>
+    <ClInclude Include="clientsock.h" />
     <ClInclude Include="Connection.h" />
+    <ClInclude Include="EthernetClient.h" />
+    <ClInclude Include="EthernetServer.h" />
     <ClInclude Include="ReceiveHandler.h" />
+    <ClInclude Include="RocketSignals.h" />
+    <ClInclude Include="serversock.h" />
+    <ClInclude Include="socket.h" />
     <ClInclude Include="UART.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="clientsock.cpp" />
+    <ClCompile Include="EthernetClient.cpp" />
+    <ClCompile Include="EthernetServer.cpp" />
+    <ClCompile Include="RocketSignals.cpp" />
+    <ClCompile Include="serversock.cpp" />
+    <ClCompile Include="socket.cpp" />
     <ClCompile Include="UART.cpp" />
   </ItemGroup>
   <ItemGroup>

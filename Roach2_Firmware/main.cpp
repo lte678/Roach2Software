@@ -1,6 +1,5 @@
-#include "../Roach2_Comm/UART.h"
+#include "FSM_OBC.h"
 
 int main(int argc, char** argv) {
-	UART* device;
-	device = new UART();
+	FSM_OBC* obc = new FSM_OBC();
 }

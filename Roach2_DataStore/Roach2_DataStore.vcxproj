@@ -36,14 +36,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="data.cpp" />
-    <ClCompile Include="data_simple.cpp" />
+    <ClCompile Include="Data_simple.cpp" />
     <ClCompile Include="Data_super.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="serialization.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="data.h" />
-    <ClInclude Include="data_simple.h" />
+    <ClInclude Include="Data_simple.h" />
     <ClInclude Include="Data_super.h" />
     <ClInclude Include="serialization.h" />
   </ItemGroup>

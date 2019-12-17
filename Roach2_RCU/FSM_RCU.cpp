@@ -6,32 +6,46 @@ FSM_RCU::FSM_RCU()
 	this->currentState = (int)FSM_STATES_RCU::IDLE;
 	this->lastState = -1;
 
-	// Init comm links
-	this->debug_link = new UART(); // Will open UART port, must be connected afterwards from PC
-	this->debug_link->addEventHandler(this);
+	// Init threads
+	this->initThreads(REBOOT_TARGET::RCU);
 
-	// Database system
-	//this->data = new Database();
+	// PWM for engine
+	this->pwm = new PWM_PCA985();
+	this->pwm->disableLEDs();
+	this->pwm->disable();
+
+	// HV generator control
+	this->hv = new Actuator_HV();
+	this->hv->disable();
 
 	// System start time
 	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
 
 	// System main loop
 	while (1) {
-		// Receive UART link data
-		this->debug_link->receive();
 		
-		// Request sensor reading from all connected sensors
+		// Check if command from OBC incoming
+		if (this->eth_server->isConnected()) {
+			if (this->eth_server->isDataReceived()) {
+				std::vector<std::string> msgs = this->eth_server->getReceivedValues();
+				for (int i = 0; i < msgs.size(); i++) {
+					std::string message = msgs[i];
+					this->packageReceivedEthernet_msg(message);
+				}
+			}
+		}
 
 		// FSM control
 		this->run();
+
+		usleep(100);
 	}
 }
 
 
 FSM_RCU::~FSM_RCU()
 {
-	delete this->debug_link;
+	
 }
 
 void FSM_RCU::triggerActuators(void) 
@@ -42,8 +56,6 @@ void FSM_RCU::triggerActuators(void)
 
 void FSM_RCU::packageReceivedUART(uint64_t message, int msg_length)
 {
-	Data_simple* send_data;
-
 	// Parse commands
 	uint32_t cmd = ((message & 0xFFFFFFFF00000000) >> 32);
 	uint32_t para = (message & 0x00000000FFFFFFFF);
@@ -53,19 +65,12 @@ void FSM_RCU::packageReceivedUART(uint64_t message, int msg_length)
 	switch ((int)res.op) {
 		// RCU alive check
 		case (int)COMMANDS_OPERATIONAL::rcu_check_alive:
-			// Check alive => RCU is alive
-			// Send command back and 1 in parameter section
-			send_data = new Data_simple(cmd, 1);
-			this->debug_link->sendData(send_data, 1);
+
 		break;
 
 		// LO event
 		case (int)COMMANDS_OPERATIONAL::rcu_lo_event:
 			this->rocketSignalReceived((int)REXUS_SIGNALS::LO);
-			
-			// Send new state back
-			send_data = new Data_simple(cmd, this->currentState);
-			this->debug_link->sendData(send_data, 1);
 		break;
 
 		// Read sensors
@@ -75,18 +80,11 @@ void FSM_RCU::packageReceivedUART(uint64_t message, int msg_length)
 		// SODS event
 		case (int)COMMANDS_OPERATIONAL::rcu_sods_event:
 			this->rocketSignalReceived((int)REXUS_SIGNALS::SODS);
-
-			// Send new state back
-			send_data = new Data_simple(cmd, this->currentState);
-			this->debug_link->sendData(send_data, 1);
 		break;
 
 		// SOE event
 		case (int)COMMANDS_OPERATIONAL::rcu_soe_event:
 			this->rocketSignalReceived((int)REXUS_SIGNALS::SOE);
-			// Send new state back
-			send_data = new Data_simple(cmd, this->currentState);
-			this->debug_link->sendData(send_data, 1);
 		break;
 	}
 
@@ -112,9 +110,6 @@ void FSM_RCU::packageReceivedUART(uint64_t message, int msg_length)
 				this->currentState = (int)FSM_STATES_RCU::DRIVE_FORWARD;
 			}
 
-			// Send current state back
-			send_data = new Data_simple(cmd, (uint32_t)this->currentState);
-			this->debug_link->sendData(send_data, 1);
 		break;
 
 		// Switch to revious state
@@ -124,10 +119,6 @@ void FSM_RCU::packageReceivedUART(uint64_t message, int msg_length)
 			} else if (this->currentState == (int)FSM_STATES_RCU::DRIVE_FORWARD) {
 				this->currentState = (int)FSM_STATES_RCU::STANDBY;
 			}
-
-			// Send current state back
-			send_data = new Data_simple(cmd, (uint32_t)this->currentState);
-			this->debug_link->sendData(send_data, 1);
 		break;
 
 		case (int)COMMANDS_DEBUG::rcu_sensor_acq_off:
@@ -170,6 +161,31 @@ void FSM_RCU::packageReceivedEthernet()
 {
 }
 
+void FSM_RCU::packageReceivedEthernet_msg(std::string command)
+{
+	Data_super* msg;
+
+	if (command.compare("RCU_FSM_STANDBY") == 0) {
+		this->currentState = (int)FSM_STATES_RCU::STANDBY;
+	}
+	else if (command.compare("RCU_FSM_DRIVE_FORWARD") == 0) {
+		this->currentState = (int)FSM_STATES_RCU::DRIVE_FORWARD;
+	}
+	else if (command.compare("RCU_FSM_IDLE") == 0) {
+		this->currentState = (int)FSM_STATES_RCU::IDLE;
+	}
+	else if (command.compare("RCU_DRIVE_FORWARD") == 0) {
+		this->pwm->enable();
+	}
+	else if (command.compare("RCU_STOP_DRIVE_FORWARD") == 0) {
+		this->pwm->disable();
+	}
+	else if (command.compare("rcu_check_alive") == 0) {
+		msg = new Data_simple("ALIVE");
+		this->eth_client->send(msg);
+	}
+}
+
 void FSM_RCU::run(void) 
 {
 	// Update system time first
@@ -182,13 +198,18 @@ void FSM_RCU::run(void)
 			case (int)FSM_STATES_RCU::IDLE:
 				// Perform selftest
 				// Check if all sensors reported at least one data object
-				
+				this->pwm->disable();
+				this->hv->disable();
 			break;
 			case (int)FSM_STATES_RCU::STANDBY:
-
+				this->pwm->disable();
+				this->pwm->enableLEDs();
+				this->hv->disable();
 			break;
 			case (int)FSM_STATES_RCU::DRIVE_FORWARD:
-
+				this->hv->enable();
+				usleep(500 * 1000); // 500ms wait
+				this->pwm->enable();
 			break;
 		}
 		this->lastState = this->currentState;
@@ -199,11 +220,10 @@ void FSM_RCU::run(void)
 				// Check if selftest done
 			break;
 			case (int)FSM_STATES_RCU::STANDBY:
-				this->pollSensors();
+				
 			break;
 			case (int)FSM_STATES_RCU::DRIVE_FORWARD:
-				this->pollSensors();
-				this->triggerActuators();
+				
 			break;
 		}
 	}
