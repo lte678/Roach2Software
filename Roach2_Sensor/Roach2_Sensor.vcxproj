@@ -85,21 +85,44 @@
   <ItemGroup>
     <ClCompile Include="ARM_Systeminfo.cpp" />
     <ClCompile Include="imu_neu.cpp" />
+    <ClCompile Include="LaserDist_VL530LX.cpp" />
     <ClCompile Include="OBC_Systemstatus.cpp" />
     <ClCompile Include="RCU_Systemstatus.cpp" />
     <ClCompile Include="Roach2_Sensor_adc.cpp" />
     <ClCompile Include="Roach2_Sensor_rotEnc.cpp" />
     <ClCompile Include="Roach2_Sensor_Sensor.cpp" />
+    <ClCompile Include="STVL53L0X\core\src\vl53l0x_api.c" />
+    <ClCompile Include="STVL53L0X\core\src\vl53l0x_api_calibration.c" />
+    <ClCompile Include="STVL53L0X\core\src\vl53l0x_api_core.c" />
+    <ClCompile Include="STVL53L0X\core\src\vl53l0x_api_ranging.c" />
+    <ClCompile Include="STVL53L0X\core\src\vl53l0x_api_strings.c" />
+    <ClCompile Include="STVL53L0X\platform\src\vl53l0x_i2c_win_serial_comms.c" />
+    <ClCompile Include="STVL53L0X\platform\src\vl53l0x_platform.c" />
+    <ClCompile Include="STVL53L0X\platform\src\vl53l0x_platform_log.c" />
     <ClCompile Include="temp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ARM_Systeminfo.h" />
     <ClInclude Include="imu_neu.h" />
+    <ClInclude Include="LaserDist_VL530LX.h" />
     <ClInclude Include="OBC_Systemstatus.h" />
     <ClInclude Include="RCU_Systemstatus.h" />
     <ClInclude Include="Roach2_Sensor_adc.h" />
     <ClInclude Include="Roach2_Sensor_rotEnc.h" />
     <ClInclude Include="Roach2_Sensor_Sensor.h" />
+    <ClInclude Include="STVL53L0X\core\inc\vl53l0x_api.h" />
+    <ClInclude Include="STVL53L0X\core\inc\vl53l0x_api_calibration.h" />
+    <ClInclude Include="STVL53L0X\core\inc\vl53l0x_api_core.h" />
+    <ClInclude Include="STVL53L0X\core\inc\vl53l0x_api_ranging.h" />
+    <ClInclude Include="STVL53L0X\core\inc\vl53l0x_api_strings.h" />
+    <ClInclude Include="STVL53L0X\core\inc\vl53l0x_def.h" />
+    <ClInclude Include="STVL53L0X\core\inc\vl53l0x_device.h" />
+    <ClInclude Include="STVL53L0X\core\inc\vl53l0x_interrupt_threshold_settings.h" />
+    <ClInclude Include="STVL53L0X\core\inc\vl53l0x_tuning.h" />
+    <ClInclude Include="STVL53L0X\platform\inc\vl53l0x_i2c_platform.h" />
+    <ClInclude Include="STVL53L0X\platform\inc\vl53l0x_platform.h" />
+    <ClInclude Include="STVL53L0X\platform\inc\vl53l0x_platform_log.h" />
+    <ClInclude Include="STVL53L0X\platform\inc\vl53l0x_types.h" />
     <ClInclude Include="Temp.h" />
   </ItemGroup>
   <ItemGroup>
@@ -109,6 +132,9 @@
     <ProjectReference Include="..\Roach2_DataStore\Roach2_DataStore.vcxproj">
       <Project>{f2dac19d-c6f3-4b98-89df-257a207661f9}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="STVL53L0X\core\src\vl53l0x_api.c.bak" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>

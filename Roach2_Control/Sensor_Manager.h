@@ -39,7 +39,7 @@ private:
 	int update_rate; // Update rate in Hz
 	std::mutex lock_data_access; // Mutex to prohibit problems with access data from multiple threads
 	int sensor_values_loaded;
-	char* filename_logging = "log.csv";
+	std::string filename_logging = "log"; // Without file extension, will be set to .csv
 	std::ofstream* logging_stream;
 public:
 	Sensor_Manager(bool obc, bool rcu, EthernetClient* client, EthernetServer* server);

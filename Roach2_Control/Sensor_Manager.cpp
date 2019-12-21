@@ -5,8 +5,17 @@ Sensor_Manager::Sensor_Manager(bool obc, bool rcu, EthernetClient* client, Ether
 	this->update_rate = 1;
 	this->sensor_values_loaded = 0; // Reset counter
 
-	// Create and open logging file
-	this->logging_stream = new std::ofstream(this->filename_logging);
+	// Create and open logging file (check if already exist and increase name)
+	bool file_new = false;
+	std::string filename;
+	int counter_f = 0;
+	while (!file_new) {
+		filename = this->filename_logging + std::to_string(counter) + ".csv";
+		std::ifstream f(filename.c_str());
+		file_new = f.good();
+		counter++;
+	}
+	this->logging_stream = new std::ofstream(filename.c_str());
 
 	// Create all sensors
 	if (obc) {
