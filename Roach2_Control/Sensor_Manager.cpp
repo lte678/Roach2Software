@@ -1,12 +1,21 @@
 #include "Sensor_Manager.h"
 
-Sensor_Manager::Sensor_Manager(bool obc, bool rcu)
+Sensor_Manager::Sensor_Manager(bool obc, bool rcu, EthernetClient* client, EthernetServer* server)
 {
 	this->update_rate = 1;
 	this->sensor_values_loaded = 0; // Reset counter
 
-	// Create and open logging file
-	this->logging_stream = new std::ofstream(this->filename_logging);
+	// Create and open logging file (check if already exist and increase name)
+	bool file_new = false;
+	std::string filename;
+	int counter_f = 0;
+	while (!file_new) {
+		filename = this->filename_logging + std::to_string(counter) + ".csv";
+		std::ifstream f(filename.c_str());
+		file_new = f.good();
+		counter++;
+	}
+	this->logging_stream = new std::ofstream(filename.c_str());
 
 	// Create all sensors
 	if (obc) {
@@ -26,8 +35,14 @@ Sensor_Manager::Sensor_Manager(bool obc, bool rcu)
 		BNO055_IMU *imu = new BNO055_IMU();
 		imu->init();
 
-		this->sensors = {info, temp, imu};
-		this->number_sensors = 3;
+		ADC_MCP3428* adc = new ADC_MCP3428();
+		adc->init();
+
+		OBC_Systemstatus* obc_info = new OBC_Systemstatus(client, server);
+		obc_info->init();
+
+		this->sensors = {info, temp, imu, adc, obc_info};
+		this->number_sensors = 5;
 	}
 	else if (rcu) {
 		/**
@@ -49,8 +64,10 @@ Sensor_Manager::Sensor_Manager(bool obc, bool rcu)
 		ROT_AS5601* rot = new ROT_AS5601();
 		rot->init();
 
-		this->sensors = { info, temp, imu, rot, adc };
-		this->number_sensors = 5;
+		RCU_Systemstatus* rcu_info = new RCU_Systemstatus(client, server);
+
+		this->sensors = { info, temp, imu, rot, adc, rcu_info};
+		this->number_sensors = 6;
 	}
 }
 

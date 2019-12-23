@@ -59,6 +59,8 @@ void ARM_Systeminfo::update()
 	close(fd);
 
 	this->data_obj->addValue("TEMP", temp);
+
+
 }
 
 /**

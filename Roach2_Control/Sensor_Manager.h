@@ -26,7 +26,8 @@
 #include "../Roach2_Sensor/ARM_Systeminfo.h"
 #include "../Roach2_Sensor/Roach2_Sensor_adc.h"
 #include "../Roach2_Sensor/Roach2_Sensor_rotEnc.h"
-
+#include "../Roach2_Sensor/OBC_Systemstatus.h"
+#include "../Roach2_Sensor/RCU_Systemstatus.h"
 
 class Sensor_Manager
 {
@@ -38,10 +39,10 @@ private:
 	int update_rate; // Update rate in Hz
 	std::mutex lock_data_access; // Mutex to prohibit problems with access data from multiple threads
 	int sensor_values_loaded;
-	char* filename_logging = "log.csv";
+	std::string filename_logging = "log"; // Without file extension, will be set to .csv
 	std::ofstream* logging_stream;
 public:
-	Sensor_Manager(bool obc, bool rcu);
+	Sensor_Manager(bool obc, bool rcu, EthernetClient* client, EthernetServer* server);
 	// Threading related
 	void run(void);
 	void stop(void);
