@@ -157,7 +157,7 @@ void FSM_OBC::run() {
 	}
 }
 
-void FSM_OBC::triggerActuators(void)
+void FSM_OBC::triggerActuators()
 {
 }
 
