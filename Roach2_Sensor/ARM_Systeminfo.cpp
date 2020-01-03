@@ -1,6 +1,11 @@
 #include "ARM_Systeminfo.h"
 #include <fcntl.h>
 
+ARM_Systeminfo::ARM_Systeminfo() {
+    // Log for consistencies sake. Not really necessary.
+    std::cout << "[Sensor|ARM] Object initialized" << std::endl;
+}
+
 void ARM_Systeminfo::init()
 {
 	// Not required here as we need to access

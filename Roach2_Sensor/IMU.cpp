@@ -5,26 +5,27 @@
 *
 * @copyright KSat Stuttgart e.V. Roach2 software team
 */
-#include "imu_neu.h"
+#include "IMU.h"
 
 /*#include "Roach2_Sensor_Sensor.h"*/
 
 BNO055_IMU::BNO055_IMU()
 {
+    std::cout << "[Sensor|IMU] Initializing" << std::endl;
 	deviceHandle = this->i2cConnect(BNO055_DEVICE_ID); // Get file/I2C handle
-	std::cout << "BNO055 ctor device handle: " << this->deviceHandle << " " << deviceHandle << std::endl;
+	std::cout << "[Sensor|IMU] ctor device handle: " << deviceHandle << std::endl;
 
-	if (this->deviceHandle == -1)
+	if (deviceHandle == -1)
 	{
-		std::cout << "IMU: Connection failed!" << std::endl;
+		std::cout << "[Sensor|IMU] Connection failed!" << std::endl;
 	}
 	if (is_online()) //checks if online
 	{
-		std::cout << "IMU: online" << std::endl;
+		std::cout << "[Sensor|IMU] Online" << std::endl;
 	}
 	else
 	{
-		std::cout << "IMU: not online! Performing reset.." << std::endl;
+		std::cout << "[Sensor|IMU] Offline! Performing reset.." << std::endl;
 	}
 }
 
@@ -32,12 +33,8 @@ bool BNO055_IMU::is_online()
 {
 	/* Checks if BNO055 is online by reading the chip id register */
 	int ret = (this->read8(CHIP_ID_ADDR));
-	if(ret == 0xA0) {
-		return true;
-	}
-	else {
-		return false;
-	}
+    // Online if return value matches
+    return ret == 0xA0;
 }
 void BNO055_IMU::init() //performs all settings possible
 {
@@ -178,7 +175,8 @@ void BNO055_IMU::reset()
 int BNO055_IMU::calibrate() 
 {
 	/* Calibrates BNO055 with help of User Action*/
-	std::cout << "BNO055: Calibration started, timeout " << CALIBRATION_TIMEOUT_SECONDS << " seconds.\n" << "BNO055: Please move and rotate device slowly with several stops that last a few seconds." << std::endl;
+	std::cout << "[Sensor|IMU] Calibration started, timeout " << CALIBRATION_TIMEOUT_SECONDS << " seconds." << std::endl;
+	std::cout << "[Sensor|IMU] Please move and rotate device slowly with several stops that last a few seconds." << std::endl;
 	// Take time and current calibration status
 	std::chrono::time_point<std::chrono::system_clock> start;
 	start = std::chrono::system_clock::now();
@@ -188,7 +186,7 @@ int BNO055_IMU::calibrate()
 	// Check for calibration completion
 	while ((calibration_status != 0b11111111) && (elapsed_seconds < CALIBRATION_TIMEOUT_SECONDS)) {
 		if (calibration_status > old_calibration_status) {
-			std::cout << "BNO055: Still calibrating, continue motion..." << std::endl;
+			std::cout << "[Sensor|IMU] Still calibrating, continue motion..." << std::endl;
 			old_calibration_status = calibration_status;
 		}
 		elapsed_seconds = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start).count();
@@ -196,11 +194,11 @@ int BNO055_IMU::calibrate()
 	}
 	// Return calibration status
 	if (calibration_status == 0b11111111) {
-		std::cout << "BNO055: Calibration successfully finished!" << std::endl;
+		std::cout << "[Sensor|IMU] Calibration successfully finished!" << std::endl;
 		return EXIT_SUCCESS;
 	}
 	else {
-		std::cout << "BNO055: Impartial or failed calibration. Calibration status " << std::bitset<8>(this->read8(CALIB_STAT_ADDR)) << "." << std::endl;
+		std::cout << "[Sensor|IMU] Impartial or failed calibration. Calibration status " << std::bitset<8>(this->read8(CALIB_STAT_ADDR)) << "." << std::endl;
 		return EXIT_FAILURE;
 	}
 

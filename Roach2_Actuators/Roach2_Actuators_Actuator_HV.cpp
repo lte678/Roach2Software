@@ -2,6 +2,8 @@
 
 Actuator_HV::Actuator_HV() : Actuator()
 {
+    std::cout << "[Actuator|HV] Initializing" << std::endl;
+
 	// Unexport GPIO pins
 	int fd_0 = open("/sys/class/gpio/unexport", O_WRONLY);
 	if (fd_0 != -1) {

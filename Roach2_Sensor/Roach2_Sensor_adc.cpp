@@ -10,10 +10,11 @@
 // TODO: INIT, UPDATE, GETDATA
 ADC_MCP3428::ADC_MCP3428()
 {
+    std::cout << "[Sensor|ADC] Initializing" << std::endl;
 	this->deviceHandle = this->i2cConnect(MCP3428_DEVICE_ID); // Get file/I2C handle
 	if (read8(MCP3428_DEVICE_ID) != 0x00) 
 	{
-		std::cout << "ADC: Connection failed!";
+		std::cout << "[Sensor|ADC] Connection failed!" << std::endl;
 	}
 }
 

@@ -2,6 +2,8 @@
 
 Actuator_Rover::Actuator_Rover()
 {
+    std::cout << "[Actuator|Rover] Initializing" << std::endl;
+
 	// Unexport GPIO pin
 	int fd_0 = open("/sys/class/gpio/unexport", O_WRONLY);
 	if (fd_0 != -1) {

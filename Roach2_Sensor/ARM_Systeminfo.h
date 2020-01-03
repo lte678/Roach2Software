@@ -21,6 +21,7 @@ class ARM_Systeminfo :
 private:
 	Data* data_obj;
 public:
+    ARM_Systeminfo();
 	void init();
 	void update();
 	Data* getData();

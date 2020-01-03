@@ -24,6 +24,7 @@ bool EthernetClient::isConnected()
 void EthernetClient::run()
 {
 	// Start thread
+    std::cout << "[Ethernet Client] Started thread. Connecting to " << ip << ":" << port_number << std::endl;
 	this->stop_running.store(false);
 
 	// Connected to server

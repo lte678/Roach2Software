@@ -1,6 +1,8 @@
 #ifndef _Actuator_GoPro_h_
 #define _Actuator_GoPro_h_
 
+#include <iostream>
+
 #include "Actuator.h"
 
 class Actuator_GoPro : public Actuator

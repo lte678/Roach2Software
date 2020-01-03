@@ -12,9 +12,11 @@ add_executable(obc_firmware
         Roach2_Actuators/Roach2_Actuators_Actuator_Rover.cpp
         Roach2_Actuators/Roach2_Actuators_Actuator_GoPro.cpp
         Roach2_Sensor/Roach2_Sensor_Sensor.cpp
+        Roach2_Sensor/OBC_Systemstatus.cpp
+        Roach2_Sensor/RCU_Systemstatus.cpp
         Roach2_Sensor/temp.cpp
         Roach2_Sensor/Roach2_Sensor_rotEnc.cpp
-        Roach2_Sensor/imu_neu.cpp
+        Roach2_Sensor/IMU.cpp
         Roach2_Sensor/Roach2_Sensor_adc.cpp
         Roach2_Sensor/ARM_Systeminfo.cpp
         Roach2_Comm/UART.cpp

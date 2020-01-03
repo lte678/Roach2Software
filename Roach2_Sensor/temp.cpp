@@ -2,6 +2,7 @@
 
 TEMP_LM75B::TEMP_LM75B()
 {
+    std::cout << "[Sensor|Temp] Initializing" << std::endl;
 	this->convertedMeasurement = 0;
 }
 
@@ -27,7 +28,7 @@ void TEMP_LM75B::update()
 	if (value & (1 << 10))
 		value |= 0xFC00;
 
-	//Return the temperature in °C
+	//Return the temperature in ï¿½C
 	convertedMeasurement =  value * 0.125;
 	*/
 	
@@ -46,7 +47,7 @@ void TEMP_LM75B::update()
 		//measurement = binaryToDecimal(measurement);
 	}
 	convertedMeasurement = measurement * 0.125;
-	/*hier wird measurement in float umgewandelt in °C*/
+	/*hier wird measurement in float umgewandelt in ï¿½C*/
 }
 
 Data* TEMP_LM75B::getData() {
@@ -54,7 +55,7 @@ Data* TEMP_LM75B::getData() {
 	data_ptr->setId((int)SENSOR_TYPES::TEMP_SENSOR);
 	data_ptr->addValue("TEMP", convertedMeasurement);
 	return data_ptr;
-		/*Effekt der eigenerhitzung wird vernachlässigt*/
+		/*Effekt der eigenerhitzung wird vernachlï¿½ssigt*/
 }
 
 int TEMP_LM75B::getI2CAddr() {

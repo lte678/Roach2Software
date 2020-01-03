@@ -12,6 +12,7 @@
 FSM_OBC::FSM_OBC()
 {
 	// init
+	std::cout << "[OBC Firmware] Starting." << std::endl;
 	int sensor_ids[] = {0, 1, 10}; // sensors: IMU, ARM Info, Temp75B
 	std::vector<Data*> sensor_data;
 
@@ -39,6 +40,7 @@ FSM_OBC::FSM_OBC()
 	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
 
 	// System main loop
+	std::cout << "[OBC Firmware] Initialization complete" << std::endl;
 	int counter_sensor_downlink = 0;
 	while (1) {
 
@@ -113,6 +115,7 @@ FSM_OBC::FSM_OBC()
 FSM_OBC::~FSM_OBC()
 {
 }
+
 void FSM_OBC::run() {
 	// Message to RCU
 	Data_super* msg;

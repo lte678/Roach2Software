@@ -11,6 +11,7 @@
 
 #include <chrono>
 #include <string>
+#include <iostream>
 
 #include "../Roach2_Control/FSM_Controller.h"
 #include "../Roach2_Comm/ReceiveHandler.h"
@@ -21,7 +22,7 @@
 #include "../Roach2_Comm/UART.h"
 #include "../Roach2_Sensor/ARM_Systeminfo.h"
 #include "../Roach2_Sensor/Temp.h"
-#include "../Roach2_Sensor/imu_neu.h"
+#include "../Roach2_Sensor/IMU.h"
 #include "../Roach2_Actuators/Roach2_Actuators_Actuator_Rover.h"
 #include "../Roach2_Actuators/Roach2_Actuators_Actuartor_GoPro.h"
 

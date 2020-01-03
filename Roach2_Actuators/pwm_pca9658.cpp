@@ -2,6 +2,7 @@
 
 PWM_PCA985::PWM_PCA985()
 {
+    std::cout << "[Actuator|PWM] Initializing" << std::endl;
 	deviceHandle = this->i2cConnect(PCA985_DEVICE_ID);
 }
 
@@ -60,7 +61,7 @@ void PWM_PCA985::stop()
 
 void PWM_PCA985::resetlaser()
 {
-	/*HIER KÖNNTE IHRE WERBUNG STEHEN*/
+	/*HIER Kï¿½NNTE IHRE WERBUNG STEHEN*/
 }
 
 

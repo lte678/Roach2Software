@@ -2,6 +2,7 @@
 
 ROT_AS5601::ROT_AS5601()
 {
+    std::cout << "[Sensor|Rot Enc] Initializing" << std::endl;
 	this->measurement[0] = 0;
 	this->measurement[1] = 0;
 }
@@ -31,7 +32,7 @@ Data* ROT_AS5601::getData() {
 	data_ptr->addValue("ROTRAW", measurement[0]);
 	data_ptr->addValue("ROT", measurement[1]);
 	return data_ptr;
-	/*Effekt der eigenerhitzung wird vernachlässigt*/
+	/*Effekt der eigenerhitzung wird vernachlï¿½ssigt*/
 }
 
 int ROT_AS5601::getI2CAddr() {

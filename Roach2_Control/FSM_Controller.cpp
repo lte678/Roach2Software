@@ -69,11 +69,13 @@ void FSM_Controller::initThreads(REBOOT_TARGET target)
 	// Ethernet links: client
 	if (target == REBOOT_TARGET::OBC) {
 		// OBC connects to RCU
+        std::cout << "[OBC Firmware] Connecting to RCU" << std::endl;
 		this->eth_client = new EthernetClient("192.168.100.100");
 		this->eth_client_thread = std::thread(&EthernetClient::run, this->eth_client);
 	}
 	else {
 		// RCU connects to OBC
+        std::cout << "[RCU Firmware] Connecting to OBC" << std::endl;
 		this->eth_client = new EthernetClient("192.168.100.101");
 		this->eth_client_thread = std::thread(&EthernetClient::run, this->eth_client);
 	}
@@ -82,7 +84,7 @@ void FSM_Controller::initThreads(REBOOT_TARGET target)
 	if (target == REBOOT_TARGET::OBC)
 	{
 		// OBC
-		this->sensor_manager = new Sensor_Manager(true, false);
+		this->sensor_manager = new Sensor_Manager(true, false, this->eth_client, this->eth_server);
 	}
 	else
 	{

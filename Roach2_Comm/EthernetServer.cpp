@@ -50,6 +50,7 @@ std::vector<std::string> EthernetServer::getReceivedValues()
 
 void EthernetServer::run()
 {
+    std::cout << "[Ethernet Server] Started thread. Listening on " << port_number << std::endl;
 	std::string message;
 	ServerSock new_conn;
 

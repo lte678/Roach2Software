@@ -2,6 +2,7 @@
 
 Actuator_GoPro::Actuator_GoPro() : Actuator()
 {
+    std::cout << "[Actuator|GoPro] Initializing" << std::endl;
 	this->gopro_enabled = false;
 
 	// Unexport GPIO pins

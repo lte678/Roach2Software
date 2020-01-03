@@ -1,7 +1,10 @@
 #ifndef ACTUATOR_ROVER_H
 #define ACTUATOR_ROVER_H
 
+#include <iostream>
+
 #include "Actuator.h"
+
 class Actuator_Rover :
 	public Actuator
 {

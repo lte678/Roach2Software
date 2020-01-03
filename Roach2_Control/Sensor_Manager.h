@@ -20,7 +20,7 @@
 #include <string.h>
 
 #include "../Roach2_Sensor/Roach2_Sensor_Sensor.h"
-#include "../Roach2_Sensor/imu_neu.h"
+#include "../Roach2_Sensor/IMU.h"
 #include "../Roach2_DataStore/data.h"
 #include "../Roach2_Sensor/Temp.h"
 #include "../Roach2_Sensor/ARM_Systeminfo.h"
