@@ -14,7 +14,7 @@ add_executable(obc_firmware
         Roach2_Sensor/Roach2_Sensor_Sensor.cpp
         Roach2_Sensor/OBC_Systemstatus.cpp
         Roach2_Sensor/RCU_Systemstatus.cpp
-        Roach2_Sensor/temp.cpp
+        Roach2_Sensor/Temp.cpp
         Roach2_Sensor/Roach2_Sensor_rotEnc.cpp
         Roach2_Sensor/IMU.cpp
         Roach2_Sensor/Roach2_Sensor_adc.cpp

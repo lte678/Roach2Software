@@ -17,37 +17,18 @@ void TEMP_LM75B::init()
 }
 
 void TEMP_LM75B::update()
-	{
-	/*
-	//Signed return value
-	short value;
+{
+	int16_t measurement = read16(TEMP_reg);
+	// Switch byte order, so it goes from MSB to LSB
+    measurement = ((measurement & 0xFF) << 8) | ((measurement & 0xFF00) >> 8);
+    measurement = measurement >> 7;
 
-	value = read16(CONF_TEMP) >> 5;
-	
-	//Sign extend negative numbers
-	if (value & (1 << 10))
-		value |= 0xFC00;
+    if(measurement & 0x0100) {
+        // Sign extension with ones
+        measurement |= 0xFE00;
+    }
 
-	//Return the temperature in �C
-	convertedMeasurement =  value * 0.125;
-	*/
-	
-	measurement = read16(CONF_TEMP);
-
-	measurement = measurement >> 5;
-	if ((measurement >> 10) != 0)
-	{
-		int signchange = 0b10000000000;
-		measurement = measurement | signchange;
-		measurement = binaryToDecimal(measurement);
-		measurement = measurement * -1;
-	}
-	else
-	{
-		//measurement = binaryToDecimal(measurement);
-	}
-	convertedMeasurement = measurement * 0.125;
-	/*hier wird measurement in float umgewandelt in �C*/
+	convertedMeasurement = measurement * 0.5;
 }
 
 Data* TEMP_LM75B::getData() {
