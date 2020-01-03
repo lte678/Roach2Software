@@ -17,43 +17,39 @@
 #include <chrono>
 
 /* ##################################################################################### */
-/* 0. Hard coded settings  */
-const long CALIBRATION_TIMEOUT_SECONDS = 60;
-const int LM75B_DEVICE_ID = 0x48; // in Schaltplan schauen
+// Hard coded settings
+const int LM75B_DEVICE_ID = 0x48;
 
 /* ##################################################################################### */
-/* 1. Enumerations */
+// Config register values
 enum Setting_Temp {
 	CONF_TEMP = 0b00000000, /*Standard einstellung*/
 	TOS_TEMP = 0b1101001000000000, /*210 -> 105�C*, only 9 are significant*/
 	THYST_TEMP = 0b1100100000000000 ,/*200 -> 100�C ... dummyvalue ;)*/
 };
-//SCHREIB HIER MEHR REIN
+
+// Addresses of the 4 internal registers
 enum LM758_REGISTER_t {
 	TEMP_reg = 0b00000000 ,
 	CONF_reg = 0b00000001,
 	THYST_reg = 0b00000010,
 	TOS_reg =  0b00000011,
-	/* change the pointer to Temperature, or conf*/
 };
 
 /* ##################################################################################### */
-/* 2. Class Definition */
-
 class TEMP_LM75B : public Sensor {
-	/* Sensor class for LM75B */
-	
 public:
 	TEMP_LM75B();
-	~TEMP_LM75B();
-	void init();
-	void update();
-	Data* getData();
-	int getI2CAddr();
-	int getSensorType();
+	~TEMP_LM75B() = default;
+
+	// Inherited from Sensor base class
+	void init() override;
+	void update() override;
+	Data* getData() override;
+	int getI2CAddr() override;
+	int getSensorType() override;
 private:
-	void tempConfig(); // Separate config function, to be called in the init()
-	double convertedMeasurement = 0.0;
+	double convertedMeasurement;
 	unsigned long timeStamp = 0;
 };
 
