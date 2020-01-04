@@ -20,6 +20,11 @@ class ARM_Systeminfo :
 {
 private:
 	Data* data_obj;
+
+    long long totalPhysMem;
+    long long physMemUsed;
+    int percent;
+    float temp;
 public:
     explicit ARM_Systeminfo(float updateFreq);
 	void init();

@@ -16,9 +16,7 @@ void ARM_Systeminfo::init()
 */
 void ARM_Systeminfo::update()
 {
-	// Create new data object
-	data_obj = new Data();
-	data_obj->setId((int)SensorType::SYS_INFO);
+
 
 	// See: https://stackoverflow.com/questions/63166/how-to-determine-cpu-and-memory-consumption-from-inside-a-process
 
@@ -28,16 +26,12 @@ void ARM_Systeminfo::update()
 	//Add other values in next statement to avoid int overflow on right hand side...
 	totalVirtualMem += memInfo.totalswap;
 	totalVirtualMem *= memInfo.mem_unit;
-	long long totalPhysMem = memInfo.totalram;
+	totalPhysMem = memInfo.totalram;
 	//Multiply in next statement to avoid int overflow on right hand side...
 	totalPhysMem *= memInfo.mem_unit; // Physical total amount RAM in Bytes
-	long long physMemUsed = memInfo.totalram - memInfo.freeram;
+	physMemUsed = memInfo.totalram - memInfo.freeram;
 	//Multiply in next statement to avoid int overflow on right hand side...
 	physMemUsed *= memInfo.mem_unit; // Physical amount of RAM used in Bytes
-
-	// RAM usage
-	data_obj->addValue("MEM_TOTAL", totalPhysMem);
-	data_obj->addValue("MEM_USED", physMemUsed);
 
 	int FileHandler;
 	char FileBuffer[1024];
@@ -50,22 +44,15 @@ void ARM_Systeminfo::update()
 	read(FileHandler, FileBuffer, sizeof(FileBuffer) - 1);
 	sscanf(FileBuffer, "%f", &load);
 	close(FileHandler);
-	int percent = (int)(load * 100);
-
-	data_obj->addValue("CPU_USAGE", percent);
+	percent = (int)(load * 100);
 
 	// CPU temperature, value is in /sys/devices/virtual/thermal/thermal_zone0/temp => Nano Pi Neo Air has one temperature sensor there (thermal_zone0)
 	int fd;
-	float temp;
 	char buffer[6];
 	fd = open("/sys/devices/virtual/thermal/thermal_zone0/temp", O_RDONLY);
 	read(fd, buffer, sizeof(buffer) - 1);
 	sscanf(buffer, "%f", &temp);
 	close(fd);
-
-	data_obj->addValue("TEMP", temp);
-
-
 }
 
 /**
@@ -73,6 +60,15 @@ void ARM_Systeminfo::update()
 */
 Data* ARM_Systeminfo::getData()
 {
+	// Create new data object
+	data_obj = new Data();
+
+	data_obj->setId((int)SensorType::SYS_INFO);
+	data_obj->addValue("MEM_TOTAL", totalPhysMem);
+	data_obj->addValue("MEM_USED", physMemUsed);
+	data_obj->addValue("CPU_USAGE", percent);
+	data_obj->addValue("TEMP", temp);
+
 	return data_obj;
 }
 
