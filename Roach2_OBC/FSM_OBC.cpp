@@ -55,6 +55,9 @@ FSM_OBC::~FSM_OBC()
 
 void FSM_OBC::run() {
     int counter_sensor_downlink = 0;
+
+    std::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
+
     while (true) {
         // Receive UART link data
         Data_simple* data = debugLink->getData();
@@ -67,10 +70,11 @@ void FSM_OBC::run() {
         stateMachine();
 
         // Update system time first
-        this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
+        time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
 
         // Send sensor updates on downlink with 5Hz
-        if (counter_sensor_downlink == 19999) {
+        if (std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime).count() > 0.2) {
+            startTime = startTime + std::chrono::high_resolution_clock::duration(std::chrono::milliseconds (200));
             counter_sensor_downlink = 0;
 
             Data_super* send_data[1];
@@ -99,10 +103,6 @@ void FSM_OBC::run() {
             sendRXSMSignalUpdate_Downlink();
 
         }
-        else {
-            counter_sensor_downlink++;
-        }
-
         usleep(10000); // Main loop running with 100kHz
     }
 }
@@ -272,7 +272,7 @@ void FSM_OBC::stateMachine()
 	// ------ State change OBC IDLE -> EXPERIMENT ------
 	if (currentState == (int)FSM_STATES_OBC::IDLE && sods) {
 		currentState = (int)FSM_STATES_OBC::EXPERIMENT; // Switch to experiment state
-        this->enableGoPro->enable();
+        enableGoPro->enable();
 
         // Switch RCU from IDLE to STANDBY
         if (currentRCUState != FSM_STATES_RCU::STANDBY) {
