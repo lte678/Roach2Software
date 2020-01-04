@@ -140,9 +140,9 @@ std::vector<uint64_t> Data::convert_to_serial() {
 	std::vector<uint64_t> serial_data;
     for(int i = 0; i < values.size(); i++) {
         serial_data.push_back(0);
-        serial_data[i] &= (uint64_t)id << 60u;          //Sensor type
-        serial_data[i] &= ((uint64_t)i & 0x0Fu) << 56u; //Sensor subtype (e.g. x y and z axis)
-        serial_data[i] &= to_binary(values[i]) & ~((uint64_t)0xFF << 56u); //Create a mask to only write the last 56 bits
+        serial_data[i] += (uint64_t)id << 60u;          //Sensor type
+        serial_data[i] += ((uint64_t)i & 0x0Fu) << 56u; //Sensor subtype (e.g. x y and z axis)
+        serial_data[i] += to_binary(values[i]) & ~((uint64_t)0xFF << 56u); //Create a mask to only write the last 56 bits
     }
 
     return serial_data;

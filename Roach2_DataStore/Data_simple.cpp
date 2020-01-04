@@ -18,8 +18,8 @@ std::vector<uint64_t> Data_simple::convert_to_serial()
 {
 	std::vector<uint64_t> data;
 	data.push_back(0);
-	data[0] = data[0] & ((uint64_t)command << 32);
-	data[0] = data[0] & parameter;
+	data[0] += ((uint64_t)command << 32);
+	data[0] += parameter;
 	return data;
 }
 
