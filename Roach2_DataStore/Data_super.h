@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 
 /**
@@ -11,7 +12,8 @@
 class Data_super
 {
 public:
-	virtual uint64_t* convert_to_serial() = 0;
+    virtual ~Data_super() = default;
+	virtual std::vector<uint64_t> convert_to_serial() = 0;
 	virtual int convert_to_serial_array_length() = 0;
 	virtual std::string get_string_ethernet() = 0;
 };

@@ -39,7 +39,7 @@ enum LM758_REGISTER_t {
 /* ##################################################################################### */
 class TEMP_LM75B : public Sensor {
 public:
-	TEMP_LM75B();
+	explicit TEMP_LM75B(float updateFreq);
 	~TEMP_LM75B() = default;
 
 	// Inherited from Sensor base class
@@ -47,7 +47,7 @@ public:
 	void update() override;
 	Data* getData() override;
 	int getI2CAddr() override;
-	int getSensorType() override;
+	SensorType getSensorType() override;
 private:
 	double convertedMeasurement;
 	unsigned long timeStamp = 0;

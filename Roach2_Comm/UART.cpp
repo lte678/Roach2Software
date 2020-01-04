@@ -26,7 +26,7 @@ void UART::send(void)
 
 		// Check whether Data_simple is used instead of Data
 		Data_super* dataToSend = this->send_queue.front();
-		uint64_t* tx_data = dataToSend->convert_to_serial();
+		std::vector<uint64_t> tx_data = dataToSend->convert_to_serial();
 		int data_length = dataToSend->convert_to_serial_array_length();
 		this->tx_frames = new uint64_t[data_length]; // each frame consists of 11 bytes
 		for (int i = 0; i < data_length; i++) {
@@ -57,7 +57,6 @@ void UART::send(void)
 		this->send_ongoing = false;
 
 		// Free memory
-		delete tx_data;
 		this->send_queue.pop();
 		delete dataToSend;
 	}
@@ -321,7 +320,7 @@ void UART::sendData(Data_super** data, int count)
  *        Non-Blocking access!
  * @return pointer to the received data or nullptr if no lock could be acquired or no data is available
 */
-Data_simple* UART::getData(void)
+Data_simple* UART::getData()
 {
 	bool res = this->lock_receive_queue.try_lock();
 

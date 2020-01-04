@@ -20,7 +20,7 @@ add_executable(obc_firmware
         Roach2_Sensor/Roach2_Sensor_adc.cpp
         Roach2_Sensor/ARM_Systeminfo.cpp
         Roach2_Comm/UART.cpp
-        Roach2_Comm/RocketSignals.cpp
+        Roach2_Sensor/RocketSignals.cpp
         Roach2_Comm/EthernetClient.cpp
         Roach2_Comm/EthernetServer.cpp
         Roach2_Comm/clientsock.cpp
@@ -28,6 +28,7 @@ add_executable(obc_firmware
         Roach2_Comm/socket.cpp
         Roach2_DataStore/data.cpp
         Roach2_DataStore/Data_simple.cpp
+        Roach2_DataStore/Data_super.cpp
         Roach2_DataStore/serialization.cpp)
 
 target_link_libraries(obc_firmware wiringPi pthread)

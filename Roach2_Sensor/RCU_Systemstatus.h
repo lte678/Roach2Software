@@ -22,12 +22,12 @@ private:
 	EthernetClient* eth_client;
 	EthernetServer* eth_server;
 public:
-	RCU_Systemstatus(EthernetClient* client, EthernetServer* server);
-	void init();
-	void update();
-	Data* getData();
-	int getI2CAddr();
-	int getSensorType();
+	RCU_Systemstatus(float updateFreq, EthernetClient* client, EthernetServer* server);
+	void init() override;
+	void update() override;
+	Data* getData() override;
+	int getI2CAddr() override;
+    SensorType getSensorType() override;
 };
 
 #endif

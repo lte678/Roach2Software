@@ -33,20 +33,22 @@ class FSM_OBC :
 {
 private:
 	FSM_STATES_RCU currentRCUState;
+	FSM_STATES_RCU lastRCUState;
 	Actuator_GoPro* enableGoPro;
 	Actuator_Rover* enableRoverPower;
 	bool enableDownstream;
-	void sendRXSMSignalUpdate_Downlink(uint32_t signals_binary);
+	std::vector<SensorType> sensor_ids;
+	void sendRXSMSignalUpdate_Downlink();
 public:
 	FSM_OBC();
 	~FSM_OBC();
-	void run(void);
+	void run() override;
 	void triggerActuators(void);
-	void packageReceivedUART(uint64_t message, int msg_length);
-	void rocketSignalReceived(int signal_source);
-	void packageReceivedRexus(uint64_t message, int msg_length);
-	void packageReceivedEthernet();
-	
+	void packageReceivedUART(uint64_t message, int msg_length) override;
+	void stateMachine();
+	void packageReceivedRexus(uint64_t message, int msg_length) override;
+	void packageReceivedEthernet() override;
+	void rocketSignalReceived(int) override {};
 };
 
 #endif

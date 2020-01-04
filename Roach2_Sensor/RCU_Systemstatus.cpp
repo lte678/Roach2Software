@@ -1,6 +1,6 @@
 #include "RCU_Systemstatus.h"
 
-RCU_Systemstatus::RCU_Systemstatus(EthernetClient* client, EthernetServer* server)
+RCU_Systemstatus::RCU_Systemstatus(float updateFreq, EthernetClient* client, EthernetServer* server) : Sensor(updateFreq)
 {
 	this->eth_client = client;
 	this->eth_server = server;
@@ -89,7 +89,7 @@ int RCU_Systemstatus::getI2CAddr()
 	return 0;
 }
 
-int RCU_Systemstatus::getSensorType()
+SensorType RCU_Systemstatus::getSensorType()
 {
-	return SENSOR_TYPES::RCU_SYS_INFO;
+	return SensorType::RCU_SYS_INFO;
 }

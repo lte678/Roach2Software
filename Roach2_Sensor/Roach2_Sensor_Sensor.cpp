@@ -1,11 +1,19 @@
 #include "Roach2_Sensor_Sensor.h"
-// Ziel: Oberklasse Sensor. Unterklassen der einzelnen sensoren übergeben Oberklasse Sensor alle daten und diese gibt sie gesammelt weiter.
+// Ziel: Oberklasse Sensor. Unterklassen der einzelnen sensoren ï¿½bergeben Oberklasse Sensor alle daten und diese gibt sie gesammelt weiter.
 
-Sensor::Sensor(){
-};
+Sensor::Sensor(float updateFreq) {
+    sleepTime = (unsigned int)(1e6 / updateFreq);
+}
 
 Sensor::~Sensor(){
 	
+}
+
+void Sensor::run() {
+    while(true) {
+        update();
+        usleep(sleepTime);
+    }
 }
 
 int Sensor::write8(int reg, int data){

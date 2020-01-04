@@ -9,11 +9,16 @@
 #include "FSM_OBC.h"
 //#include <wiringPi.h>
 
+// Ignore infinite loop in static analysis
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
+
 FSM_OBC::FSM_OBC()
 {
 	// init
 	std::cout << "[OBC Firmware] Starting." << std::endl;
-	int sensor_ids[] = {0, 1, 10}; // sensors: IMU, ARM Info, Temp75B
+	sensor_ids.push_back(SensorType::IMU); // sensors: IMU, ARM Info, Temp75B
+	sensor_ids.push_back(SensorType::SYS_INFO);
+    sensor_ids.push_back(SensorType::TEMP_SENSOR);
 	std::vector<Data*> sensor_data;
 
 	// Init state and trigger selftest through run method
@@ -41,74 +46,6 @@ FSM_OBC::FSM_OBC()
 
 	// System main loop
 	std::cout << "[OBC Firmware] Initialization complete" << std::endl;
-	int counter_sensor_downlink = 0;
-	while (1) {
-
-		// Receive UART link data
-		Data_simple* data = this->debugLink->getData();
-		if (data != nullptr) {
-			this->packageReceivedUART(*(data->convert_to_serial()), data->convert_to_serial_array_length());
-		}
-
-		// FSM control
-		this->run();
-
-		// RXSM signals
-		if (this->rocket_signals->signalChanged()) {
-			this->rocketSignalReceived((int)REXUS_SIGNALS::ALL);
-		}
-
-		// Send sensor updates on downlink with 5Hz
-		if (counter_sensor_downlink == 19999) {
-			counter_sensor_downlink = 0;
-
-			Data_super* send_data[1];
-
-			// Send RCU connection status
-			if (this->eth_client->isConnected()) {
-				send_data[0] = new Data_simple(0x0B, 1);
-				this->debugLink->sendData(send_data, 1);
-			}
-			else {
-				send_data[0] = new Data_simple(0x0B, 0);
-				this->debugLink->sendData(send_data, 1);
-			}
-
-			// Send sensor status update
-			for (int k = 0; k < 3; k++) {
-				// Send sensor status, sensors: IMU, ARM Info, Temp75B
-
-				send_data[0] = this->readSensor(sensor_ids[k]);
-
-				if (send_data[0] != nullptr) {
-					this->debugLink->sendData(send_data, 1);
-				}
-			}
-
-			// Send RXSM signal status
-			uint32_t signals_binary = 0;
-			bool* signal_levels = new bool[3];
-			signal_levels = this->rocket_signals->getRocketSignals(); // 0=SODS, 1=SOE, 2=LO
-
-			// Convert to integer for downlink
-			if (signal_levels[0]) {
-				signals_binary += 1;
-			}
-			if (signal_levels[1]) {
-				signals_binary += 2;
-			}
-			if (signal_levels[2]) {
-				signals_binary += 4;
-			}
-			this->sendRXSMSignalUpdate_Downlink(signals_binary);
-
-		}
-		else {
-			counter_sensor_downlink++;
-		}
-
-		usleep(100); // Main loop running with 100kHz
-	}
 }
 
 
@@ -117,47 +54,57 @@ FSM_OBC::~FSM_OBC()
 }
 
 void FSM_OBC::run() {
-	// Message to RCU
-	Data_super* msg;
+    int counter_sensor_downlink = 0;
+    while (true) {
+        // Receive UART link data
+        Data_simple* data = debugLink->getData();
+        if (data != nullptr) {
+            packageReceivedUART(data->convert_to_serial()[0], data->convert_to_serial_array_length());
+        }
 
-	// Update system time first
-	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
+        //  --- FSM control ---
+        // Ehemalige run funktion
+        stateMachine();
 
-	// FSM control
+        // Update system time first
+        this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
 
-	// Detect state change, the states are updated by the corresponding ReceiveHandler method
-	if (this->lastState != this->currentState) {
+        // Send sensor updates on downlink with 5Hz
+        if (counter_sensor_downlink == 19999) {
+            counter_sensor_downlink = 0;
 
-		// State change -> send through downlink
-		Data_super* data_send[1];
-		data_send[0] = new Data_simple(0x0C, this->currentState);
-		this->debugLink->sendData(data_send, 1);
+            Data_super* send_data[1];
 
-		switch (this->currentState) {
-			case (int)FSM_STATES_OBC::IDLE:
-				this->enableGoPro->disable();
+            // Send RCU connection status
+            if (this->eth_client->isConnected()) {
+                send_data[0] = new Data_simple(0x0B, 1);
+                debugLink->sendData(send_data, 1);
+            }
+            else {
+                send_data[0] = new Data_simple(0x0B, 0);
+                debugLink->sendData(send_data, 1);
+            }
 
-				// Power on RCU
-			break;
-			case (int)FSM_STATES_OBC::EXPERIMENT:
-				this->enableGoPro->enable();
+            // Send sensor status update
+            for (SensorType sensor : sensor_ids) {
+                // Send sensor status, sensors: IMU, ARM Info, Temp75B
+                send_data[0] = readSensor(sensor);
 
-				msg = new Data_simple("RCU_FSM_STANDBY");
-				this->eth_client->send(msg);
-			break;
-		}
-		this->lastState = this->currentState; // Update last state variable for change detection
-	} else {
-		// No state change, only execute contionous tasks
-		switch (this->currentState) {
-			case (int)FSM_STATES_OBC::IDLE:
+                if (send_data[0] != nullptr) {
+                    debugLink->sendData(send_data, 1);
+                }
+            }
 
-			break;
-			case (int)FSM_STATES_OBC::EXPERIMENT:
+            // Send RXSM signal status
+            sendRXSMSignalUpdate_Downlink();
 
-			break;
-		}
-	}
+        }
+        else {
+            counter_sensor_downlink++;
+        }
+
+        usleep(10000); // Main loop running with 100kHz
+    }
 }
 
 void FSM_OBC::triggerActuators()
@@ -247,8 +194,12 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 		case (int)COMMANDS_DEBUG::obc_read_sensor:
 			{
 				// Read the sensor with the given sensor id
-				Data_super* data[1];
-				data[0] = this->readSensor(para);
+                Data_super* data[1];
+				for(SensorType sensor : sensor_ids) {
+				    if((uint32_t)sensor == para) {
+                        data[0] = readSensor(sensor);
+				    }
+				}
 
 				if (data[0] == nullptr) {
 					send_data[0] = new Data_simple(cmd, -1);
@@ -273,13 +224,13 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 	// Sim commands
 	switch ((int)res.sim) {
 		case ((int)COMMANDS_SIM::obc_lo_event) :
-			this->rocketSignalReceived((int)REXUS_SIGNALS::LO);
+			//this->rocketSignalReceived((int)REXUS_SIGNALS::LO);
 			break;
 		case (int)COMMANDS_SIM::obc_sods_event:
-			this->rocketSignalReceived((int)REXUS_SIGNALS::SODS);
+			//this->rocketSignalReceived((int)REXUS_SIGNALS::SODS);
 			break;
 		case (int)COMMANDS_SIM::obc_soe_event:
-			this->rocketSignalReceived((int)REXUS_SIGNALS::SOE);
+			//this->rocketSignalReceived((int)REXUS_SIGNALS::SOE);
 			break;
 		case (int)COMMANDS_SIM::obc_touch_down_event:
 			// Power off system
@@ -288,109 +239,111 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 	}
 }
 
-void FSM_OBC::sendRXSMSignalUpdate_Downlink(uint32_t signals_binary) {
-	
+void FSM_OBC::sendRXSMSignalUpdate_Downlink() {
+    uint32_t signals_binary = 0;
+
+    // Convert to integer for downlink
+    if (rocket_signals->getSODS()) {
+        signals_binary += 1;
+    }
+    if (rocket_signals->getSOE()) {
+        signals_binary += 2;
+    }
+    if (rocket_signals->getLO()) {
+        signals_binary += 4;
+    }
+
 	// Notify connected UART debug console
 	Data_super* data[1];
 	data[0] = new Data_simple(0x0A, signals_binary);
-	this->debugLink->sendData(data, 1);
+	debugLink->sendData(data, 1);
 
 }
 
-void FSM_OBC::rocketSignalReceived(int signal_source)
+void FSM_OBC::stateMachine()
 {
-	uint32_t signals_binary = 0;
-
 	// Message to RCU
 	Data_super* msg;
 
-	// Load the signal levels
-	// If set to ALL, load the current signal sources from the rocket signals detection class otherwise use the given signal sources
-	bool* signal_levels = new bool[3];
-	signal_levels[0] = false;
-	signal_levels[1] = false;
-	signal_levels[2] = false;
+	bool lo = rocket_signals->getLO();
+	bool sods = rocket_signals->getSODS();
+	bool soe = rocket_signals->getSOE();
 
-	// Handling of signals (ALL is the real case, the others are used for simulation)
-	switch (signal_source)
-	{
-		case (int)REXUS_SIGNALS::LO:
-			signal_levels[2] = true;
-			signals_binary = 4;
-		break;
+	// ------ State change OBC IDLE -> EXPERIMENT ------
+	if (currentState == (int)FSM_STATES_OBC::IDLE && sods) {
+		currentState = (int)FSM_STATES_OBC::EXPERIMENT; // Switch to experiment state
+        this->enableGoPro->enable();
 
-		case (int)REXUS_SIGNALS::SODS:
-			signal_levels[0] = true;
-			signals_binary = 1;
-		break;
-
-		case (int)REXUS_SIGNALS::SOE:
-			signal_levels[1] = true;
-			signals_binary = 2;
-		break;
-
-		case (int)REXUS_SIGNALS::ALL:
-			signal_levels = this->rocket_signals->getRocketSignals(); // 0=SODS, 1=SOE, 2=LO
-
-			// Convert to integer for downlink
-			if (signal_levels[0]) {
-				signals_binary += 1;
-			}
-			if (signal_levels[1]) {
-				signals_binary += 2;
-			}
-			if (signal_levels[2]) {
-				signals_binary += 4;
-			}
-		break;
+        // Switch RCU from IDLE to STANDBY
+        if (currentRCUState != FSM_STATES_RCU::STANDBY) {
+            msg = new Data_simple("RCU_FSM_STANDBY");
+            eth_client->send(msg);
+            currentRCUState = FSM_STATES_RCU::STANDBY; // Note: Message to RCU is in run() method
+        }
 	}
-	// Downlink
-	this->sendRXSMSignalUpdate_Downlink(signals_binary);
-	
-	// In air
-	// Follow normal FSM, only one state change possible
-	if (this->currentState == (int)FSM_STATES_OBC::IDLE && signal_levels[0]) {
-		this->currentState = (int)FSM_STATES_OBC::EXPERIMENT; // Switch to experiment state
 
-		msg = new Data_simple("RCU_FSM_STANDBY");
-		this->eth_client->send(msg);
-
-		// Switch RCU from IDLE to STANDBY
-		if (this->currentRCUState != FSM_STATES_RCU::STANDBY) {
-			this->currentRCUState = FSM_STATES_RCU::STANDBY; // Note: Message to RCU is in run() method
-		}
+    // ------ State change OBC EXPERIMENT -> IDLE ------
+	if(currentState == (int)FSM_STATES_OBC::EXPERIMENT && !sods) {
+	    currentState = (int)FSM_STATES_OBC::IDLE; // Switch back to idle
+        enableGoPro->disable();
 	}
-		
-	if (this->currentState = (int)FSM_STATES_OBC::EXPERIMENT) {
-		// Switch RCU from STANDBY to DRIVE_FORWARD if SOE given
-		if (this->currentRCUState == FSM_STATES_RCU::STANDBY && signal_levels[1]) {
-			if (this->currentRCUState != FSM_STATES_RCU::DRIVE_FORWARD) {
-				// Send drive forward command
-				msg = new Data_simple("RCU_FSM_DRIVE_FORWARD");
-				this->eth_client->send(msg);
-			}
-			this->currentRCUState = FSM_STATES_RCU::DRIVE_FORWARD;
-		}
 
-		// Stop GoPro only once!
-		if (!signal_levels[0]) {
-			this->enableGoPro->disableGoPro();
-		}
 
-		if (this->currentState == (int)FSM_STATES_OBC::EXPERIMENT && !signal_levels[0]) {
-			this->currentState = (int)FSM_STATES_OBC::IDLE;
-		}
+    // ------ State change RCU STANDBY -> DRIVE_FORWARD ------
+	if (currentState == (int)FSM_STATES_OBC::EXPERIMENT && soe) {
+        // Switch RCU from STANDBY to DRIVE_FORWARD if SOE given
+        if (currentRCUState == FSM_STATES_RCU::STANDBY) {
+            // Send drive forward command
+            msg = new Data_simple("RCU_FSM_DRIVE_FORWARD");
+            eth_client->send(msg);
+            currentRCUState = FSM_STATES_RCU::DRIVE_FORWARD;
+        }
+    }
 
-		// Switch RCU from DRIVE FORWARD to STANDBY if SOE was deasserted
-		if (this->currentRCUState == FSM_STATES_RCU::DRIVE_FORWARD && !signal_levels[1]) {
-			if (this->currentRCUState != FSM_STATES_RCU::STANDBY) {
-				// Send standby command
-				msg = new Data_simple("RCU_FSM_STANDBY");
-				this->eth_client->send(msg);
-			}
-			this->currentRCUState = FSM_STATES_RCU::STANDBY;
-		}
-	}
+    // ------ State change RCU DRIVE_FORWARD -> STANDBY ------
+    if (!soe) {
+        if (currentRCUState != FSM_STATES_RCU::STANDBY) {
+            // Send standby command
+            msg = new Data_simple("RCU_FSM_STANDBY");
+            eth_client->send(msg);
+        }
+        currentRCUState = FSM_STATES_RCU::STANDBY;
+    }
+
+    // Detect state change
+    if (lastState != currentState) {
+        // State change -> send through downlink
+        Data_super* data_send[1];
+        data_send[0] = new Data_simple(0x0C, currentState);
+        debugLink->sendData(data_send, 1);
+        std::cout << "[OBC Firmware] State change. OBC: ";
+        switch(currentState) {
+            case (int)FSM_STATES_OBC::IDLE:
+                std::cout << "Idle" << std::endl;
+                break;
+            case (int)FSM_STATES_OBC::EXPERIMENT:
+                std::cout << "Experiment" << std::endl;
+                break;
+        }
+    }
+    lastState = currentState; // Update last state variable for change detection
+
+    if (lastRCUState != currentRCUState) {
+        // State change. Generate debug message
+        std::cout << "[OBC Firmware] State change. RCU: ";
+        switch(currentRCUState) {
+            case FSM_STATES_RCU::IDLE:
+                std::cout << "Idle" << std::endl;
+                break;
+            case FSM_STATES_RCU::STANDBY:
+                std::cout << "Standby" << std::endl;
+                break;
+            case FSM_STATES_RCU::DRIVE_FORWARD:
+                std::cout << "Drive Forward" << std::endl;
+                break;
+        }
+    }
+    lastRCUState = currentRCUState; // Update last state variable for change detection
 }
 
 void FSM_OBC::packageReceivedRexus(uint64_t message, int msg_length)

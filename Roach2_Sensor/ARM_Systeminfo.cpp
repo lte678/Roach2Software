@@ -1,7 +1,7 @@
 #include "ARM_Systeminfo.h"
 #include <fcntl.h>
 
-ARM_Systeminfo::ARM_Systeminfo() {
+ARM_Systeminfo::ARM_Systeminfo(float updateFreq) : Sensor(updateFreq) {
     // Log for consistencies sake. Not really necessary.
     std::cout << "[Sensor|ARM] Object initialized" << std::endl;
 }
@@ -17,8 +17,8 @@ void ARM_Systeminfo::init()
 void ARM_Systeminfo::update()
 {
 	// Create new data object
-	this->data_obj = new Data();
-	this->data_obj->setId((int)SENSOR_TYPES::SYS_INFO);
+	data_obj = new Data();
+	data_obj->setId((int)SensorType::SYS_INFO);
 
 	// See: https://stackoverflow.com/questions/63166/how-to-determine-cpu-and-memory-consumption-from-inside-a-process
 
@@ -36,8 +36,8 @@ void ARM_Systeminfo::update()
 	physMemUsed *= memInfo.mem_unit; // Physical amount of RAM used in Bytes
 
 	// RAM usage
-	this->data_obj->addValue("MEM_TOTAL", totalPhysMem);
-	this->data_obj->addValue("MEM_USED", physMemUsed);
+	data_obj->addValue("MEM_TOTAL", totalPhysMem);
+	data_obj->addValue("MEM_USED", physMemUsed);
 
 	int FileHandler;
 	char FileBuffer[1024];
@@ -52,7 +52,7 @@ void ARM_Systeminfo::update()
 	close(FileHandler);
 	int percent = (int)(load * 100);
 
-	this->data_obj->addValue("CPU_USAGE", percent);
+	data_obj->addValue("CPU_USAGE", percent);
 
 	// CPU temperature, value is in /sys/devices/virtual/thermal/thermal_zone0/temp => Nano Pi Neo Air has one temperature sensor there (thermal_zone0)
 	int fd;
@@ -63,7 +63,7 @@ void ARM_Systeminfo::update()
 	sscanf(buffer, "%f", &temp);
 	close(fd);
 
-	this->data_obj->addValue("TEMP", temp);
+	data_obj->addValue("TEMP", temp);
 
 
 }
@@ -73,7 +73,7 @@ void ARM_Systeminfo::update()
 */
 Data* ARM_Systeminfo::getData()
 {
-	return this->data_obj;
+	return data_obj;
 }
 
 /**
@@ -84,7 +84,7 @@ int ARM_Systeminfo::getI2CAddr()
 	return 0;
 }
 
-int ARM_Systeminfo::getSensorType()
+SensorType ARM_Systeminfo::getSensorType()
 {
-	return SENSOR_TYPES::SYS_INFO;
+	return SensorType::SYS_INFO;
 }

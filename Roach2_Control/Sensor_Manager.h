@@ -16,8 +16,6 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
-#include <stdio.h>
-#include <string.h>
 
 #include "../Roach2_Sensor/Roach2_Sensor_Sensor.h"
 #include "../Roach2_Sensor/IMU.h"
@@ -28,29 +26,30 @@
 #include "../Roach2_Sensor/Roach2_Sensor_rotEnc.h"
 #include "../Roach2_Sensor/OBC_Systemstatus.h"
 #include "../Roach2_Sensor/RCU_Systemstatus.h"
+#include "../Roach2_Sensor/RocketSignals.h"
 
 class Sensor_Manager
 {
 private:
+    std::mutex sensor_lock;
 	std::vector<Sensor*> sensors; // List of all sensor objects
-	int number_sensors; // Total number of sensors used
+	std::vector<std::thread> sensorThreads;
+	std::atomic<int> number_sensors; // Total number of sensors used
 	std::atomic<bool> stop_bit;
-	std::vector<Data*> loaded_data;
-	int update_rate; // Update rate in Hz
-	std::mutex lock_data_access; // Mutex to prohibit problems with access data from multiple threads
-	int sensor_values_loaded;
-	std::string filename_logging = "log"; // Without file extension, will be set to .csv
+	float update_rate; // Update rate in Hz
+	float fast_update_rate; // Update rate in Hz for high rate measurements
+	float logging_rate; // Logging rate in Hz
+	const std::string filename_logging = "log"; // Without file extension, will be set to .csv
 	std::ofstream* logging_stream;
 public:
-	Sensor_Manager(bool obc, bool rcu, EthernetClient* client, EthernetServer* server);
+	Sensor_Manager();
 	// Threading related
-	void run(void);
-	void stop(void);
+	void run();
+	void stop();
+	Sensor* getSensorHandle(SensorType sensor_id);
+	void attachSensor(Sensor *sensor);
 	// Access to loaded sensor data
-	bool getData(Data** data_ptr, SENSOR_TYPES sensor_id);
-	bool getData(std::vector<Data*> *available_Data);
-	void setUpdateRate(int update_rate);
-	int getStatNumberSensorValuesLoaded(void);
+	bool getData(Data*& data_ptr, SensorType sensor_id);
 };
 
 #endif

@@ -10,11 +10,16 @@ Data_simple::Data_simple(std::string msg) {
 	this->msg = msg;
 }
 
-uint64_t* Data_simple::convert_to_serial()
+Data_simple::~Data_simple() {
+
+}
+
+std::vector<uint64_t> Data_simple::convert_to_serial()
 {
-	uint64_t* data = new uint64_t[1];
-	data[0] = ((uint64_t)this->command << 32);
-	data[0]= data[0] + this->parameter;
+	std::vector<uint64_t> data;
+	data.push_back(0);
+	data[0] = data[0] & ((uint64_t)command << 32);
+	data[0] = data[0] & parameter;
 	return data;
 }
 
@@ -25,6 +30,6 @@ int Data_simple::convert_to_serial_array_length()
 
 std::string Data_simple::get_string_ethernet()
 {
-	return this->msg;
+	return msg;
 }
 

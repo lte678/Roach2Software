@@ -11,10 +11,9 @@
 #include "ReceiveHandler.h"
 
 enum CONNECTION_TYPES {
-	RS422 = 0,
-	ROCKET_SIGNALS = 1,
-	UART_LINK = 2,
-	ETHERNET = 3
+	RS422,
+	UART_LINK,
+	ETHERNET
 };
 
 class Connection

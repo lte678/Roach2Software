@@ -22,9 +22,7 @@ void FSM_Controller::saveData()
 */
 void FSM_Controller::enableSimMode(void)
 {
-	this->isSimMode = true;
-	
-
+	isSimMode = true;
 }
 
 /*
@@ -32,14 +30,14 @@ void FSM_Controller::enableSimMode(void)
  */
 void FSM_Controller::disableSimMode(void)
 {
-	this->isSimMode = false;
+	isSimMode = false;
 }
 
-Data* FSM_Controller::readSensor(int sensorId)
+Data* FSM_Controller::readSensor(SensorType sensorId)
 {
 	Data* data = nullptr;
 
-	bool res = this->sensor_manager->getData(&data, (SENSOR_TYPES)sensorId);
+	bool res = sensor_manager->getData(data, sensorId);
 
 	// Update sensor
 	if (res) {
@@ -53,44 +51,53 @@ Data* FSM_Controller::readSensor(int sensorId)
 void FSM_Controller::initThreads(REBOOT_TARGET target)
 {
 	if (target == REBOOT_TARGET::OBC) {
-		// Rocket signals from RXSM
-		this->rocket_signals = new RocketSignals();
-		this->rocket_signals_capture_thread = std::thread(&RocketSignals::run, this->rocket_signals);
-
 		// UART communication (debug link)
-		this->debugLink = new UART(); // Will open UART port, must be connected afterwards from PC
-		this->debugLink_thread = std::thread(&UART::run, this->debugLink);
+		debugLink = new UART(); // Will open UART port, must be connected afterwards from PC
+		debugLink_thread = std::thread(&UART::run, debugLink);
 	}
 	
 	// Ethernet links: server
-	this->eth_server = new EthernetServer();
-	this->eth_server_thread = std::thread(&EthernetServer::run, this->eth_server);
+	eth_server = new EthernetServer();
+	eth_server_thread = std::thread(&EthernetServer::run, eth_server);
 
 	// Ethernet links: client
 	if (target == REBOOT_TARGET::OBC) {
 		// OBC connects to RCU
         std::cout << "[OBC Firmware] Connecting to RCU" << std::endl;
-		this->eth_client = new EthernetClient("192.168.100.100");
-		this->eth_client_thread = std::thread(&EthernetClient::run, this->eth_client);
+		eth_client = new EthernetClient("192.168.100.100");
+		eth_client_thread = std::thread(&EthernetClient::run, eth_client);
 	}
 	else {
 		// RCU connects to OBC
         std::cout << "[RCU Firmware] Connecting to OBC" << std::endl;
-		this->eth_client = new EthernetClient("192.168.100.101");
-		this->eth_client_thread = std::thread(&EthernetClient::run, this->eth_client);
+		eth_client = new EthernetClient("192.168.100.101");
+		eth_client_thread = std::thread(&EthernetClient::run, eth_client);
 	}
 
 	// Sensor handling
 	if (target == REBOOT_TARGET::OBC)
 	{
 		// OBC
-		this->sensor_manager = new Sensor_Manager(true, false, this->eth_client, this->eth_server);
+		sensor_manager = new Sensor_Manager();
+		rocket_signals = new RocketSignals(500.0f);
+		sensor_manager->attachSensor(rocket_signals);
+        sensor_manager->attachSensor(new ARM_Systeminfo(10.0f));
+        sensor_manager->attachSensor(new TEMP_LM75B(10.0f));
+        sensor_manager->attachSensor(new BNO055_IMU(10.0f));
+        sensor_manager->attachSensor(new ADC_MCP3428(10.0f));
+        sensor_manager->attachSensor(new OBC_Systemstatus(10.0f, eth_client, eth_server));
 	}
 	else
 	{
 		// RCU
-		this->sensor_manager = new Sensor_Manager(false, true, this->eth_client, this->eth_server);
+		sensor_manager = new Sensor_Manager();
+        sensor_manager->attachSensor(new ARM_Systeminfo(10.0f));
+        sensor_manager->attachSensor(new TEMP_LM75B(10.0f));
+        sensor_manager->attachSensor(new ADC_MCP3428(10.0f));
+        sensor_manager->attachSensor(new BNO055_IMU(10.0f));
+        sensor_manager->attachSensor(new ROT_AS5601(10.0f));
+        sensor_manager->attachSensor(new RCU_Systemstatus(10.0f, eth_client, eth_server));
 	}
-	this->sensor_manager->setUpdateRate(10); // 10Hz update rate
-	this->sensor_thread = std::thread(&Sensor_Manager::run, this->sensor_manager);
+
+	sensor_thread = std::thread(&Sensor_Manager::run, sensor_manager);
 }

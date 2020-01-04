@@ -25,38 +25,55 @@
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
 
-// Important: The following define disables actual sensor usage!!
-// Disable it in operation usage!!!
+enum class SensorType {
+    TEMP_SENSOR = 0,
+    IMU = 1,
+    LASERDIST_0 = 2,
+    LASERDIST_1 = 3,
+    LASERDIST_2 = 4,
+    LASERDIST_3 = 5,
+    LASERDIST_4 = 6,
+    LASERDIST_5 = 7,
+    ADC = 8,
+    ROT_ENC = 9,
+    SYS_INFO = 10,
+    OBC_SYS_INFO = 11,
+    RCU_SYS_INFO = 12,
+    RX_SIGNALS = 13
+};
 
 class Sensor
 {
 	/**
 	* @brief The sensor parent class manages common functions for all Sensors
 	*/
-	
-	public:
-		Sensor();
-		~Sensor();
-		virtual void init() = 0;
-		virtual void update() = 0;
-		virtual Data* getData() = 0;
-		virtual int getI2CAddr() = 0;
-		/**
-		* @brief Returns the sensor identifier number (see SENSOR_TYPES in data.h from datastore project)
-		* @return int sensor identifier
-		*/
-		virtual int getSensorType() = 0;
+private:
+    unsigned int sleepTime;
+public:
+    Sensor(float updateFreq); //Update frequency in Hz
+    ~Sensor();
+    void run(); // Each sensor has it's own update loop
+    virtual void init() = 0;
+    virtual void update() = 0;
+    virtual Data* getData() = 0;
+    virtual int getI2CAddr() = 0;
+
+    /**
+    * @brief Returns the sensor identifier number (see SENSOR_TYPES in data.h from datastore project)
+    * @return SensorType sensor identifier
+    */
+    virtual SensorType getSensorType() = 0;
 	// I2C sensor functions are placed here to avoid redefining them for most sensors
-	protected:
-		int deviceHandle;
-		int write8(int reg, int data);
-		int read8(int reg);
-		int write16(int reg, int data);
-		int read16(int reg);
-		int i2cConnect(int dev);
-		int binaryToDecimal(int number);
-		int simpleRead();
-		int simpleWrite(int data);
+protected:
+    int deviceHandle;
+    int write8(int reg, int data);
+    int read8(int reg);
+    int write16(int reg, int data);
+    int read16(int reg);
+    int i2cConnect(int dev);
+    int static binaryToDecimal(int number);
+    int simpleRead();
+    int simpleWrite(int data);
 };
 
 #endif //Sensor_H

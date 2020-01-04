@@ -21,7 +21,7 @@ class ARM_Systeminfo :
 private:
 	Data* data_obj;
 public:
-    ARM_Systeminfo();
+    explicit ARM_Systeminfo(float updateFreq);
 	void init();
 	void update();
 	Data* getData();
@@ -30,7 +30,7 @@ public:
 	* @brief Returns the sensor identifier number (see SENSOR_TYPES in data.h from datastore project)
 	* @return int sensor identifier
 	*/
-	int getSensorType();
+    SensorType getSensorType();
 };
 
 #endif

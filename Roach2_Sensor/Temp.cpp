@@ -1,6 +1,6 @@
 #include "Temp.h"
 
-TEMP_LM75B::TEMP_LM75B()
+TEMP_LM75B::TEMP_LM75B(float updateFreq) : Sensor(updateFreq)
 {
     std::cout << "[Sensor|Temp] Initializing" << std::endl;
 	convertedMeasurement = 0.0;
@@ -34,7 +34,7 @@ void TEMP_LM75B::update()
 
 Data* TEMP_LM75B::getData() {
 	Data* data_ptr = new Data();
-	data_ptr->setId((int)SENSOR_TYPES::TEMP_SENSOR);
+	data_ptr->setId((int)SensorType::TEMP_SENSOR);
 	data_ptr->addValue("TEMP", convertedMeasurement);
 	return data_ptr;
 	/*Effekt der eigenerhitzung wird vernachlaessigt*/
@@ -44,8 +44,8 @@ int TEMP_LM75B::getI2CAddr() {
 	return LM75B_DEVICE_ID;
 }
 
-int TEMP_LM75B::getSensorType()
+SensorType TEMP_LM75B::getSensorType()
 {
-	return SENSOR_TYPES::TEMP_SENSOR;
+	return SensorType::TEMP_SENSOR;
 }
 

@@ -9,7 +9,7 @@
 
 /*#include "Roach2_Sensor_Sensor.h"*/
 
-BNO055_IMU::BNO055_IMU()
+BNO055_IMU::BNO055_IMU(float updateFreq) : Sensor(updateFreq)
 {
     std::cout << "[Sensor|IMU] Initializing" << std::endl;
 	deviceHandle = this->i2cConnect(BNO055_DEVICE_ID); // Get file/I2C handle
@@ -41,9 +41,9 @@ void BNO055_IMU::init() //performs all settings possible
 	this->config();
 	//this->calibrate();
 }
-int BNO055_IMU::getSensorType()
+SensorType BNO055_IMU::getSensorType()
 {
-	return SENSOR_TYPES::IMU; //test
+	return SensorType::IMU; //test
 }
 void BNO055_IMU::update()
 {
@@ -140,17 +140,17 @@ int BNO055_IMU::changeSign(int measurement)
 Data* BNO055_IMU::getData()
 {
 	Data* data_ptr = new Data();
-	data_ptr->setId((int)SENSOR_TYPES::IMU);
-	data_ptr->addValue("ACCELERATION_X", this->acc[0]);
-	data_ptr->addValue("ACCELERATION_Y", this->acc[1]);
-	data_ptr->addValue("ACCELERATION_Z", this->acc[2]);
-	data_ptr->addValue("NAG_X", this->mag[0]);
-	data_ptr->addValue("NAG_Y", this->mag[1]);
-	data_ptr->addValue("NAG_Z", this->mag[2]);
+	data_ptr->setId((int)SensorType::IMU);
+    data_ptr->addValue("TEMP", this->temp);
+	data_ptr->addValue("ACC_X", this->acc[0]);
+	data_ptr->addValue("ACC_Y", this->acc[1]);
+	data_ptr->addValue("ACC_Z", this->acc[2]);
+	data_ptr->addValue("MAG_X", this->mag[0]);
+	data_ptr->addValue("MAG_Y", this->mag[1]);
+	data_ptr->addValue("MAG_Z", this->mag[2]);
 	data_ptr->addValue("GYR_X", this->gyr[0]);
 	data_ptr->addValue("GYR_Y", this->gyr[1]);
 	data_ptr->addValue("GYR_Z", this->gyr[2]);
-	data_ptr->addValue("imu_temp", this->temp);
 
 	int cali_stat = this->read8(CALIB_STAT_ADDR);
 

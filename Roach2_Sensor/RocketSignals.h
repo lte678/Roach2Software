@@ -11,17 +11,16 @@
 
 #include <thread>
 #include <atomic>
-#include <math.h>
+#include <cmath>
 #include <mutex>
 
-#include "../Roach2_Comm/ReceiveHandler.h"
-#include "../Roach2_Comm/Connection.h"
+#include "Roach2_Sensor_Sensor.h"
 
 class RocketSignals :
-	public Connection
+        public Sensor
 {
 private:
-	bool sods;
+    bool sods;
 	bool soe;
 	bool lo;
 	int fd_sods;
@@ -30,21 +29,23 @@ private:
 	std::atomic<bool> changed;
 	std::atomic<bool> running;
 	std::mutex access_limit;
-	ReceiveHandler *handler;
-	void initGpio();
-	bool checkGpio();
 	double sig_lo_acc;
 	double sig_sods_acc;
 	double sig_soe_acc;
 	int sig_counter;
-	const int max_sig_counter = 100;
+	const int max_sig_counter = 50;
 public:
-	RocketSignals();
-	int whichConnection(void);
-	void run();
-	void stop();
+	explicit RocketSignals(float updateFreq);
+	~RocketSignals() = default;
+    void init() override;
+    void update() override;
+    Data* getData() override;
+    int getI2CAddr() override;
+    SensorType getSensorType() override;
 	bool signalChanged();
-	bool* getRocketSignals();
+	bool getLO();
+	bool getSOE();
+	bool getSODS();
 };
 
 #endif

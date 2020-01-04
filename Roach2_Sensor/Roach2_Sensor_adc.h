@@ -36,13 +36,13 @@ enum Setting_Adc {
 
 class ADC_MCP3428 : public Sensor {
 public:
-	ADC_MCP3428();
+	explicit ADC_MCP3428(float updateFreq);
 	~ADC_MCP3428();
 	void init();
 	void update();
 	Data* getData();
 	int getI2CAddr();
-	int getSensorType();
+    SensorType getSensorType();
 private:
 	int measurement[4] = {};
 	int ilauf = 1;

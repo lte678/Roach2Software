@@ -8,10 +8,10 @@
 #include "Roach2_Sensor_adc.h"
 
 // TODO: INIT, UPDATE, GETDATA
-ADC_MCP3428::ADC_MCP3428()
+ADC_MCP3428::ADC_MCP3428(float updateFreq) : Sensor(updateFreq)
 {
     std::cout << "[Sensor|ADC] Initializing" << std::endl;
-	this->deviceHandle = this->i2cConnect(MCP3428_DEVICE_ID); // Get file/I2C handle
+	deviceHandle = i2cConnect(MCP3428_DEVICE_ID); // Get file/I2C handle
 	if (read8(MCP3428_DEVICE_ID) != 0x00) 
 	{
 		std::cout << "[Sensor|ADC] Connection failed!" << std::endl;
@@ -56,29 +56,25 @@ void ADC_MCP3428::update()
 		ilauf++;
 		simpleWrite(adress[ilauf]);
 	}
-	this->data_obj = new Data();
-	this->data_obj->setId((int)SENSOR_TYPES::ADC);
-	std::string name = "ADC-CH1";
-	this->data_obj->addValue(name, convertedMeasurement[0]);
-	name = "ADC-CH2";
-	this->data_obj->addValue(name, convertedMeasurement[1]);
-	name = "ADC-CH3";
-	this->data_obj->addValue(name, convertedMeasurement[2]);
-	name = "ADC-CH4";
-	this->data_obj->addValue(name, convertedMeasurement[3]);
+	data_obj = new Data();
+	data_obj->setId((int)SensorType::ADC);
+	data_obj->addValue("CH1", convertedMeasurement[0]);
+	data_obj->addValue("CH2", convertedMeasurement[1]);
+	data_obj->addValue("CH3", convertedMeasurement[2]);
+	data_obj->addValue("CH4", convertedMeasurement[3]);
 	simpleWrite(CONF_ADC1);
 }
 
 Data* ADC_MCP3428::getData() {
-	return this->data_obj;
+	return data_obj;
 }
 
 int ADC_MCP3428::getI2CAddr() {
 	return MCP3428_DEVICE_ID;
 }
 
-int ADC_MCP3428::getSensorType()
+SensorType ADC_MCP3428::getSensorType()
 {
-	return SENSOR_TYPES::ADC;
+	return SensorType::ADC;
 }
 

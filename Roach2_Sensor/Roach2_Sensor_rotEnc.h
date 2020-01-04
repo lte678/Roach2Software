@@ -39,13 +39,13 @@ enum AS5601_REGISTER_t {
 class ROT_AS5601 : public Sensor {
 
 public:
-	ROT_AS5601();
+	explicit ROT_AS5601(float updateFreq);
 	~ROT_AS5601();
 	void init();
 	void update();
 	Data* getData();
 	int getI2CAddr();
-	int getSensorType();
+    SensorType getSensorType();
 private:
 	int measurement[2] = {};
 	unsigned long timeStamp = 0;

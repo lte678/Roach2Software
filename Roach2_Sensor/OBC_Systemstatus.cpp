@@ -1,6 +1,6 @@
 #include "OBC_Systemstatus.h"
 
-OBC_Systemstatus::OBC_Systemstatus(EthernetClient* client, EthernetServer* server)
+OBC_Systemstatus::OBC_Systemstatus(float updateFreq, EthernetClient* client, EthernetServer* server) : Sensor(updateFreq)
 {
 	this->eth_client = client;
 	this->eth_server = server;
@@ -62,8 +62,8 @@ void OBC_Systemstatus::update()
 	// OBC cameras (GoPro) power good
 	fd_0 = open("sys/class/gpio/gpio203/value", O_RDONLY);
 	if (fd_0 != -1) {
-		read(fd_0, &buffer, 1); // ASCII 48=0, 49=1
-		if (buffer == 49) {
+		read(fd_0, &buffer, 1);
+		if (buffer == '1') {
 			this->currentData->addValue("PG_CAM", 1);
 		}
 		else {
@@ -90,7 +90,7 @@ int OBC_Systemstatus::getI2CAddr()
 	return 0;
 }
 
-int OBC_Systemstatus::getSensorType()
+SensorType OBC_Systemstatus::getSensorType()
 {
-	return SENSOR_TYPES::OBC_SYS_INFO;
+	return SensorType::OBC_SYS_INFO;
 }

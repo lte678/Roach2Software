@@ -13,9 +13,9 @@ class LaserDist_VL530LX :
 private:
 	Data* sensorData;
 	int I2C_ADDRESS = 0x52;
-	int sensor_type;
+    SensorType sensor_type;
 public:
-	LaserDist_VL530LX(int sensor_type, int i2c_address);
+	LaserDist_VL530LX(float updateFreq, SensorType sensor_type, int i2c_address);
 	void init();
 	void update();
 	Data* getData();
@@ -24,7 +24,7 @@ public:
 	* @brief Returns the sensor identifier number (see SENSOR_TYPES in data.h from datastore project)
 	* @return int sensor identifier
 	*/
-	int getSensorType();
+    SensorType getSensorType();
 };
 
 #endif

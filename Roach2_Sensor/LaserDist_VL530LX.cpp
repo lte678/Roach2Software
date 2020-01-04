@@ -1,22 +1,22 @@
 #include "LaserDist_VL530LX.h"
 
-LaserDist_VL530LX::LaserDist_VL530LX(int sensor_type, int i2c_address)
+LaserDist_VL530LX::LaserDist_VL530LX(float updateFreq, SensorType sensor_type, int i2c_address) : Sensor(updateFreq)
 {
-	this->sensor_type = sensor_type;
-	this->I2C_ADDRESS = i2c_address;
+	sensor_type = sensor_type;
+	I2C_ADDRESS = i2c_address;
 }
 
 Data* LaserDist_VL530LX::getData()
 {
-	return this->sensorData;
+	return sensorData;
 }
 
 int LaserDist_VL530LX::getI2CAddr()
 {
-	return this->I2C_ADDRESS;
+	return I2C_ADDRESS;
 }
 
-int LaserDist_VL530LX::getSensorType()
+SensorType LaserDist_VL530LX::getSensorType()
 {
-	return this->sensor_type;
+	return sensor_type;
 }

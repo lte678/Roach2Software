@@ -22,7 +22,7 @@ private:
 	EthernetClient* eth_client;
 	EthernetServer* eth_server;
 public:
-	OBC_Systemstatus(EthernetClient* client, EthernetServer* server);
+	OBC_Systemstatus(float updateFreq, EthernetClient* client, EthernetServer* server);
 	void init();
 	void update();
 	Data* getData();
@@ -31,7 +31,7 @@ public:
 	* @brief Returns the sensor identifier number (see SENSOR_TYPES in data.h from datastore project)
 	* @return int sensor identifier
 	*/
-	int getSensorType();
+    SensorType getSensorType();
 };
 
 #endif
