@@ -33,7 +33,8 @@ private:
 	double sig_sods_acc;
 	double sig_soe_acc;
 	int sig_counter;
-	const int max_sig_counter = 50;
+	int max_sig_counter = 100; // 100 samples
+	int sig_sample_interval = 500; // 100 ns zwischen samples
 public:
 	explicit RocketSignals(float updateFreq);
 	~RocketSignals() = default;

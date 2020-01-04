@@ -8,6 +8,17 @@
 
 #include "RocketSignals.h"
 
+
+/*
+ * @brief Constructor
+ **/
+RocketSignals::RocketSignals(float updateFreq) : Sensor(updateFreq) {
+	sig_counter = 0;
+	sig_lo_acc = 0;
+	sig_sods_acc = 0;
+	sig_soe_acc = 0;
+}
+
 /**
  * @brief Inits the GPIO pins which are connected to the RXSM signals SODS, SOE and LO.
  * This GPIO uses sysfs interface from Linux Kernel directly.
@@ -76,100 +87,70 @@ void RocketSignals::update()
 	bool new_sods = false;
 	bool new_soe = false;
 	bool new_lo = false;
-	int buffer = 0;
 
 	// Check GPIO status, 0 = false, 1 = true (or any other value beside 0) (see https://www.kernel.org/doc/html/v4.17/driver-api/gpio/legacy.html#sysfs-interface-for-userspace-optional)
 	this->access_limit.lock();
 
-	// Check SODS
-	// Note, the "value" is a text (ASCII) literal, so false = 0 = 48, true = 1 = 49
-	if (fd_sods != -1) {
-		read(fd_sods, &buffer, 1);
-		if (buffer != 48) {
-			this->sig_sods_acc++;
-		}
-	}
-
-	// Check SOE
-	if (fd_soe != -1) {
-		read(fd_soe, &buffer, 1);
-		if (buffer != 48) {
-			sig_soe_acc++;
-		}
-	}
-
-	// Check LO
-	if (fd_lo != -1) {
+	int buffer = 0;
+	for (int i = 0; i < max_sig_counter; i++) {
 		read(fd_lo, &buffer, 1);
-		if (buffer != 48) {
+		lseek(fd_lo, 0, SEEK_SET);
+		if (buffer == '1') {
 			sig_lo_acc++;
 		}
+		read(fd_soe, &buffer, 1);
+		lseek(fd_soe, 0, SEEK_SET);
+		if (buffer == '1') {
+			sig_soe_acc++;
+		}
+		read(fd_sods, &buffer, 1);
+		lseek(fd_sods, 0, SEEK_SET);
+		if (buffer == '1') {
+			this->sig_sods_acc++;
+		}
+		nanosleep(reinterpret_cast<const timespec *>(sig_sample_interval), nullptr);
 	}
 
-	if (sig_counter < max_sig_counter) {
-		sig_counter++;
+	// Evaluate accumulator registers
+	double sig_lo = sig_lo_acc / (double)max_sig_counter;
+	double sig_soe = sig_soe_acc / (double)max_sig_counter;
+	double sig_sods = sig_sods_acc / (double)max_sig_counter;
+
+	// Check if "1"
+	if (sig_lo > 0.85) {
+		new_lo = true;
 	}
-	else {
-		// Evaluate accumulator registers
-		double sig_lo = sig_lo_acc / (double)max_sig_counter;
-		double sig_soe = sig_soe_acc / (double)max_sig_counter;
-		double sig_sods = sig_sods_acc / (double)max_sig_counter;
-		std::cout << sig_lo << std::endl;
-
-		// Check if "1"
-		if (sig_lo > 0.9) {
-			new_lo = true;
-		}
-		if (sig_soe > 0.9) {
-			new_soe = true;
-		}
-		if (sig_sods > 0.9) {
-			new_sods = true;
-		}
-
-		// Check against last status
-		if (sods != new_sods) {
-			changed = true;
-		}
-		if (soe != new_soe) {
-			changed = true;
-		}
-		if (lo != new_lo) {
-			changed = true;
-		}
-
-		// Write back
-		soe = new_soe;
-		sods = new_sods;
-		lo = new_lo;
-
-		// Reset counter
-		sig_counter = 0;
-		sig_lo_acc = 0;
-		sig_sods_acc = 0;
-		sig_soe_acc = 0;
+	if (sig_soe > 0.85) {
+		new_soe = true;
+	}
+	if (sig_sods > 0.85) {
+		new_sods = true;
 	}
 
-	// Unlock
-	access_limit.unlock();
+	// Check against last status
+	if (sods != new_sods) {
+		changed = true;
+	}
+	if (soe != new_soe) {
+		changed = true;
+	}
+	if (lo != new_lo) {
+		changed = true;
+	}
 
-	// We need to read the same line always, so close the file handlers at the end to reset the read function
-	close(this->fd_sods);
-	close(this->fd_soe);
-	close(this->fd_lo);
-	fd_sods = open("/sys/class/gpio/gpio67/value", O_RDONLY);
-	fd_soe = open("/sys/class/gpio/gpio66/value", O_RDONLY);
-	fd_lo = open("/sys/class/gpio/gpio65/value", O_RDONLY);
-}
+	// Write back
+	soe = new_soe;
+	sods = new_sods;
+	lo = new_lo;
 
-/*
- * @brief Constructor
- **/
-RocketSignals::RocketSignals(float updateFreq) : Sensor(updateFreq) {
+	// Reset counter
 	sig_counter = 0;
 	sig_lo_acc = 0;
 	sig_sods_acc = 0;
 	sig_soe_acc = 0;
+
+	// Unlock
+	access_limit.unlock();
 }
 
 /**
