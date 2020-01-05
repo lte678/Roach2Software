@@ -44,7 +44,7 @@ void ARM_Systeminfo::update()
 	read(FileHandler, FileBuffer, sizeof(FileBuffer) - 1);
 	sscanf(FileBuffer, "%f", &load);
 	close(FileHandler);
-	percent = (int)(load * 100);
+	percent = load * 100.0f;
 
 	// CPU temperature, value is in /sys/devices/virtual/thermal/thermal_zone0/temp => Nano Pi Neo Air has one temperature sensor there (thermal_zone0)
 	int fd;

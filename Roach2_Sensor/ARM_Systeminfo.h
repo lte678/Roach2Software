@@ -23,7 +23,7 @@ private:
 
     long long totalPhysMem;
     long long physMemUsed;
-    int percent;
+    float percent;
     float temp;
 public:
     explicit ARM_Systeminfo(float updateFreq);
