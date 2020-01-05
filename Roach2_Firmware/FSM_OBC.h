@@ -45,7 +45,7 @@ public:
 	void rocketSignalReceived(int signal_source);
 	void packageReceivedRexus(uint64_t message, int msg_length);
 	void packageReceivedEthernet();
-	
+	void simulationModeUpdate();
 };
 
 #endif

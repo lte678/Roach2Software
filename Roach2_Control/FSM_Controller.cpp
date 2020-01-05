@@ -35,6 +35,11 @@ void FSM_Controller::disableSimMode(void)
 	this->isSimMode = false;
 }
 
+bool FSM_Controller::isSimModeEnabled()
+{
+	return this->isSimMode;
+}
+
 Data* FSM_Controller::readSensor(int sensorId)
 {
 	Data* data = nullptr;
@@ -91,4 +96,42 @@ void FSM_Controller::initThreads(REBOOT_TARGET target)
 	}
 	this->sensor_manager->setUpdateRate(10); // 10Hz update rate
 	this->sensor_thread = std::thread(&Sensor_Manager::run, this->sensor_manager);
+}
+
+/**
+ * @brief Enables the simulation mode. In case it was disabled before, the simulationModeUpdate method is called.
+*/
+void FSM_Controller::enableSimMode() {
+	
+	// Only call simulationModeUpdate if sim mode property changed
+	bool call = false;
+
+	if (!this->isSimMode) {
+		call = true;
+	}
+
+	this->isSimMode = true;
+
+	if (call) {
+		this->simulationModeUpdate();
+	}
+}
+
+/**
+ * @brief Disables the simulation mode. In case it was disabled before, the simulationModeUpdate method is called.
+*/
+void FSM_Controller::disableSimMode() {
+
+	// Only call simulationModeUpdate if sim mode property changed
+	bool call = false;
+
+	if (this->isSimMode) {
+		call = true;
+	}
+
+	this->isSimMode = false;
+
+	if (call) {
+		this->simulationModeUpdate();
+	}
 }

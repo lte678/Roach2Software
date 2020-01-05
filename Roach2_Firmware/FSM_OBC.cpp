@@ -265,6 +265,18 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 			// Switch sensor acquisition on
 			this->enableDownstream = true;
 		break;
+
+		// Simulation control
+		case (int)COMMANDS_DEBUG::obc_sim_control:
+			if (para == 1) {
+				// enable simulation mode
+				this->enableSimMode();
+			}
+			else {
+				// disable simulation mode
+				this->disableSimMode();
+			}
+		break;
 	}
 
 	// Sim commands
@@ -398,4 +410,27 @@ void FSM_OBC::packageReceivedRexus(uint64_t message, int msg_length)
 void FSM_OBC::packageReceivedEthernet()
 {
 	int i = 0;
+}
+
+/**
+ * @brief Called if a change to the simulation mode properties occurs
+*/
+void FSM_OBC::simulationModeUpdate() {
+	Data_simple* msg;
+
+	if (this->isSimModeEnabled()) {
+		// Update all actuators: on OBC side nothing to be done
+
+		// Send update to RCU
+		msg = new Data_simple("RCU_SIM_MODE_ENABLE");
+		this->eth_client->send(msg);
+	}
+	else {
+		// Disable sim mode
+
+		// Send update to RCU
+		msg = new Data_simple("RCU_SIM_MODE_DISABLE");
+		this->eth_client->send(msg);
+	}
+	
 }

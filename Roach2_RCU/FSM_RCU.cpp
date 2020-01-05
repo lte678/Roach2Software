@@ -184,6 +184,27 @@ void FSM_RCU::packageReceivedEthernet_msg(std::string command)
 		msg = new Data_simple("ALIVE");
 		this->eth_client->send(msg);
 	}
+	else if (command.compare("RCU_SIM_MODE_ENABLE") == 0) {
+		// Enable simulation mode
+		this->enableSimMode();
+	}
+	else if (command.compare("RCU_SIM_MODE_DISABLE") == 0) {
+		// Disable simulation mode
+		this->disableSimMode();
+	}
+}
+
+void FSM_RCU::simulationModeUpdate()
+{
+	// Update all actuators: switch HV generator and engines in simulation mode
+	if (this->isSimModeEnabled()) {
+		this->hv->enableDebugMode();
+		this->pwm->enableDebugMode();
+	}
+	else {
+		this->hv->disableDebugMode();
+		this->pwm->disableDebugMode();
+	}
 }
 
 void FSM_RCU::run(void) 
