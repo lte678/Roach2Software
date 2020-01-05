@@ -47,94 +47,58 @@ SensorType BNO055_IMU::getSensorType()
 }
 void BNO055_IMU::update()
 {
-	this->measurement = ((this->read8(ACCEL_DATA_X_MSB_ADDR) << 8) + this->read8(ACCEL_DATA_X_LSB_ADDR)); /*Get Acceleration. 100LSB = 1m/s^2*/
+    int16_t measurement;
+	measurement = ((this->read8(ACCEL_DATA_X_MSB_ADDR) << 8) + this->read8(ACCEL_DATA_X_LSB_ADDR)); /*Get Acceleration. 100LSB = 1m/s^2*/
+	acc[0] = (double)measurement / 100.0;
 
-	this->acc[0] = this->changeSign(measurement)*0.01;
+	measurement = ((this->read8(ACCEL_DATA_Y_MSB_ADDR) << 8) + this->read8(ACCEL_DATA_Y_LSB_ADDR));
+	acc[1] = (double)measurement / 100.0;
 
-	this->measurement = ((this->read8(ACCEL_DATA_Y_MSB_ADDR) << 8) + this->read8(ACCEL_DATA_Y_LSB_ADDR));
-
-	this->acc[1] = this->changeSign(measurement)*0.01;
-
-	this->measurement = ((this->read8(ACCEL_DATA_Z_MSB_ADDR) << 8) + this->read8(ACCEL_DATA_Z_LSB_ADDR));
-
-	this->acc[2] = this->changeSign(measurement)*0.01;
+	measurement = ((this->read8(ACCEL_DATA_Z_MSB_ADDR) << 8) + this->read8(ACCEL_DATA_Z_LSB_ADDR));
+	acc[2] = (double)measurement / 100.0;
 	/*---------------------------------------------------------------------------------------------------------*/
-	this->measurement = ((this->read8(MAG_DATA_X_MSB_ADDR) << 8) + this->read8(MAG_DATA_X_LSB_ADDR)); /*Magnetometerdata. 16LSB = 1microT */
-
-	this->mag[0] = this->changeSign(measurement)*0.0625;
+	measurement = ((this->read8(MAG_DATA_X_MSB_ADDR) << 8) + this->read8(MAG_DATA_X_LSB_ADDR)); /*Magnetometerdata. 16LSB = 1microT */
+	mag[0] = (double)measurement / 16.0;
 	
-	this->measurement = ((this->read8(MAG_DATA_Y_MSB_ADDR) << 8) + this->read8(MAG_DATA_Y_LSB_ADDR));
+	measurement = ((this->read8(MAG_DATA_Y_MSB_ADDR) << 8) + this->read8(MAG_DATA_Y_LSB_ADDR));
+	mag[1] =(double)measurement / 16.0;
 	
-	this->mag[1] = this->changeSign(measurement)*0.0625;
-	
-	this->measurement = ((this->read8(MAG_DATA_Y_MSB_ADDR) << 8) + this->read8(MAG_DATA_Y_LSB_ADDR));
-	
-	this->mag[2] = this->changeSign(measurement)*0.0625;
+	measurement = ((this->read8(MAG_DATA_Z_MSB_ADDR) << 8) + this->read8(MAG_DATA_Z_LSB_ADDR));
+	mag[2] = (double)measurement / 16.0;
 	/*------------------------------------------------------------------------------------------------------------*/
-	this->measurement = ((this->read8(GYRO_DATA_X_MSB_ADDR) << 8) + this->read8(GYRO_DATA_X_LSB_ADDR)); /*Gyroscopedata. 16LSB = 1DPS */
-
-	this->gyr[0] = this->changeSign(measurement)*0.0625;
+	measurement = ((this->read8(GYRO_DATA_X_MSB_ADDR) << 8) + this->read8(GYRO_DATA_X_LSB_ADDR)); /*Gyroscopedata. 16LSB = 1DPS */
+	gyr[0] = (double)measurement / 16.0;
 	
-	this->measurement = ((this->read8(GYRO_DATA_Y_MSB_ADDR) << 8) + this->read8(GYRO_DATA_Y_LSB_ADDR)); 
+	measurement = ((this->read8(GYRO_DATA_Y_MSB_ADDR) << 8) + this->read8(GYRO_DATA_Y_LSB_ADDR));
+	gyr[1] = (double)measurement / 16.0;
 
-	this->gyr[1] = this->changeSign(measurement)*0.0625;
-
-	this->measurement = ((this->read8(GYRO_DATA_Z_MSB_ADDR) << 8) + this->read8(GYRO_DATA_Z_LSB_ADDR));
-
-	this->gyr[2] = this->changeSign(measurement)*0.0625;
+	measurement = ((this->read8(GYRO_DATA_Z_MSB_ADDR) << 8) + this->read8(GYRO_DATA_Z_LSB_ADDR));
+	gyr[2] = (double)measurement / 16.0;
 	/*------------------------------------------------------------------------------------------------------------*/
-	this->measurement = ((this->read8(QUATERNION_DATA_W_MSB_ADDR) << 8) + this->read8(QUATERNION_DATA_W_LSB_ADDR)); /*Quaterniondata. 2^(14)LSB = 1Quaternion */
-
-	this->quat[0] = this->changeSign(measurement)*0.00006103515;
+	uint16_t umeasurement;
+	umeasurement = ((this->read8(QUATERNION_DATA_W_MSB_ADDR) << 8) + this->read8(QUATERNION_DATA_W_LSB_ADDR)); /*Quaterniondata. 2^(14)LSB = 1Quaternion */
+	quat[0] = (double)umeasurement / (double)(1 << 14);
 	
-	this->measurement = ((this->read8(QUATERNION_DATA_X_MSB_ADDR) << 8) + this->read8(QUATERNION_DATA_X_LSB_ADDR)); 
+	umeasurement = ((this->read8(QUATERNION_DATA_X_MSB_ADDR) << 8) + this->read8(QUATERNION_DATA_X_LSB_ADDR));
+	quat[1] = (double)umeasurement / (double)(1 << 14);
 
-	this->quat[1] = this->changeSign(measurement)*0.00006103515;
+	umeasurement = ((this->read8(QUATERNION_DATA_Y_MSB_ADDR) << 8) + this->read8(QUATERNION_DATA_Y_LSB_ADDR));
+	quat[2] = (double)umeasurement / (double)(1 << 14);
 
-	this->measurement = ((this->read8(QUATERNION_DATA_Y_MSB_ADDR) << 8) + this->read8(QUATERNION_DATA_Y_LSB_ADDR));
-
-	this->quat[2] = this->changeSign(measurement)*0.00006103515;
-
-	this->measurement = ((this->read8(QUATERNION_DATA_Z_MSB_ADDR) << 8) + this->read8(QUATERNION_DATA_Z_LSB_ADDR)); 
-
-	this->quat[3] = this->changeSign(measurement)*0.00006103515;
+	umeasurement = ((this->read8(QUATERNION_DATA_Z_MSB_ADDR) << 8) + this->read8(QUATERNION_DATA_Z_LSB_ADDR));
+	quat[3] = (double)umeasurement / (double)(1 << 14);
 		/*------------------------------------------------------------------------------------------------------------*/
-	this->measurement = ((this->read8(EULER_R_MSB_ADDR) << 8) + this->read8(EULER_R_MSB_ADDR)); /*Euler. 16LSB = 1DPS */
+	measurement = ((this->read8(EULER_R_MSB_ADDR) << 8) + this->read8(EULER_R_MSB_ADDR)); /*Euler. 16LSB = 1DPS */
+	rot[0] = (double)measurement / 16.0;
 
-	this->rot[0] = this->changeSign(measurement)*0.0625;
+	measurement = ((this->read8(EULER_P_MSB_ADDR) << 8) + this->read8(EULER_P_MSB_ADDR));
+	rot[1] = (double)measurement / 16.0;
 
-	this->measurement = ((this->read8(EULER_P_MSB_ADDR) << 8) + this->read8(EULER_P_MSB_ADDR));
-
-	this->rot[1] = this->changeSign(measurement)*0.0625;
-
-	this->measurement = ((this->read8(EULER_H_MSB_ADDR) << 8) + this->read8(EULER_H_MSB_ADDR));
-
-	this->rot[2] = this->changeSign(measurement)*0.0625;
+	measurement = ((this->read8(EULER_H_MSB_ADDR) << 8) + this->read8(EULER_H_MSB_ADDR));
+	rot[2] = (double)measurement / 16.0;
 	/*------------------------------------------------------------------------------------------------------------*/
-	this->measurement = this->read8(TEMP_ADDR);
-	if ((this->measurement >> 7) == 1)
-	{
-		int change = 0b10000000;
-		measurement = change | measurement;
-		measurement = binaryToDecimal(measurement);
-		measurement = measurement * (-1);
-	}
-	this->temp = this->measurement*1.0;
-}
-
-int BNO055_IMU::changeSign(int measurement)
-{
-	if ((measurement >> 15) != 0)
-	{
-		int signchange = 0b1000000000000000;
-		measurement = measurement | signchange;
-		measurement = binaryToDecimal(measurement);
-			measurement = measurement * -1;
-	}
-	else
-	{
-		measurement = binaryToDecimal(measurement);
-	}
+	int8_t tmeasurement = read8(TEMP_ADDR);
+	temp = (double)tmeasurement;
 }
 
 Data* BNO055_IMU::getData()
@@ -162,8 +126,6 @@ int BNO055_IMU::getI2CAddr()
 {
 	return BNO055_DEVICE_ID;
 }
-
-
 
 void BNO055_IMU::reset()
 {
