@@ -22,8 +22,6 @@ class BNO055_IMU : public Sensor {
 		const long CALIBRATION_TIMEOUT_SECONDS = 60;
 		const int BNO055_DEVICE_ID = 0x28;
         //int deviceHandle = 0;
-		int measurement;
-		double convertedMeasurement = 0.0;
 		double acc[3];
 		double mag[3];
 		double gyr[3];
@@ -228,7 +226,6 @@ public:
 	void reset();
 	int calibrate();
 	void config();
-	int changeSign(int measurement);
     bool is_online();
 };
 	

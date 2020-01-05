@@ -314,8 +314,9 @@ void FSM_OBC::stateMachine()
     if (lastState != currentState) {
         // State change -> send through downlink
         Data_super* data_send[1];
-        data_send[0] = new Data_simple(0x0C, currentState);
+        data_send[0] = new Data_simple(0x0C, (unsigned int)currentState);
         debugLink->sendData(data_send, 1);
+        // Write debug message
         std::cout << "[OBC Firmware] State change. OBC: ";
         switch(currentState) {
             case (int)FSM_STATES_OBC::IDLE:
@@ -329,6 +330,11 @@ void FSM_OBC::stateMachine()
     lastState = currentState; // Update last state variable for change detection
 
     if (lastRCUState != currentRCUState) {
+        // State change -> send through downlink
+        //TODO: Let the RCU send this message through the ethernet connection and pass it along
+        Data_super* data_send[1];
+        data_send[0] = new Data_simple(0x0D, (unsigned int)currentRCUState);
+        debugLink->sendData(data_send, 1);
         // State change. Generate debug message
         std::cout << "[OBC Firmware] State change. RCU: ";
         switch(currentRCUState) {
