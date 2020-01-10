@@ -2,9 +2,9 @@
 
 EthernetServer::EthernetServer()
 {
-	// Init RCU server
+	// Init ethernet server
 	connected = false;
-	this->socket = new ServerSock(port_number);
+	socket = new ServerSock(port_number);
 }
 
 int EthernetServer::whichConnection()
@@ -12,100 +12,93 @@ int EthernetServer::whichConnection()
 	return CONNECTION_TYPES::ETHERNET;
 }
 
-bool EthernetServer::isDataReceived()
+bool EthernetServer::messagesReceived()
 {
-	this->access_receive_queue.lock();
+	access_receive_queue.lock();
+	bool empty = receive_queue.empty();
+	access_receive_queue.unlock();
 
-	bool empty_bit = this->receive_queue.empty();
-
-	this->access_receive_queue.unlock();
-
-	return !empty_bit;
+	return !empty;
 }
 
 bool EthernetServer::isConnected()
 {
-	this->access_receive_queue.lock();
-	bool conn_bit = this->connected;
-	this->access_receive_queue.unlock();
-
-	return conn_bit;
+	return connected;
 }
 
-std::vector<std::string> EthernetServer::getReceivedValues()
+std::vector<std::string> EthernetServer::popMessage()
 {
 	std::vector<std::string> copied;
-	this->access_receive_queue.lock();
 
+	access_receive_queue.lock();
 	// Copies all received string to vector and deletes the queue content
-	while (!this->receive_queue.empty()) {
-		std::string element = this->receive_queue.front();
+	while (!receive_queue.empty()) {
+		std::string element = receive_queue.front();
 		copied.push_back(element);
-		this->receive_queue.pop();
+		receive_queue.pop();
 	}
+	access_receive_queue.unlock();
 
-	this->access_receive_queue.unlock();
 	return copied;
 }
 
 void EthernetServer::run()
 {
     std::cout << "[Ethernet Server] Started thread. Listening on " << port_number << std::endl;
-	std::string message;
+	std::string buffer;
 	ServerSock new_conn;
 
 	// Start thread
-	this->stop_running.store(false);
+	stop_running = false;
 
 	// Connect to client, wait unitl connection established or thread stopped
-	while (this->stop_running.load() || !connected) {
+	while (!stop_running && !connected) {
 		try {
-			this->socket->accept(new_conn);
-			this->access_receive_queue.lock();
-			this->connected = true;
-			this->access_receive_queue.unlock();
+			socket->accept(new_conn);
+			connected = true;
 		}
 		catch (SockExcept & e) {
-			this->access_receive_queue.lock();
-			this->connected = false;
-			this->access_receive_queue.unlock();
+			connected = false;
 		}
 	}
 
 	// Receive data until the end
-	while (!this->stop_running.load()) {
+	while (!stop_running) {
 		try {
+            std::string message;
 			new_conn >> message;
-			this->access_receive_queue.lock();
-			this->receive_queue.push(message);
-			this->access_receive_queue.unlock();
+
+			size_t pos = 0;
+			std::string token;
+			while((pos = message.find(delimiter)) != std::string::npos) {
+			    token = message.substr(0, pos);
+                access_receive_queue.lock();
+                receive_queue.push(buffer + token);
+                access_receive_queue.unlock();
+                buffer = "";
+			}
+			buffer += message;
 		}
 		catch (SockExcept & e) {
 			// Some error occurred, try to reconnect
-			this->access_receive_queue.lock();
-			this->connected = false;
-			this->access_receive_queue.unlock();
+			connected = false;
 
 			try {
 				// First try to close socket in case this is not a loose of connection
-				this->socket->close();
+				socket->close();
 			}
 			catch (SockExcept & e) {
 				// Connection already close, this is fine, will try to reconnect next
 			}
 
 			// Now try to reconnect (accept incoming connection)
-			while (this->stop_running.load() || !this->connected) {
+			while (stop_running.load() || !connected) {
 				try {
-					this->socket->accept(new_conn);
-					this->access_receive_queue.lock();
-					this->connected = true;
-					this->access_receive_queue.unlock();
+					socket->accept(new_conn);
+					connected = true;
 				}
 				catch (SockExcept & e) {
-					this->access_receive_queue.lock();
-					this->connected = false;
-					this->access_receive_queue.unlock();
+					connected = false;
 				}
 			}
 		}

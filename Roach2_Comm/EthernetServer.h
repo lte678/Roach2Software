@@ -7,36 +7,30 @@
 
 #include <string>
 #include <iostream>
-
-#include <queue>
 #include <vector>
 
 // Threading related
-#include <thread>
-#include <deque>
 #include <mutex>
-#include <semaphore.h>
-#include <chrono>
-#include <condition_variable>
 #include <atomic>
-#include <math.h>
 
 class EthernetServer :
 	public Connection
 {
 private:
+    static constexpr int port_number = 12728;
+    static constexpr char delimiter = '\0';
+
 	ServerSock* socket;
-	bool connected;
-	int port_number = 12728;
+	std::atomic<bool> connected;
 	std::mutex access_receive_queue;
 	std::atomic<bool> stop_running;
 	std::queue<std::string> receive_queue;
 public:
 	EthernetServer();
 	int whichConnection();
-	bool isDataReceived();
+	bool messagesReceived();
 	bool isConnected();
-	std::vector<std::string> getReceivedValues();
+	std::vector<std::string> popMessage();
 	void run();
 };
 
