@@ -32,7 +32,9 @@ bool Socket::UDP_create() {
    m_sock = ::socket(AF_INET,SOCK_DGRAM,0);
    if (m_sock < 0) {
       throw SockExcept("Fehler beim Anlegen eines Socket");
+      return false;
    }
+   return true;
 }
 
 // Erzeugt die Bindung an die Serveradresse
@@ -66,7 +68,7 @@ bool Socket::listen() const {
   return true;
 }
 
-// Bearbeite die Verbindungswünsche von Clients
+// Bearbeite die Verbindungswï¿½nsche von Clients
 // Der Aufruf von accept() blockiert solange,
 // bis ein Client Verbindung aufnimmt
 bool Socket::accept ( Socket& new_socket ) const {
@@ -92,7 +94,7 @@ bool Socket::connect( const string host, const int port ) {
                &addr, sizeof(addr));
    }
    else {
-       /* Für den Fall der Fälle: Wandle den Servernamen  *
+       /* Fï¿½r den Fall der Fï¿½lle: Wandle den Servernamen  *
         * bspw. "localhost" in eine IP-Adresse um         */
        host_info = gethostbyname( host.c_str() );
        if (NULL == host_info) {
@@ -187,10 +189,10 @@ int Socket::UDP_recv( string& s ) const {
    } 
 }
 
-// Aus Portabiltätsgründen vorhanden
+// Aus Portabiltï¿½tsgrï¿½nden vorhanden
 void Socket::cleanup() const { }
 
-// Socket schließen
+// Socket schlieï¿½en
 bool Socket::close() const {
    ::close(m_sock);
    cleanup();

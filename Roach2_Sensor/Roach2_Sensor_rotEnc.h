@@ -10,8 +10,12 @@
 #ifndef ROT_AS5601_H
 #define ROT_AS5601_H
 
-#include "Roach2_Sensor_Sensor.h"
+#ifndef LOCAL_DEV
 #include <wiringPiI2C.h>
+#endif
+
+#include "Roach2_Sensor_Sensor.h"
+
 #include <bitset>
 #include <iostream>
 #include <chrono>

@@ -5,6 +5,7 @@ Actuator_GoPro::Actuator_GoPro() : Actuator()
     std::cout << "[Actuator|GoPro] Initializing" << std::endl;
 	this->gopro_enabled = false;
 
+#ifndef LOCAL_DEV
 	// Unexport GPIO pins
 	int fd_0 = open("/sys/class/gpio/unexport", O_WRONLY);
 	if (fd_0 != -1) {
@@ -86,10 +87,12 @@ Actuator_GoPro::Actuator_GoPro() : Actuator()
 		// GoPro signals are low-active, so set to high
 		this->disable();
 	}
+#endif
 }
 
 Actuator_GoPro::~Actuator_GoPro()
 {
+#ifndef LOCAL_DEV
 	close(this->fd_gopro1);
 	close(this->fd_gopro2);
 	close(this->fd_camsupply);
@@ -107,6 +110,7 @@ Actuator_GoPro::~Actuator_GoPro()
 		res0 = write(fd_0, "3", 2); // GPIO lights 2 OBC pin
 		close(fd_0);
 	}
+#endif
 }
 
 int Actuator_GoPro::getActutator_type()
@@ -116,6 +120,7 @@ int Actuator_GoPro::getActutator_type()
 
 void Actuator_GoPro::enable()
 {
+#ifndef LOCAL_DEV
 	write(this->fd_camsupply, "1", 1);
 	usleep(10000);
 
@@ -181,13 +186,14 @@ void Actuator_GoPro::enable()
 	close(this->fd_gopro2);
 	this->fd_gopro1 = open("/sys/class/gpio/gpio0/value", O_RDONLY);
 	this->fd_gopro2 = open("/sys/class/gpio/gpio1/value", O_RDONLY);
+#endif
 
 	this->gopro_enabled = true;
 }
 
 void Actuator_GoPro::disableGoPro() {
-
 	if (this->gopro_enabled) {
+#ifndef LOCAL_DEV
 
 		// Control direction: set to input
 		int fd_1 = open("/sys/class/gpio/gpio0/direction", O_WRONLY);
@@ -242,14 +248,15 @@ void Actuator_GoPro::disableGoPro() {
 
 		this->fd_gopro1 = open("/sys/class/gpio/gpio0/value", O_RDONLY);
 		this->fd_gopro2 = open("/sys/class/gpio/gpio1/value", O_RDONLY);
-
+#endif
 		this->gopro_enabled = false;
 	}
 }
 
 void Actuator_GoPro::disable()
 {
-	write(this->fd_camsupply, "1", 1);
+#ifndef LOCAL_DEV
+    write(this->fd_camsupply, "1", 1);
 	write(this->fd_lights1, "0", 1);
 	write(this->fd_lights2, "0", 1);
 
@@ -262,4 +269,5 @@ void Actuator_GoPro::disable()
 	this->fd_camsupply = open("/sys/class/gpio/gpio200/value", O_WRONLY);
 	this->fd_lights1 = open("/sys/class/gpio/gpio2/value", O_WRONLY);
 	this->fd_lights2 = open("/sys/class/gpio/gpio3/value", O_WRONLY);
+#endif
 }

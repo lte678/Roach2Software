@@ -12,7 +12,7 @@ int EthernetServer::whichConnection()
 	return CONNECTION_TYPES::ETHERNET;
 }
 
-bool EthernetServer::messagesReceived()
+bool EthernetServer::isDataReceived()
 {
 	access_receive_queue.lock();
 	bool empty = receive_queue.empty();
@@ -26,15 +26,14 @@ bool EthernetServer::isConnected()
 	return connected;
 }
 
-std::vector<std::string> EthernetServer::popMessage()
+std::string EthernetServer::popMessage()
 {
-	std::vector<std::string> copied;
+	std::string copied;
 
 	access_receive_queue.lock();
 	// Copies all received string to vector and deletes the queue content
 	while (!receive_queue.empty()) {
-		std::string element = receive_queue.front();
-		copied.push_back(element);
+		copied = receive_queue.front();
 		receive_queue.pop();
 	}
 	access_receive_queue.unlock();

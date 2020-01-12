@@ -207,6 +207,8 @@ bool UART::isData_received()
 
 UART::UART()
 {
+    std::cout << "[UART] Initializing parameters" << std::endl;
+
 	// Init
 	this->numberDataReceived = 0;
 	this->numberPackagesReceived = 0;
@@ -220,12 +222,13 @@ UART::UART()
 	// Try to open serial port
 	// Normally: /dev/ttyUSB0 or similar
 	serial_port = open(this->port, O_RDWR);
+    std::cout << "[UART] Port acquired!" << std::endl;
 
 	// Check if open was done
 	// Check also that use is in dialout group: sudo adduser $USER dialout
 	if (serial_port < 0) {
 		// Error occured
-		//printf("Error %i from open: %s\n", errno, strerror(errno));
+        std::cout << "[UART] Error opening serial port!" << std::endl;
 	}
 	else {
 		// Configure serial port
@@ -260,6 +263,7 @@ UART::UART()
 		}
 		else {
 			// Configuration load failed
+            std::cout << "[UART] Failed to set configuration" << std::endl;
 		}
 	}
 }

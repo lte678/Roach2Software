@@ -6,9 +6,13 @@
 #ifndef IMU_TEST_BNO055_H
 #define IMU_TEST_BNO055_H
 
+#ifndef LOCAL_DEV
+#include <wiringPiI2C.h>
+#endif
+
 #include "../Roach2_DataStore/data.h"
 #include "Roach2_Sensor_Sensor.h"
-#include <wiringPiI2C.h>
+
 #include <bitset>
 #include <iostream>
 #include <chrono>

@@ -10,8 +10,11 @@
 #ifndef PWM_PCA985_H
 #define PWM_PCA985_H
 
-#include "Actuator.h"
+#ifndef LOCAL_DEV
 #include <wiringPiI2C.h>
+#endif
+
+#include "Actuator.h"
 #include "../Roach2_DataStore/data.h"
 #include <bitset>
 #include <math.h>

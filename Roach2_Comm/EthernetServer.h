@@ -8,6 +8,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <queue>
 
 // Threading related
 #include <mutex>
@@ -28,9 +29,9 @@ private:
 public:
 	EthernetServer();
 	int whichConnection();
-	bool messagesReceived();
+	bool isDataReceived();
 	bool isConnected();
-	std::vector<std::string> popMessage();
+	std::string popMessage();
 	void run();
 };
 

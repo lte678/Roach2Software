@@ -86,34 +86,6 @@ int PWM_PCA985::getActutator_type()
 	return ACTUATOR_LIST::ENGINE_PWM;
 }
 
-
-int PWM_PCA985::write8(int reg, int data) {
-	int w8 = wiringPiI2CWriteReg8(this->deviceHandle, reg, data);
-	return w8;//
-}
-
-int PWM_PCA985::read8(int reg) {
-	//int readAcht = 0;  I2C_SMBUS_READ_BYTE_DATA(this->deviceHandle, (u_int8_t)reg);
-	//std::cout << "read8 device handle: " << this->deviceHandle << std::endl;
-	int res = wiringPiI2CReadReg8(this->deviceHandle, reg);
-	return res;//readAcht;
-}
-
-int PWM_PCA985::write16(int reg, int data) {
-	int w16 = wiringPiI2CWriteReg16(this->deviceHandle, reg, data);
-	return w16;// 
-}
-
-int PWM_PCA985::read16(int reg) {
-	int r16 = wiringPiI2CReadReg16(this->deviceHandle, reg);
-	return r16;// 
-}
-
-int PWM_PCA985::i2cConnect(const int dev) {
-	int fd = open("/dev/i2c-0", O_RDWR);
-	int con = ioctl(fd, I2C_SLAVE, dev);
-	return fd;
-}
 int PWM_PCA985::binaryToDecimal(int number)
 {
 	int num = number;
@@ -136,10 +108,11 @@ int PWM_PCA985::binaryToDecimal(int number)
 }
 
 
+#ifndef LOCAL_DEV
 int PWM_PCA985::simpleRead()
 {
 	int simpRead = wiringPiI2CRead(this->deviceHandle);// i2c_smbus_read_byte(this->deviceHandle);
-	return simpRead; //
+	return simpRead;
 }
 
 int PWM_PCA985::simpleWrite(int data)
@@ -147,3 +120,58 @@ int PWM_PCA985::simpleWrite(int data)
 	int sW = wiringPiI2CWrite(this->deviceHandle, data);
 	return sW;// 
 }
+
+int PWM_PCA985::write8(int reg, int data) {
+    int w8 = wiringPiI2CWriteReg8(this->deviceHandle, reg, data);
+    return w8;
+}
+
+int PWM_PCA985::read8(int reg) {
+    int res = wiringPiI2CReadReg8(this->deviceHandle, reg);
+    return res;
+}
+
+int PWM_PCA985::write16(int reg, int data) {
+    int w16 = wiringPiI2CWriteReg16(this->deviceHandle, reg, data);
+    return w16;
+}
+
+int PWM_PCA985::read16(int reg) {
+    int r16 = wiringPiI2CReadReg16(this->deviceHandle, reg);
+    return r16;
+}
+
+int PWM_PCA985::i2cConnect(const int dev) {
+    int fd = open("/dev/i2c-0", O_RDWR);
+    int con = ioctl(fd, I2C_SLAVE, dev);
+    return fd;
+}
+#else
+int PWM_PCA985::simpleRead() {
+    return 0;
+}
+
+int PWM_PCA985::simpleWrite(int data) {
+    return 0;
+}
+
+int PWM_PCA985::write8(int reg, int data) {
+    return 0;
+}
+
+int PWM_PCA985::read8(int reg) {
+    return 0;
+}
+
+int PWM_PCA985::write16(int reg, int data) {
+    return 0;
+}
+
+int PWM_PCA985::read16(int reg) {
+    return 0;
+}
+
+int PWM_PCA985::i2cConnect(const int dev) {
+    return 0;
+}
+#endif

@@ -10,8 +10,12 @@
 #ifndef TEMP_LM75B_H
 #define TEMP_LM75B_H
 
-#include "Roach2_Sensor_Sensor.h"
+#ifndef LOCAL_DEV
 #include <wiringPiI2C.h>
+#endif
+
+#include "Roach2_Sensor_Sensor.h"
+
 #include <bitset>
 #include <iostream>
 #include <chrono>

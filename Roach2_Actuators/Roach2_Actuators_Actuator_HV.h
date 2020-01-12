@@ -3,6 +3,8 @@
 
 #include "Actuator.h"
 
+#include <iostream>
+
 class Actuator_HV : public Actuator
 {
 public:

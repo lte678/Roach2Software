@@ -9,9 +9,13 @@
 #ifndef ADC_MCP3428_HEADER
 #define ADC_MCP3428_HEADER
 
+#ifndef LOCAL_DEV
+#include <wiringPiI2C.h>
+#endif
+
 #include "Roach2_Sensor_Sensor.h"
 #include "../Roach2_DataStore/data.h"
-#include <wiringPiI2C.h>
+
 #include <bitset>
 #include <iostream>
 #include <chrono>

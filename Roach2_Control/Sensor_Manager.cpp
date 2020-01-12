@@ -85,6 +85,8 @@ Sensor* Sensor_Manager::getSensorHandle(SensorType sensor_id) {
         }
     }
     sensor_lock.unlock();
+
+    return nullptr;
 }
 
 void Sensor_Manager::attachSensor(Sensor* sensor) {

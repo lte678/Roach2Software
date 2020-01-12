@@ -7,7 +7,6 @@
  * */
 
 #include "FSM_OBC.h"
-//#include <wiringPi.h>
 
 // Ignore infinite loop in static analysis
 #pragma clang diagnostic ignored "-Wmissing-noreturn"

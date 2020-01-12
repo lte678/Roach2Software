@@ -8,10 +8,12 @@
 #ifndef Sensor_H
 #define Sensor_H
 
-#include "../Roach2_DataStore/data.h"
-//#include "wiringPiSPI.h"
+#ifndef LOCAL_DEV
 #include <wiringPiI2C.h>
-//#include <wiringPi.h>
+#endif
+
+#include "../Roach2_DataStore/data.h"
+
 #include <bitset>
 #include <iostream>
 #include <chrono>

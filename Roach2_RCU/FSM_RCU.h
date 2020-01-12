@@ -29,7 +29,7 @@ public:
 	void rocketSignalReceived(int signal_source);
 	void packageReceivedRexus(uint64_t message, int msg_length);
 	void packageReceivedEthernet();
-	void packageReceivedEthernet_msg(std::string command);
+	void packageReceivedEthernet_msg(const std::string& command);
 	void simulationModeUpdate();
 };
 

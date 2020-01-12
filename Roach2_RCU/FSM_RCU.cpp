@@ -1,5 +1,9 @@
 #include "FSM_RCU.h"
 
+// Ignore infinite loop in static analysis
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
+
+
 FSM_RCU::FSM_RCU()
 {
 	// Init state and trigger selftest through run method
@@ -23,22 +27,17 @@ FSM_RCU::FSM_RCU()
 
 	// System main loop
 	while (1) {
-		
 		// Check if command from OBC incoming
-		if (this->eth_server->isConnected()) {
-			if (this->eth_server->isDataReceived()) {
-				std::vector<std::string> msgs = this->eth_server->getReceivedValues();
-				for (int i = 0; i < msgs.size(); i++) {
-					std::string message = msgs[i];
-					this->packageReceivedEthernet_msg(message);
-				}
+		if (eth_server->isConnected()) {
+			while (eth_server->isDataReceived()) {
+				packageReceivedEthernet_msg(eth_server->popMessage());
 			}
 		}
 
 		// FSM control
-		this->run();
+		run();
 
-		usleep(100);
+		usleep(10000);
 	}
 }
 
@@ -48,7 +47,7 @@ FSM_RCU::~FSM_RCU()
 	
 }
 
-void FSM_RCU::triggerActuators(void) 
+void FSM_RCU::triggerActuators()
 {
 	// Drive forward
 
@@ -161,26 +160,27 @@ void FSM_RCU::packageReceivedEthernet()
 {
 }
 
-void FSM_RCU::packageReceivedEthernet_msg(std::string command)
+void FSM_RCU::packageReceivedEthernet_msg(const std::string& command)
 {
+    std::cout << command << std::endl;
 	Data_super* msg;
 
-	if (command.compare("RCU_FSM_STANDBY") == 0) {
+	if (command == "RCU_FSM_STANDBY") {
 		this->currentState = (int)FSM_STATES_RCU::STANDBY;
 	}
-	else if (command.compare("RCU_FSM_DRIVE_FORWARD") == 0) {
+	else if (command == "RCU_FSM_DRIVE_FORWARD") {
 		this->currentState = (int)FSM_STATES_RCU::DRIVE_FORWARD;
 	}
-	else if (command.compare("RCU_FSM_IDLE") == 0) {
+	else if (command == "RCU_FSM_IDLE") {
 		this->currentState = (int)FSM_STATES_RCU::IDLE;
 	}
-	else if (command.compare("RCU_DRIVE_FORWARD") == 0) {
+	else if (command == "RCU_DRIVE_FORWARD") {
 		this->pwm->enable();
 	}
-	else if (command.compare("RCU_STOP_DRIVE_FORWARD") == 0) {
+	else if (command == "RCU_STOP_DRIVE_FORWARD") {
 		this->pwm->disable();
 	}
-	else if (command.compare("rcu_check_alive") == 0) {
+	else if (command == "rcu_check_alive") {
 		msg = new Data_simple("ALIVE");
 		this->eth_client->send(msg);
 	}

@@ -4,6 +4,7 @@ Actuator_Rover::Actuator_Rover()
 {
     std::cout << "[Actuator|Rover] Initializing" << std::endl;
 
+#ifndef LOCAL_DEV
 	// Unexport GPIO pin
 	int fd_0 = open("/sys/class/gpio/unexport", O_WRONLY);
 	if (fd_0 != -1) {
@@ -26,11 +27,13 @@ Actuator_Rover::Actuator_Rover()
 			// Error!
 		}
 	}
-		this->fd_actuator_rover = open("/sys/class/gpio/gpio6/value", O_WRONLY);
+	this->fd_actuator_rover = open("/sys/class/gpio/gpio6/value", O_WRONLY);
+#endif
 }
 
 Actuator_Rover::~Actuator_Rover()
 {
+#ifndef LOCAL_DEV
 	close(this->fd_actuator_rover);
 
 	// Unexport GPIO pin
@@ -39,6 +42,7 @@ Actuator_Rover::~Actuator_Rover()
 		int res0 = write(fd_0, "6", 2); // GPIO Rover Power enable OBC pin
 		close(fd_0);
 	}
+#endif
 }
 
 int Actuator_Rover::getActutator_type()
@@ -48,6 +52,7 @@ int Actuator_Rover::getActutator_type()
 
 void Actuator_Rover::enable()
 {
+#ifndef LOCAL_DEV
 	int buffer = 49;
 
 	// Write "1" to output
@@ -55,10 +60,12 @@ void Actuator_Rover::enable()
 	
 	close(this->fd_actuator_rover);
 	this->fd_actuator_rover = open("/sys/class/gpio/gpio6/value", O_WRONLY);
+#endif
 }
 
 void Actuator_Rover::disable()
 {
+#ifndef LOCAL_DEV
 	int buffer = 48;
 
 	// Write "0" to output
@@ -66,4 +73,5 @@ void Actuator_Rover::disable()
 
 	close(this->fd_actuator_rover);
 	this->fd_actuator_rover = open("/sys/class/gpio/gpio6/value", O_WRONLY);
+#endif
 }

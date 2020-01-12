@@ -9,8 +9,6 @@
 #ifndef UART_HEADER_FILE
 #define UART_HEADER_FILE
 
-#include <stdio.h>
-#include <string.h>
 
  // Linux headers
 #include <fcntl.h> // Contains file controls like O_RDWR
@@ -50,7 +48,11 @@ private:
 
 	const int max_number_packages_send_at_once = 1000; // Max number of packages to send at once
 	const int rx_loop_wait = 1; // Time to wait after each check of RX buffer
-	char* port = "/dev/ttyS1";
+#ifndef LOCAL_DEV
+	const char* port = "/dev/ttyS1";
+#else
+	const char* port = "/dev/ttyS0";
+#endif
 	struct termios tty;
 	int baud;
 	int serial_port;

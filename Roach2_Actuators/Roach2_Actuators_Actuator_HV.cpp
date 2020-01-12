@@ -4,6 +4,7 @@ Actuator_HV::Actuator_HV() : Actuator()
 {
     std::cout << "[Actuator|HV] Initializing" << std::endl;
 
+#ifndef LOCAL_DEV
 	// Unexport GPIO pins
 	int fd_0 = open("/sys/class/gpio/unexport", O_WRONLY);
 	if (fd_0 != -1) {
@@ -43,10 +44,12 @@ Actuator_HV::Actuator_HV() : Actuator()
 		this->fd_hv_left = open("/sys/class/gpio/gpio201/value", O_WRONLY);
 		this->fd_hv_right = open("/sys/class/gpio/gpio203/value", O_WRONLY);
 	}
+#endif
 }
 
 Actuator_HV::~Actuator_HV()
 {
+#ifndef LOCAL_DEV
 	close(this->fd_hv_left);
 	close(this->fd_hv_right);
 
@@ -57,6 +60,7 @@ Actuator_HV::~Actuator_HV()
 		res0 = write(fd_0, "203", 3); // GPIO HV right RCU pin
 		close(fd_0);
 	}
+#endif
 }
 
 int Actuator_HV::getActutator_type()
@@ -66,6 +70,7 @@ int Actuator_HV::getActutator_type()
 
 void Actuator_HV::enable()
 {
+#ifndef LOCAL_DEV
 	int buffer = 49;
 
 	// Write "1" to output
@@ -77,10 +82,12 @@ void Actuator_HV::enable()
 	close(this->fd_hv_right);
 	this->fd_hv_left = open("/sys/class/gpio/gpio201/value", O_WRONLY);
 	this->fd_hv_right = open("/sys/class/gpio/gpio203/value", O_WRONLY);
+#endif
 }
 
 void Actuator_HV::disable()
 {
+#ifndef LOCAL_DEV
 	int buffer = 48;
 
 	// Write "1" to output
@@ -92,4 +99,5 @@ void Actuator_HV::disable()
 	close(this->fd_hv_right);
 	this->fd_hv_left = open("/sys/class/gpio/gpio201/value", O_WRONLY);
 	this->fd_hv_right = open("/sys/class/gpio/gpio203/value", O_WRONLY);
+#endif
 }

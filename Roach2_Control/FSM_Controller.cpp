@@ -53,13 +53,21 @@ void FSM_Controller::initThreads(REBOOT_TARGET target)
 	if (target == REBOOT_TARGET::OBC) {
 		// OBC connects to RCU
         std::cout << "[OBC Firmware] Connecting to RCU" << std::endl;
+#ifndef LOCAL_DEV
 		eth_client = new EthernetClient("192.168.100.100");
+#else
+        eth_client = new EthernetClient("rcupi");
+#endif
 		eth_client_thread = std::thread(&EthernetClient::run, eth_client);
 	}
 	else {
 		// RCU connects to OBC
         std::cout << "[RCU Firmware] Connecting to OBC" << std::endl;
-		eth_client = new EthernetClient("192.168.100.101");
+#ifndef LOCAL_DEV
+        eth_client = new EthernetClient("192.168.100.101");
+#else
+        eth_client = new EthernetClient("obcpi");
+#endif
 		eth_client_thread = std::thread(&EthernetClient::run, eth_client);
 	}
 
