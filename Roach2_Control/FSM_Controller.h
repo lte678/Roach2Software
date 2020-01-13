@@ -37,6 +37,8 @@ enum class REBOOT_TARGET {
 
 class FSM_Controller
 {
+private:
+	bool isSimMode = false;
 protected:
 	int currentState;
 	int lastState;
@@ -53,15 +55,16 @@ protected:
 	int numberSensors;
 	int numberActuators;
 	int numberData;
-	bool isSimMode;
 	Data_super* logs;
 protected:
 	void triggerActuators(void);
 	void saveData(void);
-	void enableSimMode(void);
-	void disableSimMode(void);
 	Data* readSensor(SensorType sensorId);
 	void initThreads(REBOOT_TARGET target);
+	virtual void simulationModeUpdate() = 0;
+	void enableSimMode();
+	void disableSimMode();
+	bool isSimModeEnabled();
 public:
 	virtual void run() = 0;
 };

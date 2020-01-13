@@ -17,20 +17,9 @@ void FSM_Controller::saveData()
 
 }
 
-/*
-* @brief Enables simulation mode, this information will be passed to all registered actuators and sensors
-*/
-void FSM_Controller::enableSimMode(void)
+bool FSM_Controller::isSimModeEnabled()
 {
-	isSimMode = true;
-}
-
-/*
- * @brief Disables simulation mode, this information will be passed to all registered actuators and sensors
- */
-void FSM_Controller::disableSimMode(void)
-{
-	isSimMode = false;
+	return this->isSimMode;
 }
 
 Data* FSM_Controller::readSensor(SensorType sensorId)
@@ -100,4 +89,26 @@ void FSM_Controller::initThreads(REBOOT_TARGET target)
 	}
 
 	sensor_thread = std::thread(&Sensor_Manager::run, sensor_manager);
+}
+
+/**
+ * @brief Enables the simulation mode. In case it was disabled before, the simulationModeUpdate method is called.
+*/
+void FSM_Controller::enableSimMode() {
+    // Only call simulationModeUpdate if sim mode property changed
+    if (!isSimMode) {
+        isSimMode = true;
+        simulationModeUpdate();
+    }
+}
+
+/**
+ * @brief Disables the simulation mode. In case it was disabled before, the simulationModeUpdate method is called.
+*/
+void FSM_Controller::disableSimMode() {
+	// Only call simulationModeUpdate if sim mode property changed
+	if (isSimMode) {
+        isSimMode = false;
+        simulationModeUpdate();
+	}
 }

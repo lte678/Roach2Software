@@ -30,6 +30,7 @@ public:
 	void packageReceivedRexus(uint64_t message, int msg_length);
 	void packageReceivedEthernet();
 	void packageReceivedEthernet_msg(std::string command);
+	void simulationModeUpdate();
 };
 
 #endif

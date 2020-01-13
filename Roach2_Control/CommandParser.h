@@ -15,6 +15,12 @@ enum class COMMANDS_OPERATIONAL {
 	rcu_read_sensor  = 9,
 	obc_rcu_online = 11,
 	obc_rocket_signal_status = 10,
+	obc_sim_control = 11,
+	obc_rcu_online = 12,
+	obc_obc_state_change = 13,
+	obc_rcu_state_change = 14,
+	obc_restart_obc = 15,
+	obc_eth_stat = 16,
 	NUMBER_ELEMENTS = 12
 };
 
@@ -37,7 +43,13 @@ enum class COMMANDS_DEBUG {
 	rcu_sensor_acq_on = 15,
 	rcu_sensor_acq_off = 16,
 	obc_read_sensor = 17,
-	NUMBER_ELEMENTS = 18
+	obc_light_control = 18,
+	obc_gopro_control = 19,
+	obc_check_eth = 20,
+	rcu_lights_on = 21,
+	rcu_lights_off = 22,
+	obc_sim_control = 23,
+	NUMBER_ELEMENTS = 24
 };
 
 enum class COMMANDS_SIM {

@@ -160,11 +160,13 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 			msg = new Data_simple("RCU_DRIVE_FORWARD");
 			this->eth_client->send(msg);
 		break;
+
 		case (int)COMMANDS_DEBUG::obc_drive_stop:
 			// OBC command rover to stop driving
 			msg = new Data_simple("RCU_STOP_DRIVE_FORWARD");
 			this->eth_client->send(msg);
 		break;
+
 		case (int)COMMANDS_DEBUG::obc_next_state:
 			// OBC change state, only IDLE to EXPERIMENT possible
 			if (this->currentState == (int)FSM_STATES_OBC::IDLE) {
@@ -174,6 +176,7 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 			send_data[0] = new Data_simple(cmd, this->currentState);
 			this->debugLink->sendData(send_data, 1);
 		break;
+
 		case (int)COMMANDS_DEBUG::obc_prev_state:
 			// OBC change state, only EXPERIMENT to IDLE possible
 			if (this->currentState == (int)FSM_STATES_OBC::EXPERIMENT) {
@@ -183,14 +186,17 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 			send_data[0] = new Data_simple(cmd, this->currentState);
 			this->debugLink->sendData(send_data, 1);
 		break;
+
 		case (int)COMMANDS_DEBUG::obc_rcu_off:
 			// Switch RCU/rover off
 			this->enableRoverPower->enable();
 		break;
+
 		case (int)COMMANDS_DEBUG::obc_rcu_on:
 			// Switch RCU/rover on
 			this->enableRoverPower->disable();
 		break;
+
 		case (int)COMMANDS_DEBUG::obc_read_sensor:
 			{
 				// Read the sensor with the given sensor id
@@ -210,15 +216,29 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 				}
 			}
 		break;
+
 		// Control sensor and system status information downstream
 		case (int)COMMANDS_DEBUG::obc_sensor_acq_off:
 			// Switch sensor acquisiton off
 			this->enableDownstream = false;
 		break;
+
 		case (int)COMMANDS_DEBUG::obc_sensor_acq_on:
 			// Switch sensor acquisition on
 			this->enableDownstream = true;
 		break;
+
+		// Simulation control
+        case (int)COMMANDS_DEBUG::obc_sim_control:
+            if (para == 1) {
+                // enable simulation mode
+                this->enableSimMode();
+            }
+            else {
+                // disable simulation mode
+                this->disableSimMode();
+            }
+            break;
 	}
 
 	// Sim commands
@@ -360,4 +380,27 @@ void FSM_OBC::packageReceivedRexus(uint64_t message, int msg_length)
 void FSM_OBC::packageReceivedEthernet()
 {
 	int i = 0;
+}
+
+/**
+ * @brief Called if a change to the simulation mode properties occurs
+*/
+void FSM_OBC::simulationModeUpdate() {
+    Data_simple* msg;
+
+    if (this->isSimModeEnabled()) {
+        // Update all actuators: on OBC side nothing to be done
+
+        // Send update to RCU
+        msg = new Data_simple("RCU_SIM_MODE_ENABLE");
+        this->eth_client->send(msg);
+    }
+    else {
+        // Disable sim mode
+
+        // Send update to RCU
+        msg = new Data_simple("RCU_SIM_MODE_DISABLE");
+        this->eth_client->send(msg);
+    }
+
 }

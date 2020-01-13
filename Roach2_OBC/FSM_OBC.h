@@ -43,12 +43,13 @@ public:
 	FSM_OBC();
 	~FSM_OBC();
 	void run() override;
-	void triggerActuators(void);
+	void triggerActuators();
 	void packageReceivedUART(uint64_t message, int msg_length) override;
 	void stateMachine();
 	void packageReceivedRexus(uint64_t message, int msg_length) override;
 	void packageReceivedEthernet() override;
 	void rocketSignalReceived(int) override {};
+	void simulationModeUpdate();
 };
 
 #endif
