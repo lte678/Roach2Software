@@ -32,7 +32,7 @@ std::string EthernetServer::popMessage()
 
 	access_receive_queue.lock();
 	// Copies all received string to vector and deletes the queue content
-	while (!receive_queue.empty()) {
+	if (!receive_queue.empty()) {
 		copied = receive_queue.front();
 		receive_queue.pop();
 	}
@@ -67,10 +67,12 @@ void EthernetServer::run()
             std::string message;
 			new_conn >> message;
 
+
 			size_t pos = 0;
 			std::string token;
 			while((pos = message.find(delimiter)) != std::string::npos) {
 			    token = message.substr(0, pos);
+                message.erase(0, pos + 1);
                 access_receive_queue.lock();
                 receive_queue.push(buffer + token);
                 access_receive_queue.unlock();
@@ -81,20 +83,14 @@ void EthernetServer::run()
 		catch (SockExcept & e) {
 			// Some error occurred, try to reconnect
 			connected = false;
-
-			try {
-				// First try to close socket in case this is not a loose of connection
-				socket->close();
-			}
-			catch (SockExcept & e) {
-				// Connection already close, this is fine, will try to reconnect next
-			}
+            std::cout << "[Ethernet Server] Disconnected!" << std::endl;
 
 			// Now try to reconnect (accept incoming connection)
-			while (stop_running.load() || !connected) {
+			while (!stop_running && !connected) {
 				try {
 					socket->accept(new_conn);
 					connected = true;
+                    std::cout << "[Ethernet Server] Reconnected!" << std::endl;
 				}
 				catch (SockExcept & e) {
 					connected = false;
@@ -102,4 +98,21 @@ void EthernetServer::run()
 			}
 		}
 	}
+}
+
+Data_Raw* EthernetServer::parseBinary(std::string msg) {
+    if (msg.substr(0, 4) == "bin:") {
+        msg.erase(0, 4);
+
+        Data_Raw *data = new Data_Raw();
+
+        while (msg.length() >= 16) {
+            uint64_t packet = strtoull(msg.substr(0, 16).c_str(), nullptr,16);
+            data->addElement(packet);
+            msg.erase(0, 16);
+        }
+
+        return data;
+    }
+    return nullptr;
 }

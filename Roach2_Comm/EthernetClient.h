@@ -3,10 +3,13 @@
 
 #include "../Roach2_DataStore/data.h"
 #include "../Roach2_DataStore/Data_super.h"
+#include "../Roach2_Control/Defines.h"
+
 #include "clientsock.h"
 
 #include <string>
 #include <iostream>
+#include <iomanip>
 
 #include <queue>
 
@@ -19,6 +22,7 @@
 #include <condition_variable>
 #include <atomic>
 #include <math.h>
+#include <sstream>
 
 class EthernetClient :
 	public Connection
@@ -31,8 +35,9 @@ private:
 	std::atomic<bool> stop_running;
 	ClientSock* socket;
 	std::queue<std::string> send_queue;
+	PLATFORM origin;
 public:
-	EthernetClient(std::string ip);
+	EthernetClient(std::string ip, PLATFORM _origin);
 	int whichConnection();
 	bool isConnected();
 	void run();

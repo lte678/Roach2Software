@@ -1,8 +1,9 @@
 #include "EthernetClient.h"
 
 
-EthernetClient::EthernetClient(std::string ip)
+EthernetClient::EthernetClient(std::string ip, PLATFORM _origin)
 {
+    origin = _origin;
 	connected = false;
 	this->ip = ip;
 }
@@ -60,6 +61,7 @@ void EthernetClient::run()
 			this->access_send_queue.lock();
 			this->connected = false;
 			this->access_send_queue.unlock();
+            std::cout << "[Ethernet Client] Disconnected!" << std::endl;
 			try {
 				// First try to close socket in case this is not a loose of connection
 				this->socket->close();
@@ -72,29 +74,38 @@ void EthernetClient::run()
 			delete this->socket;
 
 			// Try to reconnect
-			while (this->stop_running.load() || !this->connected) {
+			while (!this->stop_running.load() && !this->connected) {
 				try {
 					this->socket = new ClientSock(this->ip, this->port_number);
+                    std::cout << "[Ethernet Client] Reconnected!" << std::endl;
 					this->access_send_queue.lock();
 					this->connected = true;
 					this->access_send_queue.unlock();
 				}
 				catch (SockExcept & e) {
+				    std::cout << e.get_SockExcept() << std::endl;
 					this->access_send_queue.lock();
 					this->connected = false;
 					this->access_send_queue.unlock();
 				}
-				usleep(100);
+				usleep(10000);
 			}
 		}
-		usleep(10);
+		usleep(1000);
 	}
 }
 
 
 void EthernetClient::send(Data_super* msg) {
+    std::vector<uint64_t> packets = msg->convert_to_serial(origin);
+    std::stringstream msg_string;
+    msg_string << "bin:";
+    for (uint64_t packet : packets) {
+        msg_string << std::setw(16) << std::setfill('0') << std::hex << packet;
+    }
+    msg_string << ";";
+
 	this->access_send_queue.lock();
-	std::string msg_string = msg->get_string_ethernet();
-	this->send_queue.push(msg_string);
+	this->send_queue.push(msg_string.str());
 	this->access_send_queue.unlock();
 }

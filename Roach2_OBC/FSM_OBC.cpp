@@ -18,12 +18,11 @@ FSM_OBC::FSM_OBC()
 	sensor_ids.push_back(SensorType::IMU); // sensors: IMU, ARM Info, Temp75B
 	sensor_ids.push_back(SensorType::SYS_INFO);
     sensor_ids.push_back(SensorType::TEMP_SENSOR);
-	std::vector<Data*> sensor_data;
 
 	// Init state and trigger selftest through run method
 	this->currentState = (int)FSM_STATES_OBC::IDLE;
 	this->lastState = -1;
-	this->enableDownstream = false; // Disable automically sending sensor and status information downstream
+    // Disable automically sending sensor and status information downstream
 
 	// Rover control
 	this->enableRoverPower = new Actuator_Rover();
@@ -32,7 +31,7 @@ FSM_OBC::FSM_OBC()
 	this->enableRoverPower->enable();
 
 	// Init tasks running in separate threads (communication, sensors)
-	this->initThreads(REBOOT_TARGET::OBC);
+	this->initThreads(PLATFORM::OBC);
 
 	// GoPro control
 	this->enableGoPro = new Actuator_GoPro();
@@ -53,61 +52,75 @@ FSM_OBC::~FSM_OBC()
 }
 
 void FSM_OBC::run() {
-    int counter_sensor_downlink = 0;
-
-    std::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
+    startTime = std::chrono::high_resolution_clock::now();
 
     while (true) {
         // Receive UART link data
-        Data_simple* data = debugLink->getData();
+        Data_simple *data = debugLink->getData();
         if (data != nullptr) {
-            packageReceivedUART(data->convert_to_serial()[0], data->convert_to_serial_array_length());
+            packageReceivedUART(data->convert_to_serial(PLATFORM::GS)[0], data->convert_to_serial_array_length());
+            delete data;
         }
 
         //  --- FSM control ---
         // Ehemalige run funktion
         stateMachine();
 
-        // Update system time first
-        time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
-
-        // Send sensor updates on downlink with 5Hz
-        if (std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime).count() > 0.2) {
-            startTime = startTime + std::chrono::high_resolution_clock::duration(std::chrono::milliseconds (200));
-            counter_sensor_downlink = 0;
-
-            Data_super* send_data[1];
-
-            // Send RCU connection status
-            if (this->eth_client->isConnected()) {
-                send_data[0] = new Data_simple(0x0B, 1);
-                debugLink->sendData(send_data, 1);
+        // Handle ethernet messages from rover
+        while (eth_server->isDataReceived()) {
+            std::string msg = eth_server->popMessage();
+            //std::cout << "Ethernet message: " << msg << std::endl;
+            Data_super *binMsg[1];
+            binMsg[0] = EthernetServer::parseBinary(msg);
+            if (binMsg[0]) {
+                // Forward binary data to ground station
+                debugLink->sendData(binMsg, 1);
             }
-            else {
-                send_data[0] = new Data_simple(0x0B, 0);
-                debugLink->sendData(send_data, 1);
-            }
-
-            // Send sensor status update
-            for (SensorType sensor : sensor_ids) {
-                // Send sensor status, sensors: IMU, ARM Info, Temp75B
-                send_data[0] = readSensor(sensor);
-
-                if (send_data[0] != nullptr) {
-                    debugLink->sendData(send_data, 1);
-                }
-            }
-
-            // Send RXSM signal status
-            sendRXSMSignalUpdate_Downlink();
 
         }
-        usleep(10000); // Main loop running with 100kHz
+
+        // Send sensor updates on downlink with 5Hz
+        sensorDownlink();
+
+        usleep(10000); // Main loop running with 100 Hz
     }
 }
 
 void FSM_OBC::triggerActuators()
 {
+}
+
+void FSM_OBC::sensorDownlink() {
+    // Update system time first
+    time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
+    // Send sensor updates on downlink with 5Hz
+    if (std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime).count() > 0.2) {
+        startTime = startTime + std::chrono::high_resolution_clock::duration(std::chrono::milliseconds(200));
+
+        Data_super *send_data[1];
+
+        // Send RCU connection status
+        if (this->eth_client->isConnected()) {
+            send_data[0] = new Data_simple(0x0B, 1);
+            debugLink->sendData(send_data, 1);
+        } else {
+            send_data[0] = new Data_simple(0x0B, 0);
+            debugLink->sendData(send_data, 1);
+        }
+
+        // Send sensor status update
+        for (SensorType sensor : sensor_ids) {
+            // Send sensor status, sensors: IMU, ARM Info, Temp75B
+            send_data[0] = readSensor(sensor);
+
+            if (send_data[0] != nullptr) {
+                debugLink->sendData(send_data, 1);
+            }
+        }
+
+        // Send RXSM signal status
+        sendRXSMSignalUpdate_Downlink();
+    }
 }
 
 /**
@@ -219,12 +232,12 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 		// Control sensor and system status information downstream
 		case (int)COMMANDS_DEBUG::obc_sensor_acq_off:
 			// Switch sensor acquisiton off
-			this->enableDownstream = false;
+            ;
 		break;
 
 		case (int)COMMANDS_DEBUG::obc_sensor_acq_on:
 			// Switch sensor acquisition on
-			this->enableDownstream = true;
+            ;
 		break;
 
 		// Simulation control
@@ -347,28 +360,6 @@ void FSM_OBC::stateMachine()
         }
     }
     lastState = currentState; // Update last state variable for change detection
-
-    if (lastRCUState != currentRCUState) {
-        // State change -> send through downlink
-        //TODO: Let the RCU send this message through the ethernet connection and pass it along
-        Data_super* data_send[1];
-        data_send[0] = new Data_simple(0x0D, (unsigned int)currentRCUState);
-        debugLink->sendData(data_send, 1);
-        // State change. Generate debug message
-        std::cout << "[OBC Firmware] State change. RCU: ";
-        switch(currentRCUState) {
-            case FSM_STATES_RCU::IDLE:
-                std::cout << "Idle" << std::endl;
-                break;
-            case FSM_STATES_RCU::STANDBY:
-                std::cout << "Standby" << std::endl;
-                break;
-            case FSM_STATES_RCU::DRIVE_FORWARD:
-                std::cout << "Drive Forward" << std::endl;
-                break;
-        }
-    }
-    lastRCUState = currentRCUState; // Update last state variable for change detection
 }
 
 void FSM_OBC::packageReceivedRexus(uint64_t message, int msg_length)

@@ -16,7 +16,7 @@ public:
 		Data_simple(std::string msg);
 		Data_simple(uint32_t cmd, uint32_t para);
 		~Data_simple();
-		std::vector<uint64_t> convert_to_serial() override;
+		std::vector<uint64_t> convert_to_serial(PLATFORM origin) override;
 		int convert_to_serial_array_length();
 		std::string get_string_ethernet();
 };

@@ -117,7 +117,7 @@ bool Socket::connect( const string host, const int port ) {
 
 // Daten versenden via TCP
 bool Socket::send( const string s ) const {
-   int status = ::send ( m_sock, s.c_str(), s.size(),  0 );
+   int status = ::send ( m_sock, s.c_str(), s.size(),  MSG_NOSIGNAL );
    if ( status == -1 ) {
       return false;
    }
@@ -131,7 +131,7 @@ int Socket::recv ( string& s ) const {
   char buf [ MAXRECV + 1 ];
   s = "";
   memset ( buf, 0, MAXRECV + 1 );
-  
+
   int status = ::recv ( m_sock, buf, MAXRECV, 0 );
   if ( status > 0 || status != -1 ) {
      s = buf;
@@ -140,7 +140,7 @@ int Socket::recv ( string& s ) const {
   else {
      throw SockExcept("Fehler in Socket::recv");
      return 0;
-  } 
+  }
 }
 
 // Daten versenden via UDP

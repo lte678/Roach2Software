@@ -1,6 +1,7 @@
 #ifndef HEADER_FSM_RCU
 #define HEADER_FSM_RCU
 
+
 #include "../Roach2_Control/FSM_Controller.h"
 #include "../Roach2_DataStore/Data_simple.h"
 #include "../Roach2_Comm/ReceiveHandler.h"
@@ -20,6 +21,10 @@ class FSM_RCU :
 private:
 	PWM_PCA985 *pwm;
 	Actuator_HV *hv;
+    std::vector<SensorType> sensor_ids; // Sensors to send updates for
+    std::chrono::high_resolution_clock::time_point startTime;
+
+    void sensorDownlink();
 public:
 	FSM_RCU();
 	~FSM_RCU();

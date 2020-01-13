@@ -3,6 +3,7 @@
 
 #include "../Roach2_DataStore/data.h"
 #include "../Roach2_DataStore/Data_simple.h"
+#include "../Roach2_DataStore/Data_Raw.h"
 #include "serversock.h"
 
 #include <string>
@@ -19,7 +20,7 @@ class EthernetServer :
 {
 private:
     static constexpr int port_number = 12728;
-    static constexpr char delimiter = '\0';
+    static constexpr char delimiter = ';';
 
 	ServerSock* socket;
 	std::atomic<bool> connected;
@@ -33,5 +34,7 @@ public:
 	bool isConnected();
 	std::string popMessage();
 	void run();
+
+	static Data_Raw* parseBinary(std::string msg);
 };
 

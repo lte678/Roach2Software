@@ -72,9 +72,10 @@ private:
 	bool send_ongoing;
 	bool receive_ongoing;
 	void send(void);
+	PLATFORM origin;
 	uint16_t calc_crc(const uint8_t* data, uint16_t size);
 public:
-	UART();
+	UART(PLATFORM _origin);
 	~UART();
 	void run();
 	void sendData(Data_super** data, int count);

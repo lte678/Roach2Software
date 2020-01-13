@@ -37,11 +37,11 @@ Data* FSM_Controller::readSensor(SensorType sensorId)
 	}
 }
 
-void FSM_Controller::initThreads(REBOOT_TARGET target)
+void FSM_Controller::initThreads(PLATFORM target)
 {
-	if (target == REBOOT_TARGET::OBC) {
+	if (target == PLATFORM::OBC) {
 		// UART communication (debug link)
-		debugLink = new UART(); // Will open UART port, must be connected afterwards from PC
+		debugLink = new UART(target); // Will open UART port, must be connected afterwards from PC
 		debugLink_thread = std::thread(&UART::run, debugLink);
 	}
 	
@@ -50,13 +50,13 @@ void FSM_Controller::initThreads(REBOOT_TARGET target)
 	eth_server_thread = std::thread(&EthernetServer::run, eth_server);
 
 	// Ethernet links: client
-	if (target == REBOOT_TARGET::OBC) {
+	if (target == PLATFORM::OBC) {
 		// OBC connects to RCU
         std::cout << "[OBC Firmware] Connecting to RCU" << std::endl;
 #ifndef LOCAL_DEV
-		eth_client = new EthernetClient("192.168.100.100");
+		eth_client = new EthernetClient("192.168.100.100", target);
 #else
-        eth_client = new EthernetClient("rcupi");
+        eth_client = new EthernetClient("rcupi", target);
 #endif
 		eth_client_thread = std::thread(&EthernetClient::run, eth_client);
 	}
@@ -64,15 +64,15 @@ void FSM_Controller::initThreads(REBOOT_TARGET target)
 		// RCU connects to OBC
         std::cout << "[RCU Firmware] Connecting to OBC" << std::endl;
 #ifndef LOCAL_DEV
-        eth_client = new EthernetClient("192.168.100.101");
+        eth_client = new EthernetClient("192.168.100.101", target);
 #else
-        eth_client = new EthernetClient("obcpi");
+        eth_client = new EthernetClient("obcpi", target);
 #endif
 		eth_client_thread = std::thread(&EthernetClient::run, eth_client);
 	}
 
 	// Sensor handling
-	if (target == REBOOT_TARGET::OBC)
+	if (target == PLATFORM::OBC)
 	{
 		// OBC
 		sensor_manager = new Sensor_Manager();

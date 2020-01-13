@@ -29,7 +29,9 @@ add_executable(obc_firmware
         Roach2_DataStore/data.cpp
         Roach2_DataStore/Data_simple.cpp
         Roach2_DataStore/Data_super.cpp
-        Roach2_DataStore/serialization.cpp)
+        Roach2_DataStore/Data_Raw.cpp
+        Roach2_DataStore/serialization.cpp
+        Roach2_DataStore/Data_Raw.cpp)
 
 target_link_libraries(obc_firmware pthread)
 
@@ -59,6 +61,7 @@ add_executable(rcu_firmware Roach2_RCU/main.cpp
         Roach2_DataStore/data.cpp
         Roach2_DataStore/Data_simple.cpp
         Roach2_DataStore/Data_super.cpp
+        Roach2_DataStore/Data_Raw.cpp
         Roach2_DataStore/serialization.cpp)
 
 target_link_libraries(rcu_firmware pthread)

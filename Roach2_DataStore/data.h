@@ -30,6 +30,7 @@ class Data : public Data_super {
         unsigned long time;                     // timestamp
         std::vector<std::string> columnNames;   // names of data columns
         std::vector<double> values;             // data to hold
+
     public:
         // constructors
         Data();
@@ -66,7 +67,7 @@ class Data : public Data_super {
         // pretty print
         void print();
 
-		std::vector<uint64_t> convert_to_serial() override;
+		std::vector<uint64_t> convert_to_serial(PLATFORM origin) override;
 		uint64_t to_binary(double value);
 		int convert_to_serial_array_length();
 		std::string get_string_ethernet();

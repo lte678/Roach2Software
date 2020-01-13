@@ -11,7 +11,7 @@
 /**
  * @brief Send data according to our protocol
 */
-void UART::send(void)
+void UART::send()
 {
 	if (this->send_ongoing) {
 		// Wait until previous send operation done
@@ -26,7 +26,7 @@ void UART::send(void)
 
 		// Check whether Data_simple is used instead of Data
 		Data_super* dataToSend = this->send_queue.front();
-		std::vector<uint64_t> tx_data = dataToSend->convert_to_serial();
+		std::vector<uint64_t> tx_data = dataToSend->convert_to_serial(origin);
 		int data_length = dataToSend->convert_to_serial_array_length();
 		this->tx_frames = new uint64_t[data_length]; // each frame consists of 11 bytes
 		for (int i = 0; i < data_length; i++) {
@@ -205,7 +205,7 @@ bool UART::isData_received()
 	return result;
 }
 
-UART::UART()
+UART::UART(PLATFORM _origin)
 {
     std::cout << "[UART] Initializing parameters" << std::endl;
 
@@ -216,6 +216,7 @@ UART::UART()
 	this->numberPackagesSend = 0;
 	this->send_ongoing = false;
 	this->receive_ongoing = false;
+	origin = _origin;
 
 	this->initEventHandlerArray(); // Required to use event handlers
 

@@ -17,6 +17,7 @@
 #include "../Roach2_Comm/EthernetServer.h"
 #include "../Roach2_Sensor/RocketSignals.h"
 #include "../Roach2_Comm/UART.h"
+#include "Defines.h"
 #include "Sensor_Manager.h"
 
 enum class FSM_STATES_RCU {
@@ -28,11 +29,6 @@ enum class FSM_STATES_RCU {
 enum class FSM_STATES_OBC {
 	IDLE = 0,
 	EXPERIMENT = 1,
-};
-
-enum class REBOOT_TARGET {
-	RCU = 0,
-	OBC = 1
 };
 
 class FSM_Controller
@@ -60,11 +56,11 @@ protected:
 	void triggerActuators(void);
 	void saveData(void);
 	Data* readSensor(SensorType sensorId);
-	void initThreads(REBOOT_TARGET target);
 	virtual void simulationModeUpdate() = 0;
 	void enableSimMode();
 	void disableSimMode();
 	bool isSimModeEnabled();
+	void initThreads(PLATFORM target);
 public:
 	virtual void run() = 0;
 };

@@ -136,13 +136,20 @@ void Data::print(){
  *		  Note: The length of the returned array can be requested from convert_to_serial_array_length() function
  * @return uint64_t array
 */
-std::vector<uint64_t> Data::convert_to_serial() {
+std::vector<uint64_t> Data::convert_to_serial(PLATFORM origin) {
 	std::vector<uint64_t> serial_data;
     for(int i = 0; i < values.size(); i++) {
         serial_data.push_back(0);
-        serial_data[i] += (uint64_t)id << 60u;          //Sensor type
-        serial_data[i] += ((uint64_t)i & 0x0Fu) << 56u; //Sensor subtype (e.g. x y and z axis)
-        serial_data[i] += to_binary(values[i]) & ~((uint64_t)0xFF << 56u); //Create a mask to only write the last 56 bits
+
+        // Data structure:
+        // |4bit|4bit| 1 byte | 1 byte | 1 byte |             4 bytes            |
+        // |from|type|sensorID|subtype | empty  |             payload            |
+
+        serial_data[i] |= ((uint64_t)origin & 0xFu) << 60u;                    // from
+        serial_data[i] |= ((uint64_t)DATA_TYPE::SENSOR_DATA & 0xFu) << 56u;    // data type
+        serial_data[i] |= ((uint64_t)id & 0xFFu) << 48u;                                 // sensor type
+        serial_data[i] |= ((uint64_t)i & 0xFFu) << 40u;                        // sensor subtype
+        serial_data[i] |= to_binary(values[i]) & 0xFFFFFFFF;                   // sensor data
     }
 
     return serial_data;

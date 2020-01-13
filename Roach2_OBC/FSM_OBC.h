@@ -33,12 +33,13 @@ class FSM_OBC :
 {
 private:
 	FSM_STATES_RCU currentRCUState;
-	FSM_STATES_RCU lastRCUState;
 	Actuator_GoPro* enableGoPro;
 	Actuator_Rover* enableRoverPower;
-	bool enableDownstream;
-	std::vector<SensorType> sensor_ids;
+    std::vector<SensorType> sensor_ids;
+    std::chrono::high_resolution_clock::time_point startTime;
+
 	void sendRXSMSignalUpdate_Downlink();
+    void sensorDownlink();
 public:
 	FSM_OBC();
 	~FSM_OBC();

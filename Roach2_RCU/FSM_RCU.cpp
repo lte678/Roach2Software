@@ -6,12 +6,16 @@
 
 FSM_RCU::FSM_RCU()
 {
+    sensor_ids.push_back(SensorType::TEMP_SENSOR);
+    sensor_ids.push_back(SensorType::IMU);
+    sensor_ids.push_back(SensorType::SYS_INFO);
+
 	// Init state and trigger selftest through run method
 	this->currentState = (int)FSM_STATES_RCU::IDLE;
 	this->lastState = -1;
 
 	// Init threads
-	this->initThreads(REBOOT_TARGET::RCU);
+	this->initThreads(PLATFORM::RCU);
 
 	// PWM for engine
 	this->pwm = new PWM_PCA985();
@@ -23,7 +27,12 @@ FSM_RCU::FSM_RCU()
 	this->hv->disable();
 
 	// System start time
-	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
+    this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
+
+    // sensor logging time
+    startTime = std::chrono::high_resolution_clock::now();
+
+    std::cout << "[RCU Firmware] Starting main loop" << std::endl;
 
 	// System main loop
 	while (1) {
@@ -37,10 +46,34 @@ FSM_RCU::FSM_RCU()
 		// FSM control
 		run();
 
+		// Sensor downlink ~5 Hz
+		sensorDownlink();
+
 		usleep(10000);
 	}
 }
 
+
+void FSM_RCU::sensorDownlink() {
+    // Update system time first
+    time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
+    // Send sensor updates on downlink with 5Hz
+    if (std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime).count() > 0.2) {
+        startTime = startTime + std::chrono::high_resolution_clock::duration(std::chrono::milliseconds(200));
+
+        // Send sensor status update
+        for (SensorType sensor : sensor_ids) {
+            Data_super *send_data[1];
+            // Send sensor status, sensors: IMU, ARM Info, Temp75B
+            send_data[0] = readSensor(sensor);
+
+            if (send_data[0] != nullptr) {
+                // Downlink over ethernet
+                eth_client->send(send_data[0]);
+            }
+        }
+    }
+}
 
 FSM_RCU::~FSM_RCU()
 {
@@ -182,7 +215,7 @@ void FSM_RCU::packageReceivedEthernet_msg(const std::string& command)
 	}
 	else if (command == "rcu_check_alive") {
 		msg = new Data_simple("ALIVE");
-		this->eth_client->send(msg);
+		//this->eth_client->send(msg);
 	}
 	else if (command.compare("RCU_SIM_MODE_ENABLE") == 0) {
 		// Enable simulation mode
@@ -234,6 +267,23 @@ void FSM_RCU::run(void)
 			break;
 		}
 		this->lastState = this->currentState;
+
+
+		// Inform gs about state change
+        eth_client->send(new Data_simple(0x0D, (unsigned int)currentState));
+        // State change. Generate debug message
+        std::cout << "[RCU Firmware] State change. RCU: ";
+        switch(currentState) {
+            case (int)FSM_STATES_RCU::IDLE:
+                std::cout << "Idle" << std::endl;
+                break;
+            case (int)FSM_STATES_RCU::STANDBY:
+                std::cout << "Standby" << std::endl;
+                break;
+            case (int)FSM_STATES_RCU::DRIVE_FORWARD:
+                std::cout << "Drive Forward" << std::endl;
+                break;
+        }
 	}
 	else {
 		switch (this->currentState) {
