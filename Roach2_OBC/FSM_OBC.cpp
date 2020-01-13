@@ -26,18 +26,13 @@ FSM_OBC::FSM_OBC()
 
 	// Rover control
 	this->enableRoverPower = new Actuator_Rover();
-	this->enableRoverPower->disable();
-	usleep(10000);
-	this->enableRoverPower->enable();
+	this->enableRoverPower->enable(false);
 
 	// Init tasks running in separate threads (communication, sensors)
 	this->initThreads(PLATFORM::OBC);
 
 	// GoPro control
 	this->enableGoPro = new Actuator_GoPro();
-
-	// We are not in simulation mode by default
-	this->isSimMode = false;
 
 	// System start time
 	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
@@ -154,9 +149,9 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 		break;
 		case (int)COMMANDS_OPERATIONAL::obc_restart_rover:
 			// Restart rover
-			this->enableRoverPower->disable();
-			usleep(10000);
-			this->enableRoverPower->enable();
+			this->enableRoverPower->disable(false);
+			usleep(1000 * 1000); // 1s warten
+			this->enableRoverPower->enable(false);
 			// Confirm operation and restart
 			send_data[0] = new Data_simple(cmd, 1);
 			this->debugLink->sendData(send_data, 1);
@@ -201,12 +196,12 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 
 		case (int)COMMANDS_DEBUG::obc_rcu_off:
 			// Switch RCU/rover off
-			this->enableRoverPower->enable();
+			this->enableRoverPower->enable(true);
 		break;
 
 		case (int)COMMANDS_DEBUG::obc_rcu_on:
 			// Switch RCU/rover on
-			this->enableRoverPower->disable();
+			this->enableRoverPower->disable(true);
 		break;
 
 		case (int)COMMANDS_DEBUG::obc_read_sensor:
@@ -304,7 +299,7 @@ void FSM_OBC::stateMachine()
 	// ------ State change OBC IDLE -> EXPERIMENT ------
 	if (currentState == (int)FSM_STATES_OBC::IDLE && sods) {
 		currentState = (int)FSM_STATES_OBC::EXPERIMENT; // Switch to experiment state
-        enableGoPro->enable();
+        enableGoPro->enable(false);
 
         // Switch RCU from IDLE to STANDBY
         if (currentRCUState != FSM_STATES_RCU::STANDBY) {
@@ -317,7 +312,7 @@ void FSM_OBC::stateMachine()
     // ------ State change OBC EXPERIMENT -> IDLE ------
 	if(currentState == (int)FSM_STATES_OBC::EXPERIMENT && !sods) {
 	    currentState = (int)FSM_STATES_OBC::IDLE; // Switch back to idle
-        enableGoPro->disable();
+        enableGoPro->disable(false);
 	}
 
 

@@ -10,33 +10,15 @@
 #ifndef PWM_PCA985_H
 #define PWM_PCA985_H
 
-#ifndef LOCAL_DEV
-#include <wiringPiI2C.h>
-#endif
-
 #include "Actuator.h"
 #include "../Roach2_DataStore/data.h"
-#include <bitset>
-#include <math.h>
-#include <iostream>
-#include <chrono>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <linux/i2c.h>
-#include <linux/i2c-dev.h>
+#include "../Roach2_Hardware/I2CDevice.h"
 
-/* ##################################################################################### */
-/* 0. Hard coded settings  */
+#include <cmath>
+
 const int PCA985_DEVICE_ID = 0x70; // in Schaltplan schauen
 const int PWM_FREQUENCY = 100; //  TESTVALUE!!!! IN Hz
-/* ##################################################################################### */
 
-//SCHREIB HIER MEHR REIN
 enum PCA985_REGISTER_t {
 	MODE1 = 0b00000000,
     MODE2 = 0b00000001,
@@ -87,37 +69,21 @@ enum PCA985_REGISTER_t {
 	PRE_SCALE   = 0b11111110
 };
 
-/* ##################################################################################### */
-/* 2. Class Definition */
-
 class PWM_PCA985 : public Actuator {
-
+private:
+    I2CDevice* pwmDriver;
 public:
 	PWM_PCA985();
 	~PWM_PCA985();
 	void init();
-	void drive();
-	void stop();
+	void drive(bool debug = false);
+	void stop(bool debug = false);
 	void resetlaser();
-	int getI2CAddr();
-	void enable();
-	void disable();
-	int getActutator_type();
-	void enableLEDs();
-	void disableLEDs();
-private:
-	int freq = 0;
-
-	// I2C stuff
-	int deviceHandle;
-	int write8(int reg, int data);
-	int read8(int reg);
-	int write16(int reg, int data);
-	int read16(int reg);
-	int i2cConnect(int dev);
-	int binaryToDecimal(int number);
-	int simpleRead();
-	int simpleWrite(int data);
+	void enable(bool debug) override;
+	void disable(bool debug) override;
+	int getActuatorType() override;
+	void enableLEDs(bool debug);
+	void disableLEDs(bool debug);
 };
 
 #endif //PWM_PCA985_H

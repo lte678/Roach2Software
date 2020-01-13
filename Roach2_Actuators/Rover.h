@@ -4,18 +4,19 @@
 #include <iostream>
 
 #include "Actuator.h"
+#include "../Roach2_Hardware/GPIODevice.h"
 
 class Actuator_Rover :
 	public Actuator
 {
+private:
+    GPIODevice* roverPowerPin;
 public:
 	Actuator_Rover();
 	~Actuator_Rover();
-	int getActutator_type();
-	void enable();
-	void disable();
-private:
-	int fd_actuator_rover;
+	int getActuatorType() override;
+	void enable(bool debug) override;
+	void disable(bool debug) override;
 protected:
 
 };

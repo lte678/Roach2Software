@@ -19,12 +19,12 @@ FSM_RCU::FSM_RCU()
 
 	// PWM for engine
 	this->pwm = new PWM_PCA985();
-	this->pwm->disableLEDs();
-	this->pwm->disable();
+	this->pwm->disableLEDs(false);
+	this->pwm->disable(false);
 
 	// HV generator control
 	this->hv = new Actuator_HV();
-	this->hv->disable();
+	this->hv->disable(false);
 
 	// System start time
     this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
@@ -208,10 +208,10 @@ void FSM_RCU::packageReceivedEthernet_msg(const std::string& command)
 		this->currentState = (int)FSM_STATES_RCU::IDLE;
 	}
 	else if (command == "RCU_DRIVE_FORWARD") {
-		this->pwm->enable();
+		this->pwm->enable(true);
 	}
 	else if (command == "RCU_STOP_DRIVE_FORWARD") {
-		this->pwm->disable();
+		this->pwm->disable(true);
 	}
 	else if (command == "rcu_check_alive") {
 		msg = new Data_simple("ALIVE");
@@ -252,18 +252,18 @@ void FSM_RCU::run(void)
 			case (int)FSM_STATES_RCU::IDLE:
 				// Perform selftest
 				// Check if all sensors reported at least one data object
-				this->pwm->disable();
-				this->hv->disable();
+				this->pwm->disable(false);
+				this->hv->disable(false);
 			break;
 			case (int)FSM_STATES_RCU::STANDBY:
-				this->pwm->disable();
-				this->pwm->enableLEDs();
-				this->hv->disable();
+				this->pwm->disable(false);
+				this->pwm->enableLEDs(false);
+				this->hv->disable(false);
 			break;
 			case (int)FSM_STATES_RCU::DRIVE_FORWARD:
-				this->hv->enable();
+				this->hv->enable(true);
 				usleep(500 * 1000); // 500ms wait
-				this->pwm->enable();
+				this->pwm->enable(true);
 			break;
 		}
 		this->lastState = this->currentState;

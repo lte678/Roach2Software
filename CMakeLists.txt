@@ -9,8 +9,8 @@ add_executable(obc_firmware
         Roach2_Control/FSM_Controller.cpp
         Roach2_Control/Sensor_Manager.cpp
         Roach2_Actuators/Actuator.cpp
-        Roach2_Actuators/Roach2_Actuators_Actuator_Rover.cpp
-        Roach2_Actuators/Roach2_Actuators_Actuator_GoPro.cpp
+        Roach2_Actuators/Rover.cpp
+        Roach2_Actuators/GoPro.cpp
         Roach2_Sensor/Roach2_Sensor_Sensor.cpp
         Roach2_Sensor/OBC_Systemstatus.cpp
         Roach2_Sensor/RCU_Systemstatus.cpp
@@ -31,7 +31,7 @@ add_executable(obc_firmware
         Roach2_DataStore/Data_super.cpp
         Roach2_DataStore/Data_Raw.cpp
         Roach2_DataStore/serialization.cpp
-        Roach2_DataStore/Data_Raw.cpp)
+        Roach2_DataStore/Data_Raw.cpp Roach2_Hardware/I2CDevice.cpp Roach2_Hardware/I2CDevice.h)
 
 target_link_libraries(obc_firmware pthread)
 
@@ -41,8 +41,8 @@ add_executable(rcu_firmware Roach2_RCU/main.cpp
         Roach2_Control/Sensor_Manager.cpp
         Roach2_Control/CommandParser.cpp
         Roach2_Actuators/Actuator.cpp
-        Roach2_Actuators/pwm_pca9658.cpp
-        Roach2_Actuators/Roach2_Actuators_Actuator_HV.cpp
+        Roach2_Actuators/PWM.cpp
+        Roach2_Actuators/HV.cpp
         Roach2_Comm/UART.cpp
         Roach2_Comm/EthernetClient.cpp
         Roach2_Comm/EthernetServer.cpp
@@ -62,7 +62,7 @@ add_executable(rcu_firmware Roach2_RCU/main.cpp
         Roach2_DataStore/Data_simple.cpp
         Roach2_DataStore/Data_super.cpp
         Roach2_DataStore/Data_Raw.cpp
-        Roach2_DataStore/serialization.cpp)
+        Roach2_DataStore/serialization.cpp Roach2_Hardware/GPIODevice.cpp Roach2_Hardware/GPIODevice.h Roach2_Hardware/I2CDevice.cpp Roach2_Hardware/I2CDevice.h)
 
 target_link_libraries(rcu_firmware pthread)
 

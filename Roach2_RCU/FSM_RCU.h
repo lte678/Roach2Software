@@ -8,8 +8,8 @@
 #include "../Roach2_DataStore/data.h"
 #include "../Roach2_Control/CommandParser.h"
 #include "../Roach2_Comm/UART.h"
-#include "../Roach2_Actuators/pwm_pca9658.h"
-#include "../Roach2_Actuators/Roach2_Actuators_Actuator_HV.h"
+#include "../Roach2_Actuators/PWM.h"
+#include "../Roach2_Actuators/HV.h"
 #include "../Roach2_DataStore/Data_super.h"
 #include <chrono>
 #include <string>

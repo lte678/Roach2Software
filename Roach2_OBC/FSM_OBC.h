@@ -23,8 +23,8 @@
 #include "../Roach2_Sensor/ARM_Systeminfo.h"
 #include "../Roach2_Sensor/Temp.h"
 #include "../Roach2_Sensor/IMU.h"
-#include "../Roach2_Actuators/Roach2_Actuators_Actuator_Rover.h"
-#include "../Roach2_Actuators/Roach2_Actuators_Actuartor_GoPro.h"
+#include "../Roach2_Actuators/Rover.h"
+#include "../Roach2_Actuators/GoPro.h"
 
 
 class FSM_OBC :
@@ -50,7 +50,7 @@ public:
 	void packageReceivedRexus(uint64_t message, int msg_length) override;
 	void packageReceivedEthernet() override;
 	void rocketSignalReceived(int) override {};
-	void simulationModeUpdate();
+	void simulationModeUpdate() override;
 };
 
 #endif

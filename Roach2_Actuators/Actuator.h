@@ -23,17 +23,14 @@ class Actuator
 public:
 	Actuator();
 	~Actuator();
-	virtual void enable() = 0;
-	virtual void disable() = 0;
+	virtual void enable(bool debug) = 0;
+	virtual void disable(bool debug) = 0;
 	void enableDebugMode();
 	void disableDebugMode();
-	virtual int getActutator_type() = 0;
-private:
-	bool isDebugMode;
+	virtual int getActuatorType() = 0;
 protected:
 	bool isEnabled;
-	
-	
+    bool isDebugMode;
 };
 
 #endif
