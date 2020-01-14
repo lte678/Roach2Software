@@ -40,14 +40,14 @@ void Sensor_Manager::run()
 		unsigned int time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
         sensor_lock.lock();
 		for (Sensor *sensor : sensors) {
-			Data* data = sensor->getData();
-			
-			// Store to csv file for logging	
-			std::string text = data->serializeLogging();
-			*(logging_stream) << "TIME:" << time << ":";
-			*(logging_stream) << text << std::endl;
+			std::unique_ptr<Data> data = sensor->getData();
 
-			delete data;
+			if (data) {
+                // Store to csv file for logging
+                std::string text = data->serializeLogging();
+                *(logging_stream) << "TIME:" << time << ":";
+                *(logging_stream) << text << std::endl;
+			}
 		}
         sensor_lock.unlock();
 	}
@@ -63,7 +63,7 @@ void Sensor_Manager::stop()
 	this->stop_bit.store(true);
 }
 
-bool Sensor_Manager::getData(Data*& data_ptr, SensorType sensor_id)
+bool Sensor_Manager::getData(std::unique_ptr<Data>& data_ptr, SensorType sensor_id)
 {   sensor_lock.lock();
 	// Load sensor value
 	for(Sensor *sensor : sensors) {

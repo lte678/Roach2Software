@@ -49,7 +49,7 @@ public:
 	// Inherited from Sensor base class
 	void init() override;
 	void update() override;
-	Data* getData() override;
+    std::unique_ptr<Data> getData() override;
 	int getI2CAddr() override;
 	SensorType getSensorType() override;
 private:

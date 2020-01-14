@@ -18,14 +18,17 @@ class OBC_Systemstatus :
 	public Sensor
 {
 private:
-	Data* currentData;
 	EthernetClient* eth_client;
 	EthernetServer* eth_server;
+    std::atomic<double> obc_uplink_rcu;
+    std::atomic<double> obc_downlink_rcu;
+    std::atomic<double> pg_rover;
+    std::atomic<double> pg_cam;
 public:
 	OBC_Systemstatus(float updateFreq, EthernetClient* client, EthernetServer* server);
 	void init();
 	void update();
-	Data* getData();
+    std::unique_ptr<Data> getData();
 	int getI2CAddr();
 	/**
 	* @brief Returns the sensor identifier number (see SENSOR_TYPES in data.h from datastore project)

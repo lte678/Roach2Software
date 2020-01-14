@@ -24,8 +24,8 @@ void ROT_AS5601::update()
 	measurement[1] = binaryToDecimal(measurement[1]);
 }
 
-Data* ROT_AS5601::getData() {
-	Data* data_ptr = new Data();
+std::unique_ptr<Data> ROT_AS5601::getData() {
+    std::unique_ptr<Data> data_ptr(new Data());
 	data_ptr->setId((int)SensorType::ROT_ENC);
 	data_ptr->addValue("ROTRAW", measurement[0]);
 	data_ptr->addValue("ROT", measurement[1]);

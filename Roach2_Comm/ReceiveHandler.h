@@ -10,6 +10,7 @@
 #define RECEIVE_HANDLER_HEADER
 
 #include <cstdint>
+#include <string>
 
 // Definition of REXUS signals
 enum class REXUS_SIGNALS {
@@ -25,7 +26,7 @@ public:
 	/*
 	 * @brief Function called when data was received through an Ethernet link
 	**/
-	virtual void packageReceivedEthernet() = 0;
+	virtual void packageReceivedEthernet(const std::string& msg) = 0;
 	/* 
 	 * @brief Function called when data was received from the Rexus service module link
 	 **/

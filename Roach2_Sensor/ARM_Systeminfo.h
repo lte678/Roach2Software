@@ -29,7 +29,7 @@ public:
     explicit ARM_Systeminfo(float updateFreq);
 	void init();
 	void update();
-	Data* getData();
+    std::unique_ptr<Data> getData();
 	int getI2CAddr();
 	/**
 	* @brief Returns the sensor identifier number (see SENSOR_TYPES in data.h from datastore project)

@@ -210,10 +210,10 @@ int RocketSignals::getI2CAddr() {
     return 0;
 }
 
-Data *RocketSignals::getData() {
+std::unique_ptr<Data> RocketSignals::getData() {
     access_limit.lock();
 
-    Data* data_ptr = new Data();
+    std::unique_ptr<Data> data_ptr(new Data());
     data_ptr->setId((int)SensorType::RX_SIGNALS);
     data_ptr->addValue("LO", lo);
     data_ptr->addValue("SOE", soe);

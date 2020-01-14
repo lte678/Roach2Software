@@ -58,10 +58,10 @@ void ARM_Systeminfo::update()
 /**
  * @brief Returns the sensor output
 */
-Data* ARM_Systeminfo::getData()
+std::unique_ptr<Data> ARM_Systeminfo::getData()
 {
 	// Create new data object
-	data_obj = new Data();
+    std::unique_ptr<Data> data_obj(new Data());
 
 	data_obj->setId((int)SensorType::SYS_INFO);
 	data_obj->addValue("MEM_TOTAL", totalPhysMem);

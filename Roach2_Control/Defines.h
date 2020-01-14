@@ -12,4 +12,10 @@ enum class PLATFORM {
     GS = 3
 };
 
+enum class DATA_TYPE {
+    UNKNOWN = 0,
+    COMMAND = 1,
+    SENSOR_DATA = 2
+};
+
 #endif //ROACH2_SOFTWARE_DEFINES_H

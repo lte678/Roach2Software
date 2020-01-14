@@ -49,7 +49,7 @@ public:
 	Sensor* getSensorHandle(SensorType sensor_id);
 	void attachSensor(Sensor *sensor);
 	// Access to loaded sensor data
-	bool getData(Data*& data_ptr, SensorType sensor_id);
+	bool getData(std::unique_ptr<Data>& data_ptr, SensorType sensor_id);
 };
 
 #endif

@@ -31,7 +31,9 @@ add_executable(obc_firmware
         Roach2_DataStore/Data_super.cpp
         Roach2_DataStore/Data_Raw.cpp
         Roach2_DataStore/serialization.cpp
-        Roach2_DataStore/Data_Raw.cpp Roach2_Hardware/I2CDevice.cpp Roach2_Hardware/I2CDevice.h)
+        Roach2_DataStore/Data_Raw.cpp
+        Roach2_Hardware/I2CDevice.cpp
+        Roach2_Hardware/GPIODevice.cpp)
 
 target_link_libraries(obc_firmware pthread)
 
@@ -62,7 +64,9 @@ add_executable(rcu_firmware Roach2_RCU/main.cpp
         Roach2_DataStore/Data_simple.cpp
         Roach2_DataStore/Data_super.cpp
         Roach2_DataStore/Data_Raw.cpp
-        Roach2_DataStore/serialization.cpp Roach2_Hardware/GPIODevice.cpp Roach2_Hardware/GPIODevice.h Roach2_Hardware/I2CDevice.cpp Roach2_Hardware/I2CDevice.h)
+        Roach2_DataStore/serialization.cpp
+        Roach2_Hardware/GPIODevice.cpp
+        Roach2_Hardware/I2CDevice.cpp)
 
 target_link_libraries(rcu_firmware pthread)
 

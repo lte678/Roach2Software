@@ -16,6 +16,7 @@
 #include <bitset>
 #include <iostream>
 #include <chrono>
+#include <memory>
 
 /* ##################################################################################### */
 /* 2. Class Definition */
@@ -33,7 +34,6 @@ class BNO055_IMU : public Sensor {
 		double rot[3];
 		double grav[3];
 		double temp;
-		Data* data_ptr;
 		/* ##################################################################################### */
 /* 1. Enumerations */
     enum BNO055_OPERATION_MODES_t {
@@ -223,7 +223,7 @@ public:
 
 	void init() override;
     void update() override;
-    Data* getData() override;
+    std::unique_ptr<Data> getData() override;
     SensorType getSensorType() override;
     int getI2CAddr() override;
 

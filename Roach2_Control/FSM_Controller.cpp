@@ -22,9 +22,9 @@ bool FSM_Controller::isSimModeEnabled()
 	return this->isSimMode;
 }
 
-Data* FSM_Controller::readSensor(SensorType sensorId)
+std::unique_ptr<Data> FSM_Controller::readSensor(SensorType sensorId)
 {
-	Data* data = nullptr;
+	std::unique_ptr<Data> data;
 
 	bool res = sensor_manager->getData(data, sensorId);
 
@@ -39,6 +39,8 @@ Data* FSM_Controller::readSensor(SensorType sensorId)
 
 void FSM_Controller::initThreads(PLATFORM target)
 {
+    isSimMode = false;
+
 	if (target == PLATFORM::OBC) {
 		// UART communication (debug link)
 		debugLink = new UART(target); // Will open UART port, must be connected afterwards from PC

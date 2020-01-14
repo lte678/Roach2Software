@@ -40,7 +40,9 @@ void RCU_Systemstatus::init()
 void RCU_Systemstatus::update()
 {
 	int buffer = 0;
-	this->currentData = new Data();
+
+    pg_5v = 0;
+    pg_hv = 0;
 
 	// Load sensor values:
 	// Power Good 5V
@@ -48,10 +50,7 @@ void RCU_Systemstatus::update()
 	if (fd_0 != -1) {
 		read(fd_0, &buffer, 1); // ASCII 48=0, 49=1
 		if (buffer == 49) {
-			this->currentData->addValue("PG_5V", 1);
-		}
-		else {
-			this->currentData->addValue("PG_5V", 0);
+			pg_5v = 1;
 		}
 		close(fd_0);
 	}
@@ -63,24 +62,24 @@ void RCU_Systemstatus::update()
 	if (fd_0 != -1) {
 		read(fd_0, &buffer, 1); // ASCII 48=0, 49=1
 		if (buffer == 49) {
-			this->currentData->addValue("PG_HV", 1);
-		}
-		else {
-			this->currentData->addValue("PG_HV", 0);
+			pg_hv = 1;
 		}
 		close(fd_0);
 	}
 
 	// Load connection status to OBC
-	double rcu_uplink_obc = this->eth_client->isConnected() ? 1 : 0;
-	double rcu_downlink_obc = this->eth_server->isConnected() ? 1 : 0;
-	this->currentData->addValue("RCU_UP_OBC", rcu_uplink_obc);
-	this->currentData->addValue("RCU_DOWN_OBC", rcu_downlink_obc);
+	rcu_uplink_obc = this->eth_client->isConnected() ? 1 : 0;
+	rcu_downlink_obc = this->eth_server->isConnected() ? 1 : 0;
 }
 
-Data* RCU_Systemstatus::getData()
+std::unique_ptr<Data> RCU_Systemstatus::getData()
 {
-	return this->currentData;
+    std::unique_ptr<Data> currentData(new Data());
+    currentData->addValue("RCU_UP_OBC", rcu_uplink_obc);
+    currentData->addValue("RCU_DOWN_OBC", rcu_downlink_obc);
+    currentData->addValue("PG_5V", pg_5v);
+    currentData->addValue("PG_HV", pg_hv);
+	return currentData;
 }
 
 int RCU_Systemstatus::getI2CAddr()

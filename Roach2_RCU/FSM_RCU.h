@@ -28,14 +28,14 @@ private:
 public:
 	FSM_RCU();
 	~FSM_RCU();
-	void run(void);
-	void triggerActuators(void);
-	void packageReceivedUART(uint64_t message, int msg_length);
-	void rocketSignalReceived(int signal_source);
-	void packageReceivedRexus(uint64_t message, int msg_length);
-	void packageReceivedEthernet();
-	void packageReceivedEthernet_msg(const std::string& command);
-	void simulationModeUpdate();
+	void run() override;
+    void stateMachine();
+	void triggerActuators();
+	void packageReceivedUART(uint64_t message, int msg_length) override;
+	void rocketSignalReceived(int signal_source) override;
+	void packageReceivedRexus(uint64_t message, int msg_length) override;
+	void packageReceivedEthernet(const std::string& msg) override;
+	void simulationModeUpdate() override;
 };
 
 #endif

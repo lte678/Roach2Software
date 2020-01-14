@@ -101,9 +101,9 @@ void BNO055_IMU::update()
 	temp = (double)tmeasurement;
 }
 
-Data* BNO055_IMU::getData()
+std::unique_ptr<Data> BNO055_IMU::getData()
 {
-	Data* data_ptr = new Data();
+	std::unique_ptr<Data> data_ptr(new Data());
 	data_ptr->setId((int)SensorType::IMU);
     data_ptr->addValue("TEMP", this->temp);
 	data_ptr->addValue("ACC_X", this->acc[0]);

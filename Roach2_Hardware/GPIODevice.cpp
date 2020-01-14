@@ -58,6 +58,8 @@ GPIODevice::~GPIODevice() {
 
 GPIODevice::GPIODevice(unsigned int pinNumber, IO_MODE _mode) {
     pinValid = false;
+    mode = _mode;
+    pinNumber = pinNumber;
 }
 
 GPIODevice::~GPIODevice() {

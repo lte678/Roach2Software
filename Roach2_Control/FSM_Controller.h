@@ -53,9 +53,9 @@ protected:
 	int numberData;
 	Data_super* logs;
 protected:
-	void triggerActuators(void);
-	void saveData(void);
-	Data* readSensor(SensorType sensorId);
+	void triggerActuators();
+	void saveData();
+    std::unique_ptr<Data> readSensor(SensorType sensorId);
 	virtual void simulationModeUpdate() = 0;
 	void enableSimMode();
 	void disableSimMode();

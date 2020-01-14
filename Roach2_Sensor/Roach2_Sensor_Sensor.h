@@ -27,6 +27,8 @@
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
 
+#include <memory>
+
 enum class SensorType {
     TEMP_SENSOR = 0,
     IMU = 1,
@@ -57,7 +59,7 @@ public:
     void run(); // Each sensor has it's own update loop
     virtual void init() = 0;
     virtual void update() = 0;
-    virtual Data* getData() = 0;
+    virtual std::unique_ptr<Data> getData() = 0;
     virtual int getI2CAddr() = 0;
 
     /**

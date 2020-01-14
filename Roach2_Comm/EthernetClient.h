@@ -41,6 +41,7 @@ public:
 	int whichConnection();
 	bool isConnected();
 	void run();
-	void send(Data_super *msg);
+	void send(std::unique_ptr<Data_super> msg);
+	void send(std::string msg);
 };
 

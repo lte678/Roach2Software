@@ -18,14 +18,17 @@ class RCU_Systemstatus :
 	public Sensor
 {
 private:
-	Data* currentData;
 	EthernetClient* eth_client;
 	EthernetServer* eth_server;
+	std::atomic<double> rcu_uplink_obc;
+	std::atomic<double> rcu_downlink_obc;
+	std::atomic<double> pg_hv;
+	std::atomic <double> pg_5v;
 public:
 	RCU_Systemstatus(float updateFreq, EthernetClient* client, EthernetServer* server);
 	void init() override;
 	void update() override;
-	Data* getData() override;
+    std::unique_ptr<Data> getData() override;
 	int getI2CAddr() override;
     SensorType getSensorType() override;
 };

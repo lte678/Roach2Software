@@ -20,6 +20,9 @@
 #include <iostream>
 #include <chrono>
 #include <string>
+#include <memory>
+#include <atomic>
+#include <mutex>
 
 /* ##################################################################################### */
 /* 0. Hard coded settings  */
@@ -44,16 +47,14 @@ public:
 	~ADC_MCP3428();
 	void init();
 	void update();
-	Data* getData();
+    std::unique_ptr<Data> getData();
 	int getI2CAddr();
     SensorType getSensorType();
 private:
 	int measurement[4] = {};
-	int ilauf = 1;
-	int adress[4];
-	double convertedMeasurement[4] = {};
-	unsigned long timeStamp = 0;
-	Data* data_obj;
+	int address[4]{};
+	std::mutex dataLock;
+	double convertedMeasurement[4]{};
 };
 
 #endif //ADC_MCP3428

@@ -41,7 +41,9 @@ void OBC_Systemstatus::init()
 void OBC_Systemstatus::update()
 {
 	int buffer = 0;
-	this->currentData = new Data();
+
+	pg_rover = 0;
+	pg_cam = 0;
 
 	// Load sensor values:
 	// Rover power good
@@ -49,10 +51,7 @@ void OBC_Systemstatus::update()
 	if (fd_0 != -1) {
 		read(fd_0, &buffer, 1); // ASCII 48=0, 49=1
 		if (buffer == 49) {
-			this->currentData->addValue("PG_ROVER", 1);
-		}
-		else {
-			this->currentData->addValue("PG_ROVER", 0);
+			pg_rover = 1;
 		}
 		close(fd_0);
 	}
@@ -64,24 +63,24 @@ void OBC_Systemstatus::update()
 	if (fd_0 != -1) {
 		read(fd_0, &buffer, 1);
 		if (buffer == '1') {
-			this->currentData->addValue("PG_CAM", 1);
-		}
-		else {
-			this->currentData->addValue("PG_CAM", 0);
+			pg_cam = 1;
 		}
 		close(fd_0);
 	}
 
 	// Load connection status to RCU
-	double obc_uplink_rcu = this->eth_client->isConnected() ? 1 : 0;
-	double obc_downlink_rcu = this->eth_server->isConnected() ? 1 : 0;
-	this->currentData->addValue("OBC_UP_RCU", obc_uplink_rcu);
-	this->currentData->addValue("OBC_DOWN_RCU", obc_downlink_rcu);
+	obc_uplink_rcu = this->eth_client->isConnected() ? 1 : 0;
+	obc_downlink_rcu = this->eth_server->isConnected() ? 1 : 0;
 }
 
-Data* OBC_Systemstatus::getData()
+std::unique_ptr<Data> OBC_Systemstatus::getData()
 {
-	return this->currentData;
+    std::unique_ptr<Data> currentData(new Data());
+    currentData->addValue("OBC_UP_RCU", obc_uplink_rcu);
+    currentData->addValue("OBC_DOWN_RCU", obc_downlink_rcu);
+    currentData->addValue("PG_ROVER", pg_rover);
+    currentData->addValue("PG_CAM", pg_cam);
+	return currentData;
 }
 
 int OBC_Systemstatus::getI2CAddr()

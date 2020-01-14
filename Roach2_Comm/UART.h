@@ -35,24 +35,23 @@
 
 #define CRC16 0x8005 // CRC16 polynom
 
-class UART :
-	public Connection
-{
+class UART : public Connection {
 private:
+#ifndef LOCAL_DEV
+    const char* port = "/dev/ttyS1";
+#else
+    const char* port = "/dev/ttyS0";
+#endif
+
 	// Thread related
 	std::atomic<bool> stop_bit;
 	std::mutex lock_send_queue;
 	std::mutex lock_receive_queue;
-	std::queue<Data_super*> send_queue;
+	std::queue<std::unique_ptr<Data_super>> send_queue;
 	std::queue<Data_simple*> receive_queue;
 
 	const int max_number_packages_send_at_once = 1000; // Max number of packages to send at once
 	const int rx_loop_wait = 1; // Time to wait after each check of RX buffer
-#ifndef LOCAL_DEV
-	const char* port = "/dev/ttyS1";
-#else
-	const char* port = "/dev/ttyS0";
-#endif
 	struct termios tty;
 	int baud;
 	int serial_port;
@@ -63,7 +62,6 @@ private:
 	uint64_t* rx_frames;
 	int frame_counter_tx;
 	int frame_counter_rx;
-	Data_super* dataToSend;
 	Data_super* dataReceived;
 	char* rx_buffer;
 	uint rx_buffer_counter;
@@ -78,7 +76,7 @@ public:
 	UART(PLATFORM _origin);
 	~UART();
 	void run();
-	void sendData(Data_super** data, int count);
+	void sendData(std::unique_ptr<Data_super> data);
 	Data_simple* getData(void);
 	int getNumberReceived();
 	int whichConnection();

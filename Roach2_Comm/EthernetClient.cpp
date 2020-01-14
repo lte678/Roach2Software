@@ -96,7 +96,7 @@ void EthernetClient::run()
 }
 
 
-void EthernetClient::send(Data_super* msg) {
+void EthernetClient::send(std::unique_ptr<Data_super> msg) {
     std::vector<uint64_t> packets = msg->convert_to_serial(origin);
     std::stringstream msg_string;
     msg_string << "bin:";
@@ -108,4 +108,10 @@ void EthernetClient::send(Data_super* msg) {
 	this->access_send_queue.lock();
 	this->send_queue.push(msg_string.str());
 	this->access_send_queue.unlock();
+}
+
+void EthernetClient::send(std::string msg) {
+    this->access_send_queue.lock();
+    this->send_queue.push("txt:" + msg + ";");
+    this->access_send_queue.unlock();
 }

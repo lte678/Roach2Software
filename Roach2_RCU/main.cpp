@@ -2,5 +2,6 @@
 
 int main(int argc, char** argv) {
 	FSM_RCU* controller = new FSM_RCU();
+	controller->run();
 
 }

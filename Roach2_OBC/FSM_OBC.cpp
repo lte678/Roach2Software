@@ -64,14 +64,7 @@ void FSM_OBC::run() {
         // Handle ethernet messages from rover
         while (eth_server->isDataReceived()) {
             std::string msg = eth_server->popMessage();
-            //std::cout << "Ethernet message: " << msg << std::endl;
-            Data_super *binMsg[1];
-            binMsg[0] = EthernetServer::parseBinary(msg);
-            if (binMsg[0]) {
-                // Forward binary data to ground station
-                debugLink->sendData(binMsg, 1);
-            }
-
+            packageReceivedEthernet(msg);
         }
 
         // Send sensor updates on downlink with 5Hz
@@ -92,24 +85,21 @@ void FSM_OBC::sensorDownlink() {
     if (std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime).count() > 0.2) {
         startTime = startTime + std::chrono::high_resolution_clock::duration(std::chrono::milliseconds(200));
 
-        Data_super *send_data[1];
-
         // Send RCU connection status
         if (this->eth_client->isConnected()) {
-            send_data[0] = new Data_simple(0x0B, 1);
-            debugLink->sendData(send_data, 1);
+            std::unique_ptr<Data_super> send_data(new Data_simple(0x0B, 1));
+            debugLink->sendData(std::move(send_data));
         } else {
-            send_data[0] = new Data_simple(0x0B, 0);
-            debugLink->sendData(send_data, 1);
+            std::unique_ptr<Data_super> send_data(new Data_simple(0x0B, 0));
+            debugLink->sendData(std::move(send_data));
         }
 
         // Send sensor status update
         for (SensorType sensor : sensor_ids) {
             // Send sensor status, sensors: IMU, ARM Info, Temp75B
-            send_data[0] = readSensor(sensor);
-
-            if (send_data[0] != nullptr) {
-                debugLink->sendData(send_data, 1);
+            std::unique_ptr<Data_super> sensorData(readSensor(sensor));
+            if (sensorData) {
+                debugLink->sendData(std::move(sensorData));
             }
         }
 
@@ -125,11 +115,25 @@ void FSM_OBC::sensorDownlink() {
 */
 void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 {
-	Data_super* send_data[1];
+    DATA_TYPE type = CommandParser::packet_type(message);
+    if(type != DATA_TYPE::COMMAND) {
+        // Macht keinen Sinn, wir arbeiten nicht mit Sensor packets oder sonstige
+        // Lieber streng sein
+        return;
+    }
+
+    // Leite die Daten an den Rover weiter, wenn dieser als Ziel angegeben ist
+    if (CommandParser::get_destination(message) == PLATFORM::RCU) {
+        std::unique_ptr<Data_Raw> toForward(new Data_Raw());
+        toForward->addElement(message);
+        eth_client->send(std::move(toForward));
+    }
+
+    // Es handelt sich um ein gültiges Command Packet
 
 	// Parse commands
-	uint32_t cmd = ((message & 0xFFFFFFFF00000000) >> 32);
-	uint32_t para = (message & 0x00000000FFFFFFFF);
+	uint16_t cmd = CommandParser::get_command(message);
+	uint32_t para = CommandParser::get_parameter(message);
 	parse_command_type res = CommandParser::parse(cmd);
 
 	// React on commands
@@ -137,90 +141,86 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 	switch ((int)res.op) {
 		case (int)COMMANDS_OPERATIONAL::obc_check_alive:
 			// Check alive command => send command back + 1 in parameter section
-			if (this->eth_client->isConnected()) {
+			if (eth_client->isConnected()) {
 				// Rover connected
-				send_data[0] = new Data_simple(cmd, 2);
+                std::unique_ptr<Data_super> send_data(new Data_simple(cmd, 2));
+                debugLink->sendData(std::move(send_data));
 			}
 			else {
 				// No rover connected
-				send_data[0] = new Data_simple(cmd, 1);
+                std::unique_ptr<Data_super> send_data(new Data_simple(cmd, 1));
+                debugLink->sendData(std::move(send_data));
 			}
-			this->debugLink->sendData(send_data, 1);
 		break;
+
 		case (int)COMMANDS_OPERATIONAL::obc_restart_rover:
 			// Restart rover
-			this->enableRoverPower->disable(false);
+			enableRoverPower->disable(false);
 			usleep(1000 * 1000); // 1s warten
-			this->enableRoverPower->enable(false);
+			enableRoverPower->enable(false);
 			// Confirm operation and restart
-			send_data[0] = new Data_simple(cmd, 1);
-			this->debugLink->sendData(send_data, 1);
+			std::unique_ptr<Data_super> send_data(new Data_simple(cmd, 1));
+			debugLink->sendData(std::move(send_data));
 		break;
 	}
 
 	Data_super* msg;
 
 	// Debug commands
+    std::unique_ptr<Data_super> send_data;
 	switch ((int)res.debug) {
 		case (int)COMMANDS_DEBUG::obc_drive_forward:
 			// OBC command rover to drive forward
-			msg = new Data_simple("RCU_DRIVE_FORWARD");
-			this->eth_client->send(msg);
 		break;
 
 		case (int)COMMANDS_DEBUG::obc_drive_stop:
 			// OBC command rover to stop driving
-			msg = new Data_simple("RCU_STOP_DRIVE_FORWARD");
-			this->eth_client->send(msg);
 		break;
 
 		case (int)COMMANDS_DEBUG::obc_next_state:
 			// OBC change state, only IDLE to EXPERIMENT possible
-			if (this->currentState == (int)FSM_STATES_OBC::IDLE) {
-				this->currentState = (int)FSM_STATES_OBC::EXPERIMENT;
+			if (currentState == (int)FSM_STATES_OBC::IDLE) {
+				currentState = (int)FSM_STATES_OBC::EXPERIMENT;
 			}
 			// Send new state number back
-			send_data[0] = new Data_simple(cmd, this->currentState);
-			this->debugLink->sendData(send_data, 1);
+            send_data = std::unique_ptr<Data_super>(new Data_simple(cmd, currentState));
+			debugLink->sendData(std::move(send_data));
 		break;
 
 		case (int)COMMANDS_DEBUG::obc_prev_state:
 			// OBC change state, only EXPERIMENT to IDLE possible
-			if (this->currentState == (int)FSM_STATES_OBC::EXPERIMENT) {
-				this->currentState = (int)FSM_STATES_OBC::IDLE;
+			if (currentState == (int)FSM_STATES_OBC::EXPERIMENT) {
+				currentState = (int)FSM_STATES_OBC::IDLE;
 			}
 			// Send new state number back
-			send_data[0] = new Data_simple(cmd, this->currentState);
-			this->debugLink->sendData(send_data, 1);
+            send_data = std::unique_ptr<Data_super>(new Data_simple(cmd, currentState));
+			debugLink->sendData(std::move(send_data));
 		break;
 
 		case (int)COMMANDS_DEBUG::obc_rcu_off:
 			// Switch RCU/rover off
-			this->enableRoverPower->enable(true);
+			enableRoverPower->enable(true);
 		break;
 
 		case (int)COMMANDS_DEBUG::obc_rcu_on:
 			// Switch RCU/rover on
-			this->enableRoverPower->disable(true);
+			enableRoverPower->disable(true);
 		break;
 
 		case (int)COMMANDS_DEBUG::obc_read_sensor:
 			{
 				// Read the sensor with the given sensor id
-                Data_super* data[1];
 				for(SensorType sensor : sensor_ids) {
 				    if((uint32_t)sensor == para) {
-                        data[0] = readSensor(sensor);
+                        send_data = readSensor(sensor);
 				    }
 				}
 
-				if (data[0] == nullptr) {
-					send_data[0] = new Data_simple(cmd, -1);
-					this->debugLink->sendData(send_data, 1);
+				// Send error back instead
+				if (!send_data) {
+					send_data = std::unique_ptr<Data_super>(new Data_simple(cmd, -1));
 				}
-				else {
-					this->debugLink->sendData(data, 1);
-				}
+                debugLink->sendData(std::move(send_data));
 			}
 		break;
 
@@ -281,9 +281,8 @@ void FSM_OBC::sendRXSMSignalUpdate_Downlink() {
     }
 
 	// Notify connected UART debug console
-	Data_super* data[1];
-	data[0] = new Data_simple(0x0A, signals_binary);
-	debugLink->sendData(data, 1);
+	std::unique_ptr<Data_super> data( new Data_simple((uint32_t)COMMANDS_OPERATIONAL::obc_rocket_signal_status, signals_binary));
+	debugLink->sendData(std::move(data));
 
 }
 
@@ -303,8 +302,7 @@ void FSM_OBC::stateMachine()
 
         // Switch RCU from IDLE to STANDBY
         if (currentRCUState != FSM_STATES_RCU::STANDBY) {
-            msg = new Data_simple("RCU_FSM_STANDBY");
-            eth_client->send(msg);
+            eth_client->send("RCU_FSM_STANDBY");
             currentRCUState = FSM_STATES_RCU::STANDBY; // Note: Message to RCU is in run() method
         }
 	}
@@ -321,8 +319,8 @@ void FSM_OBC::stateMachine()
         // Switch RCU from STANDBY to DRIVE_FORWARD if SOE given
         if (currentRCUState == FSM_STATES_RCU::STANDBY) {
             // Send drive forward command
-            msg = new Data_simple("RCU_FSM_DRIVE_FORWARD");
-            eth_client->send(msg);
+            std::unique_ptr<Data_simple> msg(new Data_simple("RCU_FSM_DRIVE_FORWARD"));
+            eth_client->send(std::move(msg));
             currentRCUState = FSM_STATES_RCU::DRIVE_FORWARD;
         }
     }
@@ -331,8 +329,7 @@ void FSM_OBC::stateMachine()
     if (!soe) {
         if (currentRCUState != FSM_STATES_RCU::STANDBY) {
             // Send standby command
-            msg = new Data_simple("RCU_FSM_STANDBY");
-            eth_client->send(msg);
+            eth_client->send("RCU_FSM_STANDBY");
         }
         currentRCUState = FSM_STATES_RCU::STANDBY;
     }
@@ -340,9 +337,8 @@ void FSM_OBC::stateMachine()
     // Detect state change
     if (lastState != currentState) {
         // State change -> send through downlink
-        Data_super* data_send[1];
-        data_send[0] = new Data_simple(0x0C, (unsigned int)currentState);
-        debugLink->sendData(data_send, 1);
+        std::unique_ptr<Data_super> data_send(new Data_simple(0x0C, (unsigned int)currentState));
+        debugLink->sendData(std::move(data_send));
         // Write debug message
         std::cout << "[OBC Firmware] State change. OBC: ";
         switch(currentState) {
@@ -362,30 +358,31 @@ void FSM_OBC::packageReceivedRexus(uint64_t message, int msg_length)
 	this->packageReceivedUART(message, msg_length);
 }
 
-void FSM_OBC::packageReceivedEthernet()
-{
-	int i = 0;
-}
-
 /**
  * @brief Called if a change to the simulation mode properties occurs
 */
 void FSM_OBC::simulationModeUpdate() {
-    Data_simple* msg;
-
     if (this->isSimModeEnabled()) {
         // Update all actuators: on OBC side nothing to be done
 
         // Send update to RCU
-        msg = new Data_simple("RCU_SIM_MODE_ENABLE");
-        this->eth_client->send(msg);
+        this->eth_client->send("RCU_SIM_MODE_ENABLE");
     }
     else {
         // Disable sim mode
 
         // Send update to RCU
-        msg = new Data_simple("RCU_SIM_MODE_DISABLE");
-        this->eth_client->send(msg);
+        this->eth_client->send("RCU_SIM_MODE_DISABLE");
     }
+}
 
+/**
+ * @brief Handle with ethernet data from rover
+*/
+void FSM_OBC::packageReceivedEthernet(const std::string &msg) {
+    std::unique_ptr<Data_super> binMsg(EthernetServer::parseBinary(msg));
+    if (binMsg) {
+        // Forward binary data to ground station
+        debugLink->sendData(std::move(binMsg));
+    }
 }

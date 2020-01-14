@@ -24,8 +24,7 @@ void UART::send()
 		// Convert into frame structure:
 		// 64bit data, 16bit CRC, 4bit frame number, 4bit data length
 
-		// Check whether Data_simple is used instead of Data
-		Data_super* dataToSend = this->send_queue.front();
+		std::unique_ptr<Data_super> dataToSend = std::move(send_queue.front());
 		std::vector<uint64_t> tx_data = dataToSend->convert_to_serial(origin);
 		int data_length = dataToSend->convert_to_serial_array_length();
 		this->tx_frames = new uint64_t[data_length]; // each frame consists of 11 bytes
@@ -42,7 +41,7 @@ void UART::send()
 
 			// Create current header section
 			header_data = data_length;
-			header_data += ((uint8_t)this->frame_counter_tx << 4); // Shift to upper 4bits
+			header_data += ((uint8_t)this->frame_counter_tx << 4u); // Shift to upper 4bits
 
 			// Calc CRC
 			uint8_t* crc_data = (uint8_t*)& buffer_data;
@@ -58,7 +57,6 @@ void UART::send()
 
 		// Free memory
 		this->send_queue.pop();
-		delete dataToSend;
 	}
 }
 
@@ -124,7 +122,7 @@ uint16_t UART::calc_crc(const uint8_t * data, uint16_t size)
  * @brief Receive data from serial port according to our protocol
  * This function cannot run in parallel to the main thread and is therefore replaced by run(data_ref).
 */
-void UART::receive(void)
+void UART::receive()
 {
 	uint16_t crc;
 	uint frame_nr;
@@ -305,19 +303,13 @@ void UART::run()
  * @brief Puts the given data to the list of data to send and transmits the data afterwards. If some data is already in the queue, this data will be lost!
  *		  Note: Access is blocking on send queue!
  * @param data pointer to Data objects to send
- * @param int number of Data objects passed to this function
 */
-void UART::sendData(Data_super** data, int count)
+void UART::sendData(std::unique_ptr<Data_super> data)
 {
-	// Acquire lock
-	this->lock_send_queue.lock();
-
-	// Add pointer to send queue
-	for (int i = 0; i < count; i++) {
-		this->send_queue.push(data[i]);
-	}
-
-	this->lock_send_queue.unlock();
+    // Add pointer to send queue
+	lock_send_queue.lock(); // Acquire lock
+    send_queue.push(std::move(data));
+	lock_send_queue.unlock();
 }
 
 /**

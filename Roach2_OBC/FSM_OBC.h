@@ -48,7 +48,7 @@ public:
 	void packageReceivedUART(uint64_t message, int msg_length) override;
 	void stateMachine();
 	void packageReceivedRexus(uint64_t message, int msg_length) override;
-	void packageReceivedEthernet() override;
+	void packageReceivedEthernet(const std::string& msg) override;
 	void rocketSignalReceived(int) override {};
 	void simulationModeUpdate() override;
 };

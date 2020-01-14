@@ -47,7 +47,7 @@ public:
 	~ROT_AS5601();
 	void init();
 	void update();
-	Data* getData();
+    std::unique_ptr<Data> getData();
 	int getI2CAddr();
     SensorType getSensorType();
 private:

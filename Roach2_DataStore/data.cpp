@@ -172,9 +172,9 @@ std::string Data::serializeLogging()
 	result += std::to_string(this->id);
 
 	for (int i = 0; i < this->columnNames.size(); i++) {
-		result += this->columnNames[i];
+		result += columnNames[i];
 		result += ";";
-		result += std::to_string(this->values[i]);
+		result += std::to_string(values[i]);
 	}
 
 	return result;

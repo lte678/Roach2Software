@@ -1,7 +1,9 @@
 #ifndef COMMAND_PARSER_HEADER_FILE
 #define COMMAND_PARSER_HEADER_FILE
 
+#include "../Roach2_DataStore/Data_super.h"
 #include <cstdint>
+
 enum class COMMANDS_OPERATIONAL {
 	no = 0,
 	rcu_check_alive = 1,
@@ -13,7 +15,6 @@ enum class COMMANDS_OPERATIONAL {
 	obc_restart_rover = 7,
 	rcu_touch_down_event = 8,
 	rcu_read_sensor  = 9,
-	obc_rcu_online = 11,
 	obc_rocket_signal_status = 10,
 	obc_sim_control = 11,
 	obc_rcu_online = 12,
@@ -21,7 +22,7 @@ enum class COMMANDS_OPERATIONAL {
 	obc_rcu_state_change = 14,
 	obc_restart_obc = 15,
 	obc_eth_stat = 16,
-	NUMBER_ELEMENTS = 12
+	NUMBER_ELEMENTS = 17
 };
 
 enum class COMMANDS_DEBUG {
@@ -30,26 +31,22 @@ enum class COMMANDS_DEBUG {
 	obc_prev_state = 2,
 	obc_drive_forward = 3,
 	obc_drive_stop = 4,
-	rcu_drive_forward = 5,
-	rcu_next_state = 6,
-	rcu_prev_state = 7,
-	rcu_drive_stop = 8,
-	rcu_hv_on = 9,
-	rcu_hv_off = 10,
-	obc_rcu_off = 11,
-	obc_rcu_on = 12,
-	obc_sensor_acq_on = 13,
-	obc_sensor_acq_off = 14,
-	rcu_sensor_acq_on = 15,
-	rcu_sensor_acq_off = 16,
-	obc_read_sensor = 17,
-	obc_light_control = 18,
-	obc_gopro_control = 19,
-	obc_check_eth = 20,
-	rcu_lights_on = 21,
-	rcu_lights_off = 22,
-	obc_sim_control = 23,
-	NUMBER_ELEMENTS = 24
+	rcu_next_state = 5,
+	rcu_prev_state = 6,
+	obc_sensor_acq_on = 7,
+	obc_sensor_acq_off = 8,
+	rcu_sensor_acq_on = 9,
+	rcu_sensor_acq_off = 10,
+	obc_read_sensor = 11,
+	obc_light_control = 12,
+	obc_gopro_control = 13,
+	obc_check_eth = 14,
+	rcu_lights_on = 15,
+	rcu_lights_off = 16,
+	obc_sim_control = 17,
+    obc_rcu_off = 18,
+    obc_rcu_on = 19,
+	NUMBER_ELEMENTS = 20
 };
 
 enum class COMMANDS_SIM {
@@ -58,7 +55,11 @@ enum class COMMANDS_SIM {
 	obc_touch_down_event = 2,
 	obc_soe_event = 3,
 	obc_lo_event = 4,
-	NUMBER_ELEMENTS = 5
+    rcu_hv_on = 5,
+    rcu_hv_off = 6,
+    rcu_drive_enable = 7,
+    rcu_drive_stop = 8,
+	NUMBER_ELEMENTS = 9
 };
 
 struct parse_command_type {
@@ -70,7 +71,11 @@ struct parse_command_type {
 class CommandParser
 {
 	public:
-		static parse_command_type parse(uint32_t command);
+		static parse_command_type parse(uint16_t command);
+		static DATA_TYPE packet_type(uint64_t packet);
+		static uint32_t get_parameter(uint64_t packet);
+		static uint16_t get_command(uint64_t packet);
+		static PLATFORM get_destination(uint64_t packet);
 };
 
 #endif

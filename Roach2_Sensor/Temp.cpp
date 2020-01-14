@@ -32,8 +32,8 @@ void TEMP_LM75B::update()
 	convertedMeasurement = measurement * 0.5;
 }
 
-Data* TEMP_LM75B::getData() {
-	Data* data_ptr = new Data();
+std::unique_ptr<Data> TEMP_LM75B::getData() {
+    std::unique_ptr<Data> data_ptr(new Data());
 	data_ptr->setId((int)SensorType::TEMP_SENSOR);
 	data_ptr->addValue("TEMP", convertedMeasurement);
 	return data_ptr;
