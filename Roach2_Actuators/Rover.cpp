@@ -19,6 +19,7 @@ int Actuator_Rover::getActuatorType()
 void Actuator_Rover::enable(bool debug)
 {
     if(!isDebugMode || debug) {
+        std::cout << "[Actuator|Rover] Rover power enable" << std::endl;
         roverPowerPin->write(true);
     }
 }
@@ -26,6 +27,7 @@ void Actuator_Rover::enable(bool debug)
 void Actuator_Rover::disable(bool debug)
 {
     if(!isDebugMode || debug) {
+        std::cout << "[Actuator|Rover] Rover power disable" << std::endl;
         roverPowerPin->write(false);
     }
 }

@@ -6,59 +6,13 @@
  * @param command: raw 32bit command word
  * @return parsed command in parse_command_type strucutre
 */
-parse_command_type CommandParser::parse(uint16_t command)
+COMMAND CommandParser::parse(uint16_t command)
 {
-	parse_command_type result = {};
-
-	// Command type is MSB byte
-	// first 4 bits
-	uint8_t cmdType = ((command & 0xF000u) >> 12u);
-
-	// Command number
-	// last 12 bits
-	uint16_t cmdNr = command & 0x0FFFu;
-
-	if (cmdType == 0) {
-		// Operational related command
-
-		// Check if valid command
-		if (cmdNr > (int)COMMANDS_OPERATIONAL::NUMBER_ELEMENTS - 1) {
-			// No valid command
-			result.op = COMMANDS_OPERATIONAL::no;
-		} else {
-			result.op = static_cast<COMMANDS_OPERATIONAL>(cmdNr);
-		}
-		result.debug = COMMANDS_DEBUG::no;
-		result.sim = COMMANDS_SIM::no;
-	}
-	else if (cmdType == 1) {
-		// Debug related command
-
-		// Check if valid command
-		if (cmdNr > (int)COMMANDS_DEBUG::NUMBER_ELEMENTS - 1) {
-			// No valid command
-			result.debug = COMMANDS_DEBUG::no;
-		} else {
-			result.debug = static_cast<COMMANDS_DEBUG>(cmdNr);
-		}
-		result.op = COMMANDS_OPERATIONAL::no;
-		result.sim = COMMANDS_SIM::no;
-	}
-	else if (cmdType == 2) {
-		// Sim related command
-
-		// Check if valid command
-		if (cmdNr > (int)COMMANDS_SIM::NUMBER_ELEMENTS - 1) {
-            // No valid command
-            result.sim = COMMANDS_SIM::no;
-        } else {
-			result.sim = static_cast<COMMANDS_SIM>(cmdNr);
-		}
-		result.op = COMMANDS_OPERATIONAL::no;
-		result.debug = COMMANDS_DEBUG::no;
-	}
-
-	return result;
+    if (command < (uint16_t)COMMAND::NUMBER_ELEMENTS) {
+        return static_cast<COMMAND>(command);
+    } else {
+        return COMMAND::unknown;
+    }
 }
 
 DATA_TYPE CommandParser::packet_type(uint64_t packet) {

@@ -131,23 +131,34 @@ void FSM_RCU::packageReceivedEthernet(const std::string& msg) {
     // Parse commands
     uint16_t cmd = CommandParser::get_command(cmdPacket);
     uint32_t para = CommandParser::get_parameter(cmdPacket);
-    parse_command_type res = CommandParser::parse(cmd);
+    COMMAND res = CommandParser::parse(cmd);
 
     Data_super* send_data[1];
 
-    // Sim commands
-    switch ((int)res.sim) {
-        case (int)COMMANDS_SIM::rcu_hv_on:
+    // Process commands
+    switch (res) {
+        case COMMAND::rcu_hv_on:
             hv->enable(true); // Force change because of debug mode
             break;
-        case (int)COMMANDS_SIM::rcu_hv_off:
+
+        case COMMAND::rcu_hv_off:
             hv->disable(true); // Force change because of debug mode
             break;
-        case (int)COMMANDS_SIM::rcu_drive_enable:
+
+        case COMMAND::rcu_drive_enable:
             pwm->enable(true); // Force change because of debug mode
             break;
-        case (int)COMMANDS_SIM::rcu_drive_stop:
+
+        case COMMAND::rcu_drive_stop:
             pwm->disable(true); // Force change because of debug mode
+            break;
+
+        case COMMAND::rcu_lights_on:
+            pwm->enableLEDs(true);
+            break;
+
+        case COMMAND::rcu_lights_off:
+            pwm->disableLEDs(true);
             break;
     }
 

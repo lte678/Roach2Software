@@ -22,6 +22,7 @@ int Actuator_HV::getActuatorType()
 void Actuator_HV::enable(bool debug)
 {
     if(!isDebugMode || debug) {
+        std::cout << "[Actuator|HV] Enabling" << std::endl;
         hvLeft->write(true);
         hvRight->write(true);
     }
@@ -30,6 +31,7 @@ void Actuator_HV::enable(bool debug)
 void Actuator_HV::disable(bool debug)
 {
     if(!isDebugMode || debug) {
+        std::cout << "[Actuator|HV] Disabling" << std::endl;
         hvLeft->write(false);
         hvRight->write(false);
     }

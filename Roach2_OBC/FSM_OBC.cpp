@@ -123,10 +123,11 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
     }
 
     // Leite die Daten an den Rover weiter, wenn dieser als Ziel angegeben ist
+    std::unique_ptr<Data_Raw> toForward(new Data_Raw());
+    toForward->addElement(message);
     if (CommandParser::get_destination(message) == PLATFORM::RCU) {
-        std::unique_ptr<Data_Raw> toForward(new Data_Raw());
-        toForward->addElement(message);
         eth_client->send(std::move(toForward));
+        return;
     }
 
     // Es handelt sich um ein gültiges Command Packet
@@ -134,109 +135,67 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 	// Parse commands
 	uint16_t cmd = CommandParser::get_command(message);
 	uint32_t para = CommandParser::get_parameter(message);
-	parse_command_type res = CommandParser::parse(cmd);
+	COMMAND res = CommandParser::parse(cmd);
 
 	// React on commands
-	// Operational commands
-	switch ((int)res.op) {
-		case (int)COMMANDS_OPERATIONAL::obc_check_alive:
+
+    std::unique_ptr<Data_super> send_data;
+
+	switch (res) {
+		case COMMAND::obc_check_alive:
 			// Check alive command => send command back + 1 in parameter section
 			if (eth_client->isConnected()) {
 				// Rover connected
-                std::unique_ptr<Data_super> send_data(new Data_simple(cmd, 2));
+                send_data = std::make_unique<Data_simple>(cmd, 2);
                 debugLink->sendData(std::move(send_data));
 			}
 			else {
 				// No rover connected
-                std::unique_ptr<Data_super> send_data(new Data_simple(cmd, 1));
+                send_data = std::make_unique<Data_simple>(cmd, 1);
                 debugLink->sendData(std::move(send_data));
 			}
-		break;
+		    break;
 
-		case (int)COMMANDS_OPERATIONAL::obc_restart_rover:
+		case COMMAND::obc_restart_rover:
 			// Restart rover
 			enableRoverPower->disable(false);
 			usleep(1000 * 1000); // 1s warten
 			enableRoverPower->enable(false);
 			// Confirm operation and restart
-			std::unique_ptr<Data_super> send_data(new Data_simple(cmd, 1));
+            send_data = std::make_unique<Data_simple>(cmd, 1);
 			debugLink->sendData(std::move(send_data));
-		break;
-	}
+		    break;
 
-	Data_super* msg;
+	    case COMMAND::obc_restart_obc:
+	        //TODO: Obc restart!
+	        break;
 
-	// Debug commands
-    std::unique_ptr<Data_super> send_data;
-	switch ((int)res.debug) {
-		case (int)COMMANDS_DEBUG::obc_drive_forward:
-			// OBC command rover to drive forward
-		break;
+        case COMMAND::obc_rcu_off:
+            // Switch RCU/rover off
+            enableRoverPower->enable(true);
+            break;
 
-		case (int)COMMANDS_DEBUG::obc_drive_stop:
-			// OBC command rover to stop driving
-		break;
+        case COMMAND::obc_rcu_on:
+            // Switch RCU/rover on
+            enableRoverPower->disable(true);
+            break;
 
-		case (int)COMMANDS_DEBUG::obc_next_state:
-			// OBC change state, only IDLE to EXPERIMENT possible
-			if (currentState == (int)FSM_STATES_OBC::IDLE) {
-				currentState = (int)FSM_STATES_OBC::EXPERIMENT;
-			}
-			// Send new state number back
-            send_data = std::unique_ptr<Data_super>(new Data_simple(cmd, currentState));
-			debugLink->sendData(std::move(send_data));
-		break;
+        case COMMAND::obc_read_sensor:
+            // Read the sensor with the given sensor id
+            for(SensorType sensor : sensor_ids) {
+                if((uint32_t)sensor == para) {
+                    send_data = readSensor(sensor);
+                }
+            }
 
-		case (int)COMMANDS_DEBUG::obc_prev_state:
-			// OBC change state, only EXPERIMENT to IDLE possible
-			if (currentState == (int)FSM_STATES_OBC::EXPERIMENT) {
-				currentState = (int)FSM_STATES_OBC::IDLE;
-			}
-			// Send new state number back
-            send_data = std::unique_ptr<Data_super>(new Data_simple(cmd, currentState));
-			debugLink->sendData(std::move(send_data));
-		break;
+            // Send error back instead
+            if (!send_data) {
+                send_data = std::make_unique<Data_simple>(cmd, -1);
+            }
+            debugLink->sendData(std::move(send_data));
+            break;
 
-		case (int)COMMANDS_DEBUG::obc_rcu_off:
-			// Switch RCU/rover off
-			enableRoverPower->enable(true);
-		break;
-
-		case (int)COMMANDS_DEBUG::obc_rcu_on:
-			// Switch RCU/rover on
-			enableRoverPower->disable(true);
-		break;
-
-		case (int)COMMANDS_DEBUG::obc_read_sensor:
-			{
-				// Read the sensor with the given sensor id
-				for(SensorType sensor : sensor_ids) {
-				    if((uint32_t)sensor == para) {
-                        send_data = readSensor(sensor);
-				    }
-				}
-
-				// Send error back instead
-				if (!send_data) {
-					send_data = std::unique_ptr<Data_super>(new Data_simple(cmd, -1));
-				}
-                debugLink->sendData(std::move(send_data));
-			}
-		break;
-
-		// Control sensor and system status information downstream
-		case (int)COMMANDS_DEBUG::obc_sensor_acq_off:
-			// Switch sensor acquisiton off
-            ;
-		break;
-
-		case (int)COMMANDS_DEBUG::obc_sensor_acq_on:
-			// Switch sensor acquisition on
-            ;
-		break;
-
-		// Simulation control
-        case (int)COMMANDS_DEBUG::obc_sim_control:
+        case COMMAND::obc_sim_control:
             if (para == 1) {
                 // enable simulation mode
                 this->enableSimMode();
@@ -246,23 +205,20 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
                 this->disableSimMode();
             }
             break;
-	}
 
-	// Sim commands
-	switch ((int)res.sim) {
-		case ((int)COMMANDS_SIM::obc_lo_event) :
-			//this->rocketSignalReceived((int)REXUS_SIGNALS::LO);
-			break;
-		case (int)COMMANDS_SIM::obc_sods_event:
-			//this->rocketSignalReceived((int)REXUS_SIGNALS::SODS);
-			break;
-		case (int)COMMANDS_SIM::obc_soe_event:
-			//this->rocketSignalReceived((int)REXUS_SIGNALS::SOE);
-			break;
-		case (int)COMMANDS_SIM::obc_touch_down_event:
-			// Power off system
-			system("poweroff"); // Shutdown system
-			break;
+        // Additionally forward RCU messages if not already done
+	    case COMMAND::rcu_drive_enable:
+        case COMMAND::rcu_drive_stop:
+        case COMMAND::rcu_hv_on:
+        case COMMAND::rcu_hv_off:
+        case COMMAND::rcu_lights_on:
+        case COMMAND::rcu_lights_off:
+            eth_client->send(std::move(toForward));
+            break;
+
+	    default:
+	        std::cout << "[OBC Firmware] received unknown command: " << (int)res << std::endl;
+	        break;
 	}
 }
 
@@ -281,7 +237,7 @@ void FSM_OBC::sendRXSMSignalUpdate_Downlink() {
     }
 
 	// Notify connected UART debug console
-	std::unique_ptr<Data_super> data( new Data_simple((uint32_t)COMMANDS_OPERATIONAL::obc_rocket_signal_status, signals_binary));
+	std::unique_ptr<Data_super> data( new Data_simple((uint16_t)COMMAND::obc_rocket_signal_status, signals_binary));
 	debugLink->sendData(std::move(data));
 
 }
@@ -337,10 +293,10 @@ void FSM_OBC::stateMachine()
     // Detect state change
     if (lastState != currentState) {
         // State change -> send through downlink
-        std::unique_ptr<Data_super> data_send(new Data_simple(0x0C, (unsigned int)currentState));
+        std::unique_ptr<Data_super> data_send(new Data_simple((uint16_t)COMMAND::obc_state_change, (unsigned int)currentState));
         debugLink->sendData(std::move(data_send));
         // Write debug message
-        std::cout << "[OBC Firmware] State change. OBC: ";
+        std::cout << "[OBC Firmware] State change. >> ";
         switch(currentState) {
             case (int)FSM_STATES_OBC::IDLE:
                 std::cout << "Idle" << std::endl;
@@ -366,13 +322,13 @@ void FSM_OBC::simulationModeUpdate() {
         // Update all actuators: on OBC side nothing to be done
 
         // Send update to RCU
-        this->eth_client->send("RCU_SIM_MODE_ENABLE");
+        eth_client->send(std::make_unique<Data_simple>((uint16_t)COMMAND::obc_sim_control, 1));
     }
     else {
         // Disable sim mode
 
         // Send update to RCU
-        this->eth_client->send("RCU_SIM_MODE_DISABLE");
+        eth_client->send(std::make_unique<Data_simple>((uint16_t)COMMAND::obc_sim_control, 0));
     }
 }
 

@@ -28,9 +28,12 @@ int Actuator_GoPro::getActuatorType()
 
 void Actuator_GoPro::enable(bool debug)
 {
+    // Dont enable if in debug mode and not a debug command.
     if(isDebugMode && !debug) {
         return;
     }
+
+    std::cout << "[Actuator|GoPro] Enabling" << std::endl;
 
     camsupply->write(true);
     lights1->write(true);
@@ -55,6 +58,7 @@ void Actuator_GoPro::enable(bool debug)
 
 void Actuator_GoPro::disableGoPro(bool debug) {
 	if (gopro_enabled) {
+        std::cout << "[Actuator|GoPro] Disabling" << std::endl;
         if(isDebugMode && !debug) {
             return;
         }
