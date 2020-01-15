@@ -123,12 +123,10 @@ void Data::print(){
      * */
     std::cout << "ID: " << this->id << std::endl;
     std::cout << "TIME: " << this->time << std::endl;
-    std::cout << "COLUMNNAMES: ";
-    for(int i = 0; i<this->columnNames.size(); i++) std::cout << this->columnNames[i] << " ";
-    std::cout << std::endl;
-    std::cout << "VALUES: ";
-    for(int i = 0; i<this->values.size(); i++) std::cout << this->values[i] << " ";
-    std::cout << std::endl;
+    std::cout << "COLUMN      VALUE" << std::endl;
+    for(int i = 0; i < columnNames.size(); i++) {
+        std::cout << std::setw(12) << std::left << columnNames[i] << values[i] << std::endl;
+    }
 }
 
 /**

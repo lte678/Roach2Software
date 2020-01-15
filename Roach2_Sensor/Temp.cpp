@@ -20,16 +20,16 @@ void TEMP_LM75B::update()
 
 	// Switch byte order, so it goes from MSB to LSB
     measurement = ((measurement & 0xFF) << 8) | ((measurement & 0xFF00) >> 8);
-    measurement = measurement >> 7;
+    measurement = measurement >> 5;
 
     // Check if negative number
-    if(measurement & 0x0100) {
+    if(measurement & 0x0400) {
         // Sign extension with ones
-        measurement |= 0xFE00;
+        measurement |= 0xF800;
     }
 
     // Final temperature value in degrees celsius
-	convertedMeasurement = measurement * 0.5;
+	convertedMeasurement = measurement * 0.125;
 }
 
 std::unique_ptr<Data> TEMP_LM75B::getData() {

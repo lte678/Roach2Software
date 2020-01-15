@@ -14,8 +14,8 @@
 #include <string>
 #include <iostream>
 #include "serialization.h"
-#include <string.h>
-#include <string.h>
+#include <cstring>
+#include <iomanip>
 
 #include "Data_super.h"
 

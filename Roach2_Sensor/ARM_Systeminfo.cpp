@@ -53,6 +53,7 @@ void ARM_Systeminfo::update()
 	read(fd, buffer, sizeof(buffer) - 1);
 	sscanf(buffer, "%f", &temp);
 	close(fd);
+	temp = temp / 1000.0f;
 }
 
 /**
