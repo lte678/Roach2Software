@@ -70,9 +70,30 @@ add_executable(rcu_firmware Roach2_RCU/main.cpp
 
 target_link_libraries(rcu_firmware pthread)
 
+add_executable(syscheck Roach2_SysCheckUtil/main.cpp
+        Roach2_Sensor/Roach2_Sensor_Sensor.cpp
+        Roach2_Sensor/OBC_Systemstatus.cpp
+        Roach2_Sensor/RCU_Systemstatus.cpp
+        Roach2_Sensor/Temp.cpp
+        Roach2_Sensor/Roach2_Sensor_rotEnc.cpp
+        Roach2_Sensor/IMU.cpp
+        Roach2_Sensor/Roach2_Sensor_adc.cpp
+        Roach2_Sensor/ARM_Systeminfo.cpp
+        Roach2_Sensor/RocketSignals.cpp
+        Roach2_DataStore/data.cpp
+        Roach2_DataStore/Data_Raw.cpp
+        Roach2_DataStore/serialization.cpp
+        Roach2_Comm/EthernetClient.cpp
+        Roach2_Comm/EthernetServer.cpp
+        Roach2_Comm/serversock.cpp
+        Roach2_Comm/clientsock.cpp
+        Roach2_Comm/socket.cpp)
+target_link_libraries(syscheck pthread)
+
 if(LOCAL_DEV)
     add_compile_definitions(LOCAL_DEV)
 else()
     target_link_libraries(obc_firmware wiringPi)
     target_link_libraries(rcu_firmware wiringPi)
+    target_link_libraries(syscheck wiringPi)
 endif()
