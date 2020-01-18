@@ -21,12 +21,14 @@
 #include "Sensor_Manager.h"
 
 enum class FSM_STATES_RCU {
+    INVALID = -1,
 	IDLE = 0,
 	STANDBY = 1,
 	DRIVE_FORWARD = 2 
 };
 
 enum class FSM_STATES_OBC {
+    INVALID = -1,
 	IDLE = 0,
 	EXPERIMENT = 1,
 };
@@ -36,8 +38,6 @@ class FSM_Controller
 private:
 	bool isSimMode = false;
 protected:
-	int currentState;
-	int lastState;
 	int time;
 	Sensor_Manager* sensor_manager;
 	RocketSignals* rocket_signals;

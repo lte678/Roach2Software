@@ -6,6 +6,7 @@
 #define ROACH2_SOFTWARE_DATA_RAW_H
 
 #include <vector>
+#include <iostream>
 
 #include "Data_super.h"
 

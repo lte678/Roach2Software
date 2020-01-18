@@ -16,11 +16,13 @@
 #include <termios.h> // Contains POSIX terminal control definitions
 #include <unistd.h> // write(), read(), close()
 #include <unistd.h>
+#include <memory>
+#include <cstring>
 
 #include <queue>
 
-#include "../Roach2_DataStore/data.h"
-#include "../Roach2_DataStore/Data_simple.h"
+#include "../Roach2_DataStore/Data_super.h"
+#include "../Roach2_DataStore/Data_Raw.h"
 #include "Connection.h"
 
 // Threading related
@@ -48,39 +50,30 @@ private:
 	std::mutex lock_send_queue;
 	std::mutex lock_receive_queue;
 	std::queue<std::unique_ptr<Data_super>> send_queue;
-	std::queue<Data_simple*> receive_queue;
+	std::queue<std::unique_ptr<Data_super>> receive_queue;
 
-	const int max_number_packages_send_at_once = 1000; // Max number of packages to send at once
-	const int rx_loop_wait = 1; // Time to wait after each check of RX buffer
 	struct termios tty;
-	int baud;
 	int serial_port;
 	int numberPackagesReceived;
-	int numberPackagesReceivedInvalid;
-	int numberPackagesSend;
-	uint64_t* tx_frames;
-	uint64_t* rx_frames;
-	int frame_counter_tx;
 	int frame_counter_rx;
-	Data_super* dataReceived;
 	char* rx_buffer;
 	uint rx_buffer_counter;
-	int numberDataToSend;
 	int numberDataReceived;
-	bool send_ongoing;
-	bool receive_ongoing;
-	void send(void);
+	std::mutex send_lock;
+	void send();
 	PLATFORM origin;
+	static const uint8_t syncword;
+
 	uint16_t calc_crc(const uint8_t* data, uint16_t size);
 public:
-	UART(PLATFORM _origin);
+	explicit UART(PLATFORM _origin);
 	~UART();
 	void run();
 	void sendData(std::unique_ptr<Data_super> data);
-	Data_simple* getData(void);
+	std::unique_ptr<Data_super> getData();
 	int getNumberReceived();
-	int whichConnection();
-	void receive(void);
+	int whichConnection() override;
+	void receive();
 	void stop_thread();
 	bool isData_received();
 };

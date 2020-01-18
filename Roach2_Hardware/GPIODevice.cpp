@@ -30,17 +30,13 @@ GPIODevice::GPIODevice(unsigned int pinNumber, GPIODevice::IO_MODE _mode) {
         }
         dir_file.close();
 
-        // Open the device
-        if(mode == IO_MODE::OUTPUT) {
-            pinValue.open("/sys/class/gpio/gpio" + pinStr + "/value", std::fstream::out);
-        } else {
-            pinValue.open("/sys/class/gpio/gpio" + pinStr + "/value", std::fstream::in);
-        }
+        pinValue.open("/sys/class/gpio/gpio" + pinStr + "/value", std::fstream::in);
         if(pinValue) {
             // We made it this far, the pin is finally valid!
             pinValid = true;
+            pinValue.close();
         }
-
+        pinValue.clear();
     }
 }
 
@@ -69,9 +65,11 @@ GPIODevice::~GPIODevice() {
 
 bool GPIODevice::read() {
     if(mode == IO_MODE::INPUT && pinValid) {
-        pinValue.seekg(0, std::fstream::beg);
+        pinValue.open("/sys/class/gpio/gpio" + pinStr + "/value", std::fstream::in);
         char state;
         pinValue.read(&state, 1);
+        pinValue.close();
+        pinValue.clear();
         return state == '1';
     } else {
         return false;
@@ -80,12 +78,14 @@ bool GPIODevice::read() {
 
 void GPIODevice::write(bool state) {
     if(mode == IO_MODE::OUTPUT && pinValid) {
-        pinValue.seekg(0, std::fstream::beg);
+        pinValue.open("/sys/class/gpio/gpio" + pinStr + "/value", std::fstream::out);
         if(state) {
             pinValue << '1';
         } else {
             pinValue << '0';
         }
+        pinValue.close();
+        pinValue.clear();
     }
 }
 

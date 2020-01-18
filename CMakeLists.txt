@@ -35,7 +35,7 @@ add_executable(obc_firmware
         Roach2_Hardware/I2CDevice.cpp
         Roach2_Hardware/GPIODevice.cpp)
 
-target_link_libraries(obc_firmware pthread)
+target_link_libraries(obc_firmware pthread atomic)
 
 add_executable(rcu_firmware Roach2_RCU/main.cpp
         Roach2_RCU/FSM_RCU.cpp
@@ -68,7 +68,7 @@ add_executable(rcu_firmware Roach2_RCU/main.cpp
         Roach2_Hardware/GPIODevice.cpp
         Roach2_Hardware/I2CDevice.cpp)
 
-target_link_libraries(rcu_firmware pthread)
+target_link_libraries(rcu_firmware pthread atomic)
 
 add_executable(syscheck Roach2_SysCheckUtil/main.cpp
         Roach2_Sensor/Roach2_Sensor_Sensor.cpp
@@ -80,6 +80,11 @@ add_executable(syscheck Roach2_SysCheckUtil/main.cpp
         Roach2_Sensor/Roach2_Sensor_adc.cpp
         Roach2_Sensor/ARM_Systeminfo.cpp
         Roach2_Sensor/RocketSignals.cpp
+        Roach2_Actuators/PWM.cpp
+        Roach2_Actuators/Actuator.cpp
+        Roach2_Actuators/Rover.cpp
+        Roach2_Hardware/GPIODevice.cpp
+        Roach2_Hardware/I2CDevice.cpp
         Roach2_DataStore/data.cpp
         Roach2_DataStore/Data_Raw.cpp
         Roach2_DataStore/serialization.cpp
@@ -88,7 +93,7 @@ add_executable(syscheck Roach2_SysCheckUtil/main.cpp
         Roach2_Comm/serversock.cpp
         Roach2_Comm/clientsock.cpp
         Roach2_Comm/socket.cpp)
-target_link_libraries(syscheck pthread)
+target_link_libraries(syscheck pthread atomic)
 
 if(LOCAL_DEV)
     add_compile_definitions(LOCAL_DEV)

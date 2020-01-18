@@ -17,9 +17,19 @@ void Data_Raw::addElement(uint64_t element) {
 }
 
 std::vector<uint64_t> Data_Raw::convert_to_serial(PLATFORM origin) {
-    return data;
+    if(!data.empty()) {
+        return data;
+    } else {
+        std::cout << "[Data Raw] No data. Returning 0 element" << std::endl;
+        return std::vector<uint64_t >({0}); // At least have some data to work with. Empty vector might cause problems
+    }
+
 }
 
 int Data_Raw::convert_to_serial_array_length() {
-    return data.size();
+    if(!data.empty()) {
+        return data.size();
+    } else {
+        return 1;
+    }
 }

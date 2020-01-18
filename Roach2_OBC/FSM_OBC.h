@@ -37,6 +37,9 @@ private:
 	Actuator_Rover* enableRoverPower;
     std::vector<SensorType> sensor_ids;
     std::chrono::high_resolution_clock::time_point startTime;
+    bool prevSOE, prevLO, prevSODS;
+    FSM_STATES_OBC currentState;
+    FSM_STATES_OBC lastState;
 
 	void sendRXSMSignalUpdate_Downlink();
     void sensorDownlink();

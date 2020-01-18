@@ -13,8 +13,8 @@ FSM_RCU::FSM_RCU()
     sensor_ids.push_back(SensorType::SYS_INFO);
 
 	// Init state and trigger selftest through run method
-	this->currentState = (int)FSM_STATES_RCU::IDLE;
-	this->lastState = -1;
+	this->currentState = FSM_STATES_RCU::IDLE;
+	this->lastState = FSM_STATES_RCU::INVALID;
 
 	// Init threads
 	this->initThreads(PLATFORM::RCU);
@@ -64,25 +64,7 @@ void FSM_RCU::packageReceivedUART(uint64_t message, int msg_length) {
 
 void FSM_RCU::rocketSignalReceived(int signal_source)
 {
-	if (signal_source == (int)REXUS_SIGNALS::LO) {
-		// Not relevant for FSM control
-	}
-	else if (signal_source == (int)REXUS_SIGNALS::SODS) {
-		if (this->currentState == (int)FSM_STATES_RCU::IDLE) {
-			// Go into standby
-			this->currentState = (int)FSM_STATES_RCU::STANDBY;
-		}
-	}
-	else if (signal_source == (int)REXUS_SIGNALS::SOE) {
-		if (this->currentState == (int)FSM_STATES_RCU::STANDBY) {
-			// Start driving
-			this->currentState = (int)FSM_STATES_RCU::DRIVE_FORWARD;
-		}
-		else if (this->currentState == (int)FSM_STATES_RCU::DRIVE_FORWARD) {
-			// Stop driving
-			this->currentState = (int)FSM_STATES_RCU::STANDBY;
-		}
-	}
+
 }
 
 void FSM_RCU::packageReceivedRexus(uint64_t message, int msg_length)
@@ -122,9 +104,9 @@ void FSM_RCU::packageReceivedEthernet(const std::string& msg) {
     }
 
     // Bearbeite das Packet nicht, wenn es nicht den Rover als Ziel hat
-    if (CommandParser::get_destination(cmdPacket) != PLATFORM::RCU) {
-        return;
-    }
+    //if (CommandParser::get_destination(cmdPacket) != PLATFORM::RCU) {
+    //    return;
+    //}
 
     // Alles klar, es ist ein gültiges Command-Packet
 
@@ -133,10 +115,18 @@ void FSM_RCU::packageReceivedEthernet(const std::string& msg) {
     uint32_t para = CommandParser::get_parameter(cmdPacket);
     COMMAND res = CommandParser::parse(cmd);
 
-    Data_super* send_data[1];
-
     // Process commands
     switch (res) {
+        case COMMAND::rcu_state_change:
+            if (para == (uint32_t)FSM_STATES_RCU::IDLE) {
+                currentState = FSM_STATES_RCU::IDLE;
+            } else if(para == (uint32_t)FSM_STATES_RCU::STANDBY) {
+                currentState = FSM_STATES_RCU::STANDBY;
+            } else if(para == (uint32_t)FSM_STATES_RCU::DRIVE_FORWARD) {
+                currentState = FSM_STATES_RCU::DRIVE_FORWARD;
+            }
+
+
         case COMMAND::rcu_hv_on:
             hv->enable(true); // Force change because of debug mode
             break;
@@ -160,6 +150,7 @@ void FSM_RCU::packageReceivedEthernet(const std::string& msg) {
         case COMMAND::rcu_lights_off:
             pwm->disableLEDs(true);
             break;
+
     }
 
 }
@@ -199,56 +190,46 @@ void FSM_RCU::stateMachine() {
 
     // FSM control
     // Detect state change, the states are updated by the corresponding ReceiveHandler method
-    if (this->lastState != this->currentState) {
-        switch (this->currentState) {
-            case (int)FSM_STATES_RCU::IDLE:
+    if (lastState != currentState) {
+        switch (currentState) {
+            case FSM_STATES_RCU::IDLE:
                 // Perform selftest
                 // Check if all sensors reported at least one data object
-                this->pwm->disable(false);
-                this->hv->disable(false);
+                pwm->stop(false);
+                pwm->disableLEDs(false);
+                hv->disable(false);
                 break;
-            case (int)FSM_STATES_RCU::STANDBY:
-                this->pwm->disable(false);
-                this->pwm->enableLEDs(false);
-                this->hv->disable(false);
+            case FSM_STATES_RCU::STANDBY:
+                pwm->stop(false);
+                pwm->enableLEDs(false);
+                hv->disable(false);
                 break;
-            case (int)FSM_STATES_RCU::DRIVE_FORWARD:
-                this->hv->enable(false);
+            case FSM_STATES_RCU::DRIVE_FORWARD:
+                hv->enable(false);
+                pwm->enableLEDs(false);
                 usleep(500 * 1000); // 500ms wait
-                this->pwm->enable(false);
+                pwm->drive(false);
                 break;
         }
-        this->lastState = this->currentState;
 
 
         // Inform gs about state change
-        std::unique_ptr<Data_super> msg(new Data_simple(0x0D, (unsigned int)currentState));
+        std::unique_ptr<Data_super> msg(new Data_simple((uint32_t)COMMAND::rcu_state_change, (unsigned int)currentState));
         eth_client->send(std::move(msg));
         // State change. Generate debug message
         std::cout << "[RCU Firmware] State change. RCU: ";
         switch(currentState) {
-            case (int)FSM_STATES_RCU::IDLE:
+            case FSM_STATES_RCU::IDLE:
                 std::cout << "Idle" << std::endl;
                 break;
-            case (int)FSM_STATES_RCU::STANDBY:
+            case FSM_STATES_RCU::STANDBY:
                 std::cout << "Standby" << std::endl;
                 break;
-            case (int)FSM_STATES_RCU::DRIVE_FORWARD:
+            case FSM_STATES_RCU::DRIVE_FORWARD:
                 std::cout << "Drive Forward" << std::endl;
                 break;
         }
     }
-    else {
-        switch (this->currentState) {
-            case (int)FSM_STATES_RCU::IDLE:
-                // Check if selftest done
-                break;
-            case (int)FSM_STATES_RCU::STANDBY:
 
-                break;
-            case (int)FSM_STATES_RCU::DRIVE_FORWARD:
-
-                break;
-        }
-    }
+    lastState = currentState;
 }

@@ -20,22 +20,22 @@ FSM_OBC::FSM_OBC()
     sensor_ids.push_back(SensorType::TEMP_SENSOR);
 
 	// Init state and trigger selftest through run method
-	this->currentState = (int)FSM_STATES_OBC::IDLE;
-	this->lastState = -1;
+	currentState = FSM_STATES_OBC::IDLE;
+	lastState = FSM_STATES_OBC::INVALID;
     // Disable automically sending sensor and status information downstream
 
 	// Rover control
-	this->enableRoverPower = new Actuator_Rover();
-	this->enableRoverPower->enable(false);
+	enableRoverPower = new Actuator_Rover();
+	enableRoverPower->enable(false);
 
 	// Init tasks running in separate threads (communication, sensors)
-	this->initThreads(PLATFORM::OBC);
+	initThreads(PLATFORM::OBC);
 
 	// GoPro control
-	this->enableGoPro = new Actuator_GoPro();
+	enableGoPro = new Actuator_GoPro();
 
 	// System start time
-	this->time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
+	time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
 
 	// System main loop
 	std::cout << "[OBC Firmware] Initialization complete" << std::endl;
@@ -47,14 +47,14 @@ FSM_OBC::~FSM_OBC()
 }
 
 void FSM_OBC::run() {
+    enableSimMode();
     startTime = std::chrono::high_resolution_clock::now();
 
     while (true) {
         // Receive UART link data
-        Data_simple *data = debugLink->getData();
+        std::unique_ptr<Data_super> data = debugLink->getData();
         if (data != nullptr) {
             packageReceivedUART(data->convert_to_serial(PLATFORM::GS)[0], data->convert_to_serial_array_length());
-            delete data;
         }
 
         //  --- FSM control ---
@@ -83,14 +83,15 @@ void FSM_OBC::sensorDownlink() {
     time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
     // Send sensor updates on downlink with 5Hz
     if (std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime).count() > 0.2) {
-        startTime = startTime + std::chrono::high_resolution_clock::duration(std::chrono::milliseconds(200));
+        startTime = startTime + std::chrono::high_resolution_clock::duration(std::chrono::milliseconds(1000));
 
         // Send RCU connection status
         if (this->eth_client->isConnected()) {
-            std::unique_ptr<Data_super> send_data(new Data_simple(0x0B, 1));
+            //TODO: Use proper command
+            std::unique_ptr<Data_super> send_data(new Data_simple((uint16_t)COMMAND::obc_check_alive, 1));
             debugLink->sendData(std::move(send_data));
         } else {
-            std::unique_ptr<Data_super> send_data(new Data_simple(0x0B, 0));
+            std::unique_ptr<Data_super> send_data(new Data_simple((uint16_t)COMMAND::obc_check_alive, 0));
             debugLink->sendData(std::move(send_data));
         }
 
@@ -139,6 +140,9 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 
 	// React on commands
 
+	std::cout << "[DEBUG] Received " << std::hex << message <<  std::endl;
+	std::cout << "[DEBUG] Received cmd " << std::hex << cmd << " with parameter " << para << std::endl;
+
     std::unique_ptr<Data_super> send_data;
 
 	switch (res) {
@@ -158,12 +162,12 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 
 		case COMMAND::obc_restart_rover:
 			// Restart rover
-			enableRoverPower->disable(false);
+			enableRoverPower->disable(true);
 			usleep(1000 * 1000); // 1s warten
-			enableRoverPower->enable(false);
+			enableRoverPower->enable(true);
 			// Confirm operation and restart
-            send_data = std::make_unique<Data_simple>(cmd, 1);
-			debugLink->sendData(std::move(send_data));
+            //send_data = std::make_unique<Data_simple>(cmd, 1);
+			//debugLink->sendData(std::move(send_data));
 		    break;
 
 	    case COMMAND::obc_restart_obc:
@@ -172,12 +176,12 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 
         case COMMAND::obc_rcu_off:
             // Switch RCU/rover off
-            enableRoverPower->enable(true);
+            enableRoverPower->disable(true);
             break;
 
         case COMMAND::obc_rcu_on:
             // Switch RCU/rover on
-            enableRoverPower->disable(true);
+            enableRoverPower->enable(true);
             break;
 
         case COMMAND::obc_read_sensor:
@@ -239,55 +243,53 @@ void FSM_OBC::sendRXSMSignalUpdate_Downlink() {
 	// Notify connected UART debug console
 	std::unique_ptr<Data_super> data( new Data_simple((uint16_t)COMMAND::obc_rocket_signal_status, signals_binary));
 	debugLink->sendData(std::move(data));
-
 }
 
 void FSM_OBC::stateMachine()
 {
 	// Message to RCU
-	Data_super* msg;
+    std::unique_ptr<Data_super> msg;
 
-	bool lo = rocket_signals->getLO();
+    bool lo = rocket_signals->getLO();
 	bool sods = rocket_signals->getSODS();
 	bool soe = rocket_signals->getSOE();
+	bool loRisingEdge = lo && !prevLO;
+	bool loFallingEdge = prevLO && !lo;
+    bool sodsRisingEdge = sods && !prevSODS;
+    bool sodsFallingEdge = prevSODS && !sods;
+    bool soeRisingEdge = soe && !prevSOE;
+    bool soeFallingEdge = prevSOE && !soe;
 
 	// ------ State change OBC IDLE -> EXPERIMENT ------
-	if (currentState == (int)FSM_STATES_OBC::IDLE && sods) {
-		currentState = (int)FSM_STATES_OBC::EXPERIMENT; // Switch to experiment state
+	if (currentState == FSM_STATES_OBC::IDLE && sods) {
+		currentState = FSM_STATES_OBC::EXPERIMENT; // Switch to experiment state
         enableGoPro->enable(false);
 
         // Switch RCU from IDLE to STANDBY
-        if (currentRCUState != FSM_STATES_RCU::STANDBY) {
-            eth_client->send("RCU_FSM_STANDBY");
-            currentRCUState = FSM_STATES_RCU::STANDBY; // Note: Message to RCU is in run() method
-        }
+        msg = std::make_unique<Data_simple>((uint8_t)COMMAND::rcu_state_change, (uint32_t)FSM_STATES_RCU::STANDBY);
+        eth_client->send(std::move(msg));
 	}
 
     // ------ State change OBC EXPERIMENT -> IDLE ------
-	if(currentState == (int)FSM_STATES_OBC::EXPERIMENT && !sods) {
-	    currentState = (int)FSM_STATES_OBC::IDLE; // Switch back to idle
+	if(currentState == FSM_STATES_OBC::EXPERIMENT && !sods) {
+	    currentState = FSM_STATES_OBC::IDLE; // Switch back to idle
         enableGoPro->disable(false);
 	}
 
 
     // ------ State change RCU STANDBY -> DRIVE_FORWARD ------
-	if (currentState == (int)FSM_STATES_OBC::EXPERIMENT && soe) {
+	if (currentState == FSM_STATES_OBC::EXPERIMENT && soeRisingEdge) {
         // Switch RCU from STANDBY to DRIVE_FORWARD if SOE given
-        if (currentRCUState == FSM_STATES_RCU::STANDBY) {
-            // Send drive forward command
-            std::unique_ptr<Data_simple> msg(new Data_simple("RCU_FSM_DRIVE_FORWARD"));
-            eth_client->send(std::move(msg));
-            currentRCUState = FSM_STATES_RCU::DRIVE_FORWARD;
-        }
+        // Send drive forward command
+        msg = std::make_unique<Data_simple>((uint8_t)COMMAND::rcu_state_change, (uint32_t)FSM_STATES_RCU::DRIVE_FORWARD);
+        eth_client->send(std::move(msg));
     }
 
     // ------ State change RCU DRIVE_FORWARD -> STANDBY ------
-    if (!soe) {
-        if (currentRCUState != FSM_STATES_RCU::STANDBY) {
-            // Send standby command
-            eth_client->send("RCU_FSM_STANDBY");
-        }
-        currentRCUState = FSM_STATES_RCU::STANDBY;
+    if (soeFallingEdge) {
+        // Send standby command
+        msg = std::make_unique<Data_simple>((uint8_t)COMMAND::rcu_state_change, (uint32_t)FSM_STATES_RCU::STANDBY);
+        eth_client->send(std::move(msg));
     }
 
     // Detect state change
@@ -298,15 +300,16 @@ void FSM_OBC::stateMachine()
         // Write debug message
         std::cout << "[OBC Firmware] State change. >> ";
         switch(currentState) {
-            case (int)FSM_STATES_OBC::IDLE:
+            case FSM_STATES_OBC::IDLE:
                 std::cout << "Idle" << std::endl;
                 break;
-            case (int)FSM_STATES_OBC::EXPERIMENT:
+            case FSM_STATES_OBC::EXPERIMENT:
                 std::cout << "Experiment" << std::endl;
                 break;
         }
     }
     lastState = currentState; // Update last state variable for change detection
+    prevSOE = soe;
 }
 
 void FSM_OBC::packageReceivedRexus(uint64_t message, int msg_length)

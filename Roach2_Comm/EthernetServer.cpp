@@ -61,12 +61,13 @@ void EthernetServer::run()
 		}
 	}
 
+    std::cout << "[Ethernet Server] Connected!" << std::endl;
+
 	// Receive data until the end
 	while (!stop_running) {
 		try {
             std::string message;
 			new_conn >> message;
-
 
 			size_t pos = 0;
 			std::string token;

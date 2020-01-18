@@ -16,6 +16,8 @@ enum class COMMAND {
 	obc_state_change,
     obc_rcu_off,
     obc_rcu_on,
+    obc_gopro_on,
+    obc_gopro_off,
     obc_read_sensor,
 	rcu_state_change,
 	rcu_lights_on,
@@ -24,14 +26,15 @@ enum class COMMAND {
     rcu_hv_off,
     rcu_drive_enable,
     rcu_drive_stop,
-
+    obc_lights_on,
+    obc_lights_off,
 	NUMBER_ELEMENTS
 };
 
 class CommandParser
 {
 public:
-    static COMMAND parse(uint16_t command);
+    static COMMAND parse(uint8_t command);
     static DATA_TYPE packet_type(uint64_t packet);
     static uint32_t get_parameter(uint64_t packet);
     static uint16_t get_command(uint64_t packet);

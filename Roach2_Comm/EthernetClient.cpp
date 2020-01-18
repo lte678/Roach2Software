@@ -32,18 +32,16 @@ void EthernetClient::run()
 	while (!connected && !this->stop_running.load()) {
 		try {
 			this->socket = new ClientSock(this->ip, this->port_number);
-			this->access_send_queue.lock();
 			this->connected = true;
-			this->access_send_queue.unlock();
 		}
 		catch (SockExcept & e) {
-			this->access_send_queue.lock();
 			this->connected = false;
-			this->access_send_queue.unlock();
 		}
 
 		usleep(100);
 	}
+
+	std::cout << "[Ethernet Client] Connected!" << std::endl;
 
 	// Send messages to server (server is not expected to return data)
 	while (!this->stop_running.load()) {
@@ -51,16 +49,17 @@ void EthernetClient::run()
 			this->access_send_queue.lock();
 			for (int i = 0; i < this->send_queue.size(); i++) {
 				std::string msg = this->send_queue.front();
+				std::cout << "[Ethernet Client] Sending message: " << msg << std::endl;
 				*(this->socket) << msg;
 				this->send_queue.pop();
 			}
 			this->access_send_queue.unlock();
 		}
 		catch (SockExcept &e) {
+            this->access_send_queue.unlock();
+
 			// Some error occurred, try to reconnect
-			this->access_send_queue.lock();
 			this->connected = false;
-			this->access_send_queue.unlock();
             std::cout << "[Ethernet Client] Disconnected!" << std::endl;
 			try {
 				// First try to close socket in case this is not a loose of connection
@@ -78,15 +77,10 @@ void EthernetClient::run()
 				try {
 					this->socket = new ClientSock(this->ip, this->port_number);
                     std::cout << "[Ethernet Client] Reconnected!" << std::endl;
-					this->access_send_queue.lock();
 					this->connected = true;
-					this->access_send_queue.unlock();
 				}
 				catch (SockExcept & e) {
-				    std::cout << e.get_SockExcept() << std::endl;
-					this->access_send_queue.lock();
 					this->connected = false;
-					this->access_send_queue.unlock();
 				}
 				usleep(10000);
 			}

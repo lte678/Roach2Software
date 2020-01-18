@@ -6,9 +6,9 @@
  * @param command: raw 32bit command word
  * @return parsed command in parse_command_type strucutre
 */
-COMMAND CommandParser::parse(uint16_t command)
+COMMAND CommandParser::parse(uint8_t command)
 {
-    if (command < (uint16_t)COMMAND::NUMBER_ELEMENTS) {
+    if (command < (uint8_t)COMMAND::NUMBER_ELEMENTS) {
         return static_cast<COMMAND>(command);
     } else {
         return COMMAND::unknown;
@@ -44,6 +44,6 @@ PLATFORM CommandParser::get_destination(uint64_t packet) {
 }
 
 uint16_t CommandParser::get_command(uint64_t packet) {
-    // Das Command ist im 2. und 3. Byte gespeichert
-    return (uint16_t)((packet & 0x00FFFF0000000000u) >> 40u);
+    // Das Command ist im 2. Byte gespeichert
+    return (uint16_t)((packet & 0x00FF000000000000u) >> 48u);
 }

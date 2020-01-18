@@ -23,6 +23,8 @@ private:
 	Actuator_HV *hv;
     std::vector<SensorType> sensor_ids; // Sensors to send updates for
     std::chrono::high_resolution_clock::time_point startTime;
+    FSM_STATES_RCU currentState;
+    FSM_STATES_RCU lastState;
 
     void sensorDownlink();
 public:

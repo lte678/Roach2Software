@@ -11,6 +11,8 @@
 #include "../Roach2_Sensor/IMU.h"
 #include "../Roach2_Sensor/Temp.h"
 #include "../Roach2_Sensor/RocketSignals.h"
+#include "../Roach2_Actuators/PWM.h"
+#include "../Roach2_Actuators/Rover.h"
 
 #include <iostream>
 #include <cstring>
@@ -64,6 +66,13 @@ int main(int argc, char* argv[]) {
         cout << "[TEST] REXUS signals..." << endl;
         RocketSignals sensor4(10.0f);
         printSensorData(&sensor4);
+
+        cout << "[TEST] Power cycling rover..." << endl;
+        Actuator_Rover actuator1;
+        actuator1.enable(true);
+        usleep(1000 * 1000 * 2); // power for 5 seconds
+        actuator1.disable(true);
+        cout << "Done!" << endl << endl;
     } else {
         cout << "Running hardware tests for RCU" << endl << endl;
 
@@ -74,6 +83,14 @@ int main(int argc, char* argv[]) {
         cout << "[TEST] BNO055 - IMU..." << endl;
         BNO055_IMU sensor2(10.0f);
         printSensorData(&sensor2);
+
+        cout << "[TEST] Starting motor..." << endl;
+        PWM_PCA985 actuator2;
+        actuator2.init();
+        actuator2.drive();
+        usleep(1000 * 1000 * 2); // Run for 2 seconds
+        actuator2.stop();
+        cout << "Done!" << endl << endl;
     }
 
     cout << "Tests executed successfully" << endl;

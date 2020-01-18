@@ -8,56 +8,49 @@
 
 #include "UART.h"
 
+const uint8_t UART::syncword = 0xEF;
+
 /**
  * @brief Send data according to our protocol
 */
 void UART::send()
 {
-	if (this->send_ongoing) {
-		// Wait until previous send operation done
-	}
-	else {
-		// Send next data
-		this->frame_counter_tx = 0;
+    send_lock.lock();
+    lock_send_queue.lock();
+    while (!send_queue.empty()) {
+        // Convert into frame structure:
+        // 64bit data, 16bit CRC, 4bit frame number, 4bit data length
 
-		this->send_ongoing = true;
-		// Convert into frame structure:
-		// 64bit data, 16bit CRC, 4bit frame number, 4bit data length
+        std::unique_ptr<Data_super> dataToSend = std::move(send_queue.front());
+        send_queue.pop();
 
-		std::unique_ptr<Data_super> dataToSend = std::move(send_queue.front());
-		std::vector<uint64_t> tx_data = dataToSend->convert_to_serial(origin);
-		int data_length = dataToSend->convert_to_serial_array_length();
-		this->tx_frames = new uint64_t[data_length]; // each frame consists of 11 bytes
-		for (int i = 0; i < data_length; i++) {
-			this->tx_frames[i] = tx_data[i];
-		}
-			 
-		// write to UART
-		uint64_t buffer_data;
-		u_int16_t crc;
-		uint8_t header_data;
-		for (int i = 0; i < data_length; i++) {
-			buffer_data = this->tx_frames[i];
+        std::vector<uint64_t> tx_data = dataToSend->convert_to_serial(origin);
+        int data_length = tx_data.size();
 
-			// Create current header section
-			header_data = data_length;
-			header_data += ((uint8_t)this->frame_counter_tx << 4u); // Shift to upper 4bits
+        // write to UART
+        uint64_t buffer_data;
+        u_int16_t crc;
+        uint8_t header_data;
+        for (int i = 0; i < data_length; i++) {
+            buffer_data = tx_data[i];
 
-			// Calc CRC
-			uint8_t* crc_data = (uint8_t*)& buffer_data;
-			crc = this->calc_crc(crc_data, 8);
+            // Create current header section
+            header_data = data_length;
+            header_data += ((uint8_t)i << 4u); // Shift to upper 4bits
 
-			// UART transmission are LSB first, this must be handled by the receiver
-			write(this->serial_port, &header_data, sizeof(header_data));
-			write(this->serial_port, &buffer_data, sizeof(buffer_data));
-			write(this->serial_port, &crc, sizeof(crc));
-			this->frame_counter_tx++;
-		}
-		this->send_ongoing = false;
+            // Calc CRC
+            uint8_t* crc_data = (uint8_t*)& buffer_data;
+            crc = this->calc_crc(crc_data, 8);
 
-		// Free memory
-		this->send_queue.pop();
-	}
+            // UART transmission are LSB first, this must be handled by the receiver
+            write(this->serial_port, &header_data, sizeof(header_data));
+            write(this->serial_port, &syncword, sizeof(syncword));
+            write(this->serial_port, &buffer_data, sizeof(buffer_data));
+            write(this->serial_port, &crc, sizeof(crc));
+        }
+    }
+    send_lock.unlock();
+    lock_send_queue.unlock();
 }
 
 /**
@@ -164,12 +157,9 @@ void UART::receive()
 			
 			this->rx_buffer_counter = 0;
 
-			// Split incoming message
-			uint32_t cmd = ((data & 0xFFFFFFFF00000000) >> 32);
-			uint32_t para = (data & 0x00000000FFFFFFFF);
-
-			Data_simple* data_obj = new Data_simple(cmd, para);
-			this->receive_queue.push(data_obj);
+			std::unique_ptr<Data_Raw> data_obj(new Data_Raw());
+			data_obj->addElement(data);
+			this->receive_queue.push(std::move(data_obj));
 		}
 		else {
 			// Some parts missing
@@ -210,15 +200,12 @@ UART::UART(PLATFORM _origin)
 	// Init
 	this->numberDataReceived = 0;
 	this->numberPackagesReceived = 0;
-	this->numberPackagesReceivedInvalid = 0;
-	this->numberPackagesSend = 0;
-	this->send_ongoing = false;
-	this->receive_ongoing = false;
 	origin = _origin;
+	stop_bit = false;
 
 	this->initEventHandlerArray(); // Required to use event handlers
 
-	// Try to open serial port
+	// Try to open serial port5E415E415E445E405E405E
 	// Normally: /dev/ttyUSB0 or similar
 	serial_port = open(this->port, O_RDWR);
     std::cout << "[UART] Port acquired!" << std::endl;
@@ -237,9 +224,11 @@ UART::UART(PLATFORM _origin)
 			tty.c_cflag &= ~PARENB; // No parity: clear parity bit
 			tty.c_cflag &= ~CSTOPB; // One stop bit
 			tty.c_cflag |= CS8; // 8bits per byte
-			tty.c_cflag |= CRTSCTS; // No hardware flow control
+			tty.c_cflag &= ~CRTSCTS; // No hardware flow control
 			tty.c_cflag |= CREAD | CLOCAL; // disable modem specific signals and acitve data reading (CREAD)
 			tty.c_lflag &= ~ICANON; // Disable canonical mode to prevent to miss some bytes with special meaning (possibly)
+            tty.c_lflag &= ~ECHO; // Disable echo
+            tty.c_lflag &= ~ECHOE; // Disable erasure
 			tty.c_lflag &= ~ECHONL; // Disable echo functionality
 			tty.c_lflag &= ~ISIG; // Don't interpret any special characters
 			tty.c_iflag &= ~(IXON | IXOFF | IXANY); // Disable software flow control
@@ -277,25 +266,17 @@ void UART::run()
 	// Init
 
 	// Main loop
-	while (!this->stop_bit.load()) {
+	while (!stop_bit) {
 		// Check if data was received
 		this->lock_receive_queue.lock();
 		this->receive();
 		this->lock_receive_queue.unlock();
 
 		// Check if data to send
-		// Acquire lock
-		this->lock_send_queue.lock();
-		
-		while (!this->send_queue.empty()) {
-			this->send();
-		}
-
-		// Release lock
-		this->lock_send_queue.unlock();
+		this->send();
 
 		// Wait for 100us => thus we would reach around 10Kpackages/s, even more depending on the UART buffer size
-		usleep(100);
+		usleep(1000);
 	}
 }
 
@@ -317,29 +298,21 @@ void UART::sendData(std::unique_ptr<Data_super> data)
  *        Non-Blocking access!
  * @return pointer to the received data or nullptr if no lock could be acquired or no data is available
 */
-Data_simple* UART::getData()
+std::unique_ptr<Data_super> UART::getData()
 {
 	bool res = this->lock_receive_queue.try_lock();
 
 	// Try to load from queue if lock could be acquired
+    std::unique_ptr<Data_super> dataPtr;
 	if (res) {
-		Data_simple* copy;
 		if (!this->receive_queue.empty()) {
-			copy = this->receive_queue.front();
+			dataPtr = std::move(receive_queue.front());
 			this->receive_queue.pop();
-		}
-		else {
-			// No data available
-			copy = nullptr;
 		}
 		// Release lock
 		this->lock_receive_queue.unlock();
-		return copy;
 	}
-	else {
-		// No lock acquired
-		return nullptr;
-	}
+	return dataPtr;
 }
 
 /**
