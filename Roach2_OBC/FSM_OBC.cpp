@@ -48,7 +48,6 @@ FSM_OBC::~FSM_OBC()
 }
 
 void FSM_OBC::run() {
-    enableSimMode();
     startTime = std::chrono::high_resolution_clock::now();
 
     while (true) {
@@ -139,9 +138,6 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 	COMMAND res = CommandParser::parse(cmd);
 
 	// React on commands
-
-	std::cout << "[DEBUG] Received " << std::hex << message <<  std::endl;
-	std::cout << "[DEBUG] Received cmd " << std::hex << cmd << " with parameter " << para << std::endl;
 
     std::unique_ptr<Data_super> send_data;
 
@@ -322,13 +318,13 @@ void FSM_OBC::packageReceivedRexus(uint64_t message, int msg_length)
 */
 void FSM_OBC::simulationModeUpdate() {
     if (this->isSimModeEnabled()) {
-        // Update all actuators: on OBC side nothing to be done
-
+        enableRoverPower->enableDebugMode();
         // Send update to RCU
         eth_client->send(std::make_unique<Data_simple>((uint16_t)COMMAND::obc_sim_control, 1));
     }
     else {
         // Disable sim mode
+        enableRoverPower->disableDebugMode();
 
         // Send update to RCU
         eth_client->send(std::make_unique<Data_simple>((uint16_t)COMMAND::obc_sim_control, 0));
