@@ -159,7 +159,9 @@ void UART::receive()
 
 			std::unique_ptr<Data_Raw> data_obj(new Data_Raw());
 			data_obj->addElement(data);
+            lock_receive_queue.lock();
 			this->receive_queue.push(std::move(data_obj));
+            lock_receive_queue.unlock();
 		}
 		else {
 			// Some parts missing
@@ -268,9 +270,7 @@ void UART::run()
 	// Main loop
 	while (!stop_bit) {
 		// Check if data was received
-		this->lock_receive_queue.lock();
 		this->receive();
-		this->lock_receive_queue.unlock();
 
 		// Check if data to send
 		this->send();
@@ -300,18 +300,15 @@ void UART::sendData(std::unique_ptr<Data_super> data)
 */
 std::unique_ptr<Data_super> UART::getData()
 {
-	bool res = this->lock_receive_queue.try_lock();
+	lock_receive_queue.lock();
 
-	// Try to load from queue if lock could be acquired
     std::unique_ptr<Data_super> dataPtr;
-	if (res) {
-		if (!this->receive_queue.empty()) {
-			dataPtr = std::move(receive_queue.front());
-			this->receive_queue.pop();
-		}
-		// Release lock
-		this->lock_receive_queue.unlock();
-	}
+    if (!this->receive_queue.empty()) {
+        dataPtr = std::move(receive_queue.front());
+        this->receive_queue.pop();
+    }
+    // Release lock
+    lock_receive_queue.unlock();
 	return dataPtr;
 }
 

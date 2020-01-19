@@ -49,7 +49,6 @@ void EthernetClient::run()
 			this->access_send_queue.lock();
 			for (int i = 0; i < this->send_queue.size(); i++) {
 				std::string msg = this->send_queue.front();
-				std::cout << "[Ethernet Client] Sending message: " << msg << std::endl;
 				*(this->socket) << msg;
 				this->send_queue.pop();
 			}

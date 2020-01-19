@@ -125,7 +125,15 @@ void FSM_RCU::packageReceivedEthernet(const std::string& msg) {
             } else if(para == (uint32_t)FSM_STATES_RCU::DRIVE_FORWARD) {
                 currentState = FSM_STATES_RCU::DRIVE_FORWARD;
             }
+            break;
 
+        case COMMAND::obc_sim_control:
+            if (para == 1) {
+                enableSimMode();
+            } else {
+                disableSimMode();
+            }
+            break;
 
         case COMMAND::rcu_hv_on:
             hv->enable(true); // Force change because of debug mode

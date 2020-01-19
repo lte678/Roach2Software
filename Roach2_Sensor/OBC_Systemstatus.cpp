@@ -76,6 +76,7 @@ void OBC_Systemstatus::update()
 std::unique_ptr<Data> OBC_Systemstatus::getData()
 {
     std::unique_ptr<Data> currentData(new Data());
+    currentData->setId((int)SensorType::OBC_SYS_INFO);
     currentData->addValue("OBC_UP_RCU", obc_uplink_rcu);
     currentData->addValue("OBC_DOWN_RCU", obc_downlink_rcu);
     currentData->addValue("PG_ROVER", pg_rover);

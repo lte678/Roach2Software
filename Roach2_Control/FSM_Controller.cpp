@@ -107,6 +107,7 @@ void FSM_Controller::initThreads(PLATFORM target)
 void FSM_Controller::enableSimMode() {
     // Only call simulationModeUpdate if sim mode property changed
     if (!isSimMode) {
+        std::cout << "[FSM] Enabling sim mode" << std::endl;
         isSimMode = true;
         simulationModeUpdate();
     }
@@ -118,6 +119,7 @@ void FSM_Controller::enableSimMode() {
 void FSM_Controller::disableSimMode() {
 	// Only call simulationModeUpdate if sim mode property changed
 	if (isSimMode) {
+        std::cout << "[FSM] Disabling sim mode" << std::endl;
         isSimMode = false;
         simulationModeUpdate();
 	}

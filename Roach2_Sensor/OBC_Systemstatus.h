@@ -20,8 +20,8 @@ class OBC_Systemstatus :
 private:
 	EthernetClient* eth_client;
 	EthernetServer* eth_server;
-    std::atomic<double> obc_uplink_rcu;
-    std::atomic<double> obc_downlink_rcu;
+    std::atomic<int> obc_uplink_rcu;
+    std::atomic<int> obc_downlink_rcu;
     std::atomic<double> pg_rover;
     std::atomic<double> pg_cam;
 public:

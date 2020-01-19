@@ -18,6 +18,7 @@ FSM_OBC::FSM_OBC()
 	sensor_ids.push_back(SensorType::IMU); // sensors: IMU, ARM Info, Temp75B
 	sensor_ids.push_back(SensorType::SYS_INFO);
     sensor_ids.push_back(SensorType::TEMP_SENSOR);
+    sensor_ids.push_back(SensorType::OBC_SYS_INFO);
 
 	// Init state and trigger selftest through run method
 	currentState = FSM_STATES_OBC::IDLE;
@@ -83,11 +84,10 @@ void FSM_OBC::sensorDownlink() {
     time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
     // Send sensor updates on downlink with 5Hz
     if (std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime).count() > 0.2) {
-        startTime = startTime + std::chrono::high_resolution_clock::duration(std::chrono::milliseconds(1000));
+        startTime = startTime + std::chrono::high_resolution_clock::duration(std::chrono::milliseconds(200));
 
         // Send RCU connection status
-        if (this->eth_client->isConnected()) {
-            //TODO: Use proper command
+        if (eth_server->isConnected()) {
             std::unique_ptr<Data_super> send_data(new Data_simple((uint16_t)COMMAND::obc_check_alive, 1));
             debugLink->sendData(std::move(send_data));
         } else {
