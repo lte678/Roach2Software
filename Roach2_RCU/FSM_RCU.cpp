@@ -13,20 +13,21 @@ FSM_RCU::FSM_RCU()
     sensor_ids.push_back(SensorType::SYS_INFO);
 
 	// Init state and trigger selftest through run method
-	this->currentState = FSM_STATES_RCU::IDLE;
-	this->lastState = FSM_STATES_RCU::INVALID;
+	currentState = FSM_STATES_RCU::IDLE;
+	lastState = FSM_STATES_RCU::INVALID;
 
 	// Init threads
-	this->initThreads(PLATFORM::RCU);
+	initThreads(PLATFORM::RCU);
 
 	// PWM for engine
-	this->pwm = new PWM_PCA985();
-	this->pwm->disableLEDs(false);
-	this->pwm->disable(false);
+	pwm = new PWM_PCA985();
+	pwm->init();
+	pwm->disableLEDs(false);
+	pwm->disable(false);
 
 	// HV generator control
-	this->hv = new Actuator_HV();
-	this->hv->disable(false);
+	hv = new Actuator_HV();
+	hv->disable(false);
 }
 
 FSM_RCU::~FSM_RCU()
