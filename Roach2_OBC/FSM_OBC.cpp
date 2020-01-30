@@ -144,7 +144,7 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
 	switch (res) {
 		case COMMAND::obc_check_alive:
 			// Check alive command => send command back + 1 in parameter section
-			if (eth_client->isConnected()) {
+			if (eth_server->isConnected()) {
 				// Rover connected
                 send_data = std::make_unique<Data_simple>(cmd, 2);
                 debugLink->sendData(std::move(send_data));
@@ -270,6 +270,7 @@ void FSM_OBC::stateMachine()
 	if(currentState == FSM_STATES_OBC::EXPERIMENT && !sods) {
 	    currentState = FSM_STATES_OBC::IDLE; // Switch back to idle
         enableGoPro->disable(false);
+        enableGoPro->disableGoPro(false);
 	}
 
 

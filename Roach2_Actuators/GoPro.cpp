@@ -28,11 +28,6 @@ int Actuator_GoPro::getActuatorType()
 
 void Actuator_GoPro::enable(bool debug)
 {
-    // Dont enable if in debug mode and not a debug command.
-    if((!isDebugMode && !debug) || (debug && isDebugMode)) {
-        return;
-    }
-
     std::cout << "[Actuator|GoPro] Enabling" << std::endl;
 
     camsupply->write(true);
@@ -59,9 +54,6 @@ void Actuator_GoPro::enable(bool debug)
 void Actuator_GoPro::disableGoPro(bool debug) {
 	if (gopro_enabled) {
         std::cout << "[Actuator|GoPro] Disabling" << std::endl;
-        if(isDebugMode && !debug) {
-            return;
-        }
 
         // Write "1" to output
         gopro1->setMode(GPIODevice::OUTPUT);
@@ -72,15 +64,17 @@ void Actuator_GoPro::disableGoPro(bool debug) {
         // Note: GoPro signals are only trigger signals
         usleep(2300 * 1000); // wait 2500ms
 
+        // Set GoPro pins to floating
+        gopro1->setMode(GPIODevice::INPUT);
+        gopro2->setMode(GPIODevice::INPUT);
+
 		gopro_enabled = false;
 	}
 }
 
 void Actuator_GoPro::disable(bool debug)
 {
-    if((!isDebugMode && !debug) || (debug && isDebugMode)) {
-        camsupply->write(true);
-        lights1->write(false);
-        lights2->write(false);
-    }
+    camsupply->write(true);
+    lights1->write(false);
+    lights2->write(false);
 }

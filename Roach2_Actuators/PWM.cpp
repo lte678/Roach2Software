@@ -24,28 +24,23 @@ void PWM_PCA985::init()
 
 void PWM_PCA985::enableLEDs(bool debug) {
 	// LEDS on
-	if((!isDebugMode && !debug) || (debug && isDebugMode)) {
-        std::cout << "[Actuator|PWM] Enabling LEDs" << std::endl;
+	std::cout << "[Actuator|PWM] Enabling LEDs" << std::endl;
 
-        pwmDriver->write8(0x2B, 0x10);
-        pwmDriver->write8(0x2D, 0x00);
-	}
-
+	pwmDriver->write8(0x2B, 0x10);
+	pwmDriver->write8(0x2D, 0x00);
 }
 
 void PWM_PCA985::disableLEDs(bool debug) {
 	// LEDS off
-    if((!isDebugMode && !debug) || (debug && isDebugMode)) {
-        std::cout << "[Actuator|PWM] Disabling LEDs" << std::endl;
+    std::cout << "[Actuator|PWM] Disabling LEDs" << std::endl;
 
-        pwmDriver->write8(0x2B, 0x00);
-        pwmDriver->write8(0x2D, 0x10);
-    }
+    pwmDriver->write8(0x2B, 0x00);
+    pwmDriver->write8(0x2D, 0x10);
 }
 
 void PWM_PCA985::drive(bool debug)
 {
-    if((!isDebugMode && !debug) || (debug && isDebugMode)) {
+    if(!isDebugMode || debug) {
         std::cout << "[Actuator|PWM] Enabling motor" << std::endl;
 
 	    //pwmDriver->write8(0x07, 0x10);
@@ -61,12 +56,11 @@ void PWM_PCA985::drive(bool debug)
 
 void PWM_PCA985::stop(bool debug)
 {
-    if((!isDebugMode && !debug) || (debug && isDebugMode)) {
-        std::cout << "[Actuator|PWM] Disabling motor" << std::endl;
+    // Always allow disable
+    std::cout << "[Actuator|PWM] Disabling motor" << std::endl;
 
-        pwmDriver->write8(0x07, 0x00);
-        pwmDriver->write8(0x09, 0x10);
-    }
+    pwmDriver->write8(0x07, 0x00);
+    pwmDriver->write8(0x09, 0x10);
 
 	/*write8(MOT1_ON_H, 0b00000000); //Bitte checken
 	write8(MOT2_ON_H, 0b00000000);

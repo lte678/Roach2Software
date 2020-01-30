@@ -11,6 +11,7 @@ FSM_RCU::FSM_RCU()
     sensor_ids.push_back(SensorType::TEMP_SENSOR);
     sensor_ids.push_back(SensorType::IMU);
     sensor_ids.push_back(SensorType::SYS_INFO);
+    sensor_ids.push_back(SensorType::RCU_SYS_INFO);
 
 	// Init state and trigger selftest through run method
 	currentState = FSM_STATES_RCU::IDLE;
