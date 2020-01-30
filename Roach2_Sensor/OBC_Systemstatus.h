@@ -14,18 +14,20 @@
 #include "../Roach2_Comm/EthernetServer.h"
 #include "Roach2_Sensor_Sensor.h"
 
+class FSM_Controller;
+
 class OBC_Systemstatus :
 	public Sensor
 {
 private:
-	EthernetClient* eth_client;
-	EthernetServer* eth_server;
+	FSM_Controller* obcPtr;
     std::atomic<int> obc_uplink_rcu;
     std::atomic<int> obc_downlink_rcu;
+    std::atomic<bool> obc_sim_mode;
     std::atomic<double> pg_rover;
     std::atomic<double> pg_cam;
 public:
-	OBC_Systemstatus(float updateFreq, EthernetClient* client, EthernetServer* server);
+	OBC_Systemstatus(float updateFreq, FSM_Controller* obc);
 	void init();
 	void update();
     std::unique_ptr<Data> getData();

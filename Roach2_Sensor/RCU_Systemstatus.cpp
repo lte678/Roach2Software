@@ -1,9 +1,9 @@
 #include "RCU_Systemstatus.h"
+#include "../Roach2_RCU/FSM_RCU.h"FS
 
-RCU_Systemstatus::RCU_Systemstatus(float updateFreq, EthernetClient* client, EthernetServer* server) : Sensor(updateFreq)
+RCU_Systemstatus::RCU_Systemstatus(float updateFreq, FSM_Controller* rcu) : Sensor(updateFreq)
 {
-	this->eth_client = client;
-	this->eth_server = server;
+    rcuPtr = rcu;
 }
 
 void RCU_Systemstatus::init()
@@ -68,8 +68,9 @@ void RCU_Systemstatus::update()
 	}
 
 	// Load connection status to OBC
-	rcu_uplink_obc = this->eth_client->isConnected() ? 1 : 0;
-	rcu_downlink_obc = this->eth_server->isConnected() ? 1 : 0;
+	rcu_uplink_obc = rcuPtr->isEthUplink() ? 1 : 0;
+	rcu_downlink_obc = rcuPtr->isEthDownlink() ? 1 : 0;
+	rcu_sim_mode = rcuPtr->isSimModeEnabled();
 }
 
 std::unique_ptr<Data> RCU_Systemstatus::getData()
@@ -79,6 +80,7 @@ std::unique_ptr<Data> RCU_Systemstatus::getData()
     currentData->addValue("RCU_DOWN_OBC", rcu_downlink_obc);
     currentData->addValue("PG_5V", pg_5v);
     currentData->addValue("PG_HV", pg_hv);
+    currentData->addValue("RCU_SIM_MODE", rcu_sim_mode);
 	return currentData;
 }
 

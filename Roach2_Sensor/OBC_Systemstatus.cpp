@@ -1,9 +1,9 @@
 #include "OBC_Systemstatus.h"
+#include "../Roach2_OBC/FSM_OBC.h"
 
-OBC_Systemstatus::OBC_Systemstatus(float updateFreq, EthernetClient* client, EthernetServer* server) : Sensor(updateFreq)
+OBC_Systemstatus::OBC_Systemstatus(float updateFreq, FSM_Controller* obc) : Sensor(updateFreq)
 {
-	this->eth_client = client;
-	this->eth_server = server;
+    obcPtr = obc;
 }
 
 void OBC_Systemstatus::init()
@@ -69,8 +69,9 @@ void OBC_Systemstatus::update()
 	}
 
 	// Load connection status to RCU
-	obc_uplink_rcu = this->eth_client->isConnected() ? 1 : 0;
-	obc_downlink_rcu = this->eth_server->isConnected() ? 1 : 0;
+	obc_uplink_rcu = obcPtr->isEthUplink() ? 1 : 0;
+	obc_downlink_rcu = obcPtr->isEthDownlink() ? 1 : 0;
+	obc_sim_mode = obcPtr->isSimModeEnabled() ? 1 : 0;
 }
 
 std::unique_ptr<Data> OBC_Systemstatus::getData()
@@ -81,6 +82,7 @@ std::unique_ptr<Data> OBC_Systemstatus::getData()
     currentData->addValue("OBC_DOWN_RCU", obc_downlink_rcu);
     currentData->addValue("PG_ROVER", pg_rover);
     currentData->addValue("PG_CAM", pg_cam);
+    currentData->addValue("OBC_SIM_MODE", obc_sim_mode);
 	return currentData;
 }
 

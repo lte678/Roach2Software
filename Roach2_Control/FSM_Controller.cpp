@@ -84,7 +84,7 @@ void FSM_Controller::initThreads(PLATFORM target)
         sensor_manager->attachSensor(new TEMP_LM75B(10.0f));
         sensor_manager->attachSensor(new BNO055_IMU(10.0f));
         sensor_manager->attachSensor(new ADC_MCP3428(10.0f));
-        sensor_manager->attachSensor(new OBC_Systemstatus(10.0f, eth_client, eth_server));
+        sensor_manager->attachSensor(new OBC_Systemstatus(10.0f, this));
 	}
 	else
 	{
@@ -95,7 +95,7 @@ void FSM_Controller::initThreads(PLATFORM target)
         sensor_manager->attachSensor(new ADC_MCP3428(10.0f));
         sensor_manager->attachSensor(new BNO055_IMU(10.0f));
         sensor_manager->attachSensor(new ROT_AS5601(10.0f));
-        sensor_manager->attachSensor(new RCU_Systemstatus(10.0f, eth_client, eth_server));
+        sensor_manager->attachSensor(new RCU_Systemstatus(10.0f, this));
 	}
 
 	sensor_thread = std::thread(&Sensor_Manager::run, sensor_manager);
@@ -123,4 +123,12 @@ void FSM_Controller::disableSimMode() {
         isSimMode = false;
         simulationModeUpdate();
 	}
+}
+
+bool FSM_Controller::isEthDownlink() {
+    return eth_server->isConnected();
+}
+
+bool FSM_Controller::isEthUplink() {
+    return eth_client->isConnected();
 }

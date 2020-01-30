@@ -59,10 +59,12 @@ protected:
 	virtual void simulationModeUpdate() = 0;
 	void enableSimMode();
 	void disableSimMode();
-	bool isSimModeEnabled();
 	void initThreads(PLATFORM target);
 public:
 	virtual void run() = 0;
+    bool isSimModeEnabled();
+    bool isEthDownlink();
+    bool isEthUplink();
 };
 
 #endif
