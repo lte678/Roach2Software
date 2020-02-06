@@ -10,6 +10,7 @@
 #include "../Roach2_Sensor/ARM_Systeminfo.h"
 #include "../Roach2_Sensor/IMU.h"
 #include "../Roach2_Sensor/Temp.h"
+#include "../Roach2_Sensor/Roach2_Sensor_adc.h"
 #include "../Roach2_Sensor/RocketSignals.h"
 #include "../Roach2_Actuators/PWM.h"
 #include "../Roach2_Actuators/Rover.h"
@@ -66,6 +67,10 @@ int main(int argc, char* argv[]) {
         cout << "[TEST] REXUS signals..." << endl;
         RocketSignals sensor4(10.0f);
         printSensorData(&sensor4);
+
+        cout << "[TEST] MCP3428 - ADC..." << endl;
+        ADC_MCP3428 sensor5(10.0f);
+        printSensorData(&sensor5);
 
         cout << "[TEST] Power cycling rover..." << endl;
         Actuator_Rover actuator1;

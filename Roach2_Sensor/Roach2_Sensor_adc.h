@@ -11,6 +11,7 @@
 
 #ifndef LOCAL_DEV
 #include <wiringPiI2C.h>
+#include <linux/i2c-dev.h>
 #endif
 
 #include "Roach2_Sensor_Sensor.h"
@@ -26,15 +27,16 @@
 
 /* ##################################################################################### */
 /* 0. Hard coded settings  */
-const int MCP3428_DEVICE_ID = 0x68; // in Schaltplan schauen
+extern const int MCP3428_DEVICE_ID; // in Schaltplan schauen
+extern const float LSB_SCALING;
 
 /* ##################################################################################### */
 /* 1. Enumerations */
 enum Setting_Adc {
-	CONF_ADC1 = 0b10011000, /*CH1, 15 sps, conti, x1 gain*/
-	CONF_ADC2 = 0b10111000, /*CH2, 15 sps, conti, x1 gain*/
-    CONF_ADC3 = 0b11011000, /*CH3, 15 sps, conti, x1 gain*/
-	CONF_ADC4 = 0b11111000 /*CH4, 15 sps, conti, x1 gain*/
+	CONF_ADC1 = 0b10001000, /*CH1, 15 sps, conti, x1 gain*/
+	CONF_ADC2 = 0b10101000, /*CH2, 15 sps, conti, x1 gain*/
+    CONF_ADC3 = 0b11001000, /*CH3, 15 sps, conti, x1 gain*/
+	CONF_ADC4 = 0b11101000 /*CH4, 15 sps, conti, x1 gain*/
 };
 //SCHREIB HIER MEHR REIN
 
@@ -51,8 +53,7 @@ public:
 	int getI2CAddr();
     SensorType getSensorType();
 private:
-	int measurement[4] = {};
-	int address[4]{};
+	unsigned char chSetting[4];
 	std::mutex dataLock;
 	double convertedMeasurement[4]{};
 };

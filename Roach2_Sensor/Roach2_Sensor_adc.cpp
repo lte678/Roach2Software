@@ -7,12 +7,21 @@
 */
 #include "Roach2_Sensor_adc.h"
 
+const int MCP3428_DEVICE_ID = 0x68;
+const float LSB_SCALING = 0.0625f;
+
 // TODO: INIT, UPDATE, GETDATA
 ADC_MCP3428::ADC_MCP3428(float updateFreq) : Sensor(updateFreq)
 {
     std::cout << "[Sensor|ADC] Initializing" << std::endl;
 	deviceHandle = i2cConnect(MCP3428_DEVICE_ID); // Get file/I2C handle
-	if (read8(MCP3428_DEVICE_ID) != 0x00) 
+
+    chSetting[0] = CONF_ADC1;
+    chSetting[1] = CONF_ADC2;
+    chSetting[2] = CONF_ADC3;
+    chSetting[3] = CONF_ADC4;
+
+	if (simpleRead() != 0x00)
 	{
 		std::cout << "[Sensor|ADC] Connection failed!" << std::endl;
 	}
@@ -24,39 +33,33 @@ ADC_MCP3428::~ADC_MCP3428()
 
 void ADC_MCP3428::init()
 {
-	simpleWrite(CONF_ADC1);
-    address[0] = CONF_ADC1;
-    address[1] = CONF_ADC2;
-    address[2] = CONF_ADC3;
-    address[3] = CONF_ADC4;
+	//simpleWrite(CONF_ADC1);
+
 }
 
 void ADC_MCP3428::update()
 {
-	for (int ch = 0; ch<=3; ch++) {
-		measurement[ch] = simpleRead();
+    for (int ch = 0; ch<=3; ch++) {
+        // Tell ADC to take measurement
+        simpleWrite(chSetting[ch]);
 
-//TODO: Stimmt möglicherweise nicht
-		measurement[ch] = measurement[ch] >> 5;
-		if ((measurement[ch] >> 15) != 0)
-		{
-			int signchange = 0b1000000000000000;
-			measurement[ch] = measurement[ch] | signchange;
-			measurement[ch] = binaryToDecimal(measurement[ch]);
-			measurement[ch] = measurement[ch] * -1;
-		}
-		else
-		{
-			measurement[ch] = binaryToDecimal(measurement[ch]);
-		}
-		dataLock.lock();
-		convertedMeasurement[ch] = measurement[ch] * 0.0625;
-		dataLock.unlock();
-		/*hier wird measurement in float umgewandelt in mV*/
-		simpleWrite(address[ch]);
-	}
+        usleep(100);
 
-	simpleWrite(CONF_ADC1);
+        // Take measurement
+        unsigned char data[4];
+        do {
+            read(deviceHandle, data, 4);
+            usleep(100);
+        } while(data[2] & 0b10000000u);
+
+        int16_t measurement = data[1];
+        measurement |= data[0] << 8;
+
+        std::cout << measurement << std::endl;
+        dataLock.lock();
+        convertedMeasurement[ch] = (float)measurement * LSB_SCALING;
+        dataLock.unlock();
+    }
 }
 
 std::unique_ptr<Data> ADC_MCP3428::getData() {

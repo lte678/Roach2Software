@@ -25,28 +25,60 @@ I2CDevice::~I2CDevice() {
 
 int I2CDevice::simpleRead()
 {
-	return wiringPiI2CRead(deviceHandle);
+    if (deviceValid) {
+        return wiringPiI2CRead(deviceHandle);
+    }
+	return -1;
 }
 
 int I2CDevice::simpleWrite(int data)
 {
-	return wiringPiI2CWrite(deviceHandle, data);
+    if(deviceValid) {
+        return wiringPiI2CWrite(deviceHandle, data);
+    }
+	return -1;
 }
 
 int I2CDevice::write8(int reg, int data) {
-    return wiringPiI2CWriteReg8(deviceHandle, reg, data);
+    if(deviceValid) {
+        return wiringPiI2CWriteReg8(deviceHandle, reg, data);
+    }
+    return -1;
 }
 
 int I2CDevice::read8(int reg) {
-    return wiringPiI2CReadReg8(deviceHandle, reg);
+    if(deviceValid) {
+        return wiringPiI2CReadReg8(deviceHandle, reg);
+    }
+    return -1;
 }
 
 int I2CDevice::write16(int reg, int data) {
-    return wiringPiI2CWriteReg16(deviceHandle, reg, data);
+    if(deviceValid) {
+        return wiringPiI2CWriteReg16(deviceHandle, reg, data);
+    }
+    return -1;
 }
 
 int I2CDevice::read16(int reg) {
-    return wiringPiI2CReadReg16(deviceHandle, reg);
+    if(deviceValid) {
+        return wiringPiI2CReadReg16(deviceHandle, reg);
+    }
+    return -1;
+}
+
+int I2CDevice::writeBlock(int reg, char *data, int nr) {
+    if(deviceValid) {
+        return 0;
+    }
+    return -1;
+}
+
+int I2CDevice::readBlock(int reg, char *data) {
+    if(deviceValid) {
+        return 0;
+    }
+    return -1;
 }
 
 #else

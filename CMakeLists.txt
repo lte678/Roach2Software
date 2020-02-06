@@ -88,6 +88,9 @@ add_executable(syscheck Roach2_SysCheckUtil/main.cpp
         Roach2_DataStore/data.cpp
         Roach2_DataStore/Data_Raw.cpp
         Roach2_DataStore/serialization.cpp
+        Roach2_Control/FSM_Controller.cpp
+        Roach2_Control/Sensor_Manager.cpp
+        Roach2_Comm/UART.cpp
         Roach2_Comm/EthernetClient.cpp
         Roach2_Comm/EthernetServer.cpp
         Roach2_Comm/serversock.cpp

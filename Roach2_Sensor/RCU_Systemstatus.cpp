@@ -1,5 +1,5 @@
 #include "RCU_Systemstatus.h"
-#include "../Roach2_RCU/FSM_RCU.h"FS
+#include "../Roach2_RCU/FSM_RCU.h"
 
 RCU_Systemstatus::RCU_Systemstatus(float updateFreq, FSM_Controller* rcu) : Sensor(updateFreq)
 {

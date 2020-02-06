@@ -25,7 +25,7 @@ BNO055_IMU::BNO055_IMU(float updateFreq) : Sensor(updateFreq)
 	}
 	else
 	{
-		std::cout << "[Sensor|IMU] Offline! Performing reset.." << std::endl;
+		std::cout << "[Sensor|IMU] Offline!" << std::endl;
 	}
 }
 
