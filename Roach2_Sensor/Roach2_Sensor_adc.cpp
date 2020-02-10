@@ -9,6 +9,7 @@
 
 const int MCP3428_DEVICE_ID = 0x68;
 const float LSB_SCALING = 0.0625f;
+const int MAX_READ_ATTEMPTS = 10;
 
 // TODO: INIT, UPDATE, GETDATA
 ADC_MCP3428::ADC_MCP3428(float updateFreq) : Sensor(updateFreq)
@@ -21,7 +22,7 @@ ADC_MCP3428::ADC_MCP3428(float updateFreq) : Sensor(updateFreq)
     chSetting[2] = CONF_ADC3;
     chSetting[3] = CONF_ADC4;
 
-	if (simpleRead() != 0x00)
+	if (deviceHandle == 0 || simpleRead() != 0x00)
 	{
 		std::cout << "[Sensor|ADC] Connection failed!" << std::endl;
 	}
@@ -40,6 +41,8 @@ void ADC_MCP3428::init()
 void ADC_MCP3428::update()
 {
     for (int ch = 0; ch<=3; ch++) {
+        bool measurementFailed = false;
+
         // Tell ADC to take measurement
         simpleWrite(chSetting[ch]);
 
@@ -47,17 +50,26 @@ void ADC_MCP3428::update()
 
         // Take measurement
         unsigned char data[4];
+        int readAttempts = 0;
         do {
-            read(deviceHandle, data, 4);
-            usleep(100);
-        } while(data[2] & 0b10000000u);
+            if (readAttempts < MAX_READ_ATTEMPTS) {
+                readBlock((char*)data, 4);
+                usleep(100);
+                readAttempts++;
+            } else {
+                measurementFailed = true;
+            }
+        } while(data[2] & 0b10000000u && !measurementFailed);
 
         int16_t measurement = data[1];
         measurement |= data[0] << 8;
 
-        std::cout << measurement << std::endl;
         dataLock.lock();
-        convertedMeasurement[ch] = (float)measurement * LSB_SCALING;
+        if(!measurementFailed) {
+            convertedMeasurement[ch] = (float)measurement * LSB_SCALING;
+        } else {
+            convertedMeasurement[ch] = -1.0f;
+        }
         dataLock.unlock();
     }
 }

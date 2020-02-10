@@ -29,6 +29,7 @@
 /* 0. Hard coded settings  */
 extern const int MCP3428_DEVICE_ID; // in Schaltplan schauen
 extern const float LSB_SCALING;
+extern const int MAX_READ_ATTEMPTS;
 
 /* ##################################################################################### */
 /* 1. Enumerations */

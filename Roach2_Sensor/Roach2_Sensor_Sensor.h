@@ -78,6 +78,7 @@ protected:
     int static binaryToDecimal(int number);
     int simpleRead();
     int simpleWrite(int data);
+    void readBlock(char *buffer, int n);
 };
 
 #endif //Sensor_H
