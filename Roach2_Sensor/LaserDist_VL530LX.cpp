@@ -4,11 +4,25 @@ LaserDist_VL530LX::LaserDist_VL530LX(float updateFreq, SensorType sensor_type, i
 {
 	sensor_type = sensor_type;
 	I2C_ADDRESS = i2c_address;
+	distance = 0.0f;
 }
 
-Data* LaserDist_VL530LX::getData()
+void LaserDist_VL530LX::init() {
+    // Dont do anything yet
+}
+
+void LaserDist_VL530LX::update() {
+    distance = 0.0f;
+}
+
+std::unique_ptr<Data> LaserDist_VL530LX::getData()
 {
-	return sensorData;
+    std::unique_ptr<Data> data_ptr(new Data());
+    data_ptr->setId((int)SensorType::ADC);
+
+    data_ptr->addValue("DIST", distance);
+
+    return data_ptr;
 }
 
 int LaserDist_VL530LX::getI2CAddr()

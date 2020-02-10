@@ -16,6 +16,7 @@
 #include "../Roach2_Comm/EthernetClient.h"
 #include "../Roach2_Comm/EthernetServer.h"
 #include "../Roach2_Sensor/RocketSignals.h"
+#include "../Roach2_Sensor/LaserDist_VL530LX.h"
 #include "../Roach2_Comm/UART.h"
 #include "Defines.h"
 #include "Sensor_Manager.h"

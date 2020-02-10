@@ -18,6 +18,7 @@ FSM_OBC::FSM_OBC()
 	sensor_ids.push_back(SensorType::IMU); // sensors: IMU, ARM Info, Temp75B
 	sensor_ids.push_back(SensorType::SYS_INFO);
     sensor_ids.push_back(SensorType::TEMP_SENSOR);
+    sensor_ids.push_back(SensorType::ADC);
     sensor_ids.push_back(SensorType::OBC_SYS_INFO);
 
 	// Init state and trigger selftest through run method

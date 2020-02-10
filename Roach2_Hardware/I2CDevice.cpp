@@ -67,20 +67,6 @@ int I2CDevice::read16(int reg) {
     return -1;
 }
 
-int I2CDevice::writeBlock(int reg, char *data, int nr) {
-    if(deviceValid) {
-        return 0;
-    }
-    return -1;
-}
-
-int I2CDevice::readBlock(int reg, char *data) {
-    if(deviceValid) {
-        return 0;
-    }
-    return -1;
-}
-
 #else
 // Dummy interfaces
 

@@ -3,32 +3,35 @@
 ROT_AS5601::ROT_AS5601(float updateFreq) : Sensor(updateFreq)
 {
     std::cout << "[Sensor|Rot Enc] Initializing" << std::endl;
-	this->measurement[0] = 0;
-	this->measurement[1] = 0;
+    deviceHandle = i2cConnect(AS5601_DEVICE_ID); // Get file/I2C handle
+    angle = 0.0f;
 }
 
-ROT_AS5601::~ROT_AS5601()
-{
-}
+ROT_AS5601::~ROT_AS5601() = default;
 
 void ROT_AS5601::init()
 {
+    startAngle = getAngle();
+}
+
+float ROT_AS5601::getAngle() {
+    uint16_t rawAngle = read16(RAW_REG);
+    rawAngle = (rawAngle << 8) | (rawAngle >> 8);
+
+    return (float)rawAngle * PRESCALER;
 }
 
 void ROT_AS5601::update()
 {
-	measurement[0] = ((read8(RAW1_reg)<< 8) + read8(RAW2_reg)); /*masking?*/
-	measurement[0] = binaryToDecimal(measurement[0]);
-
-	measurement[1] = ((read8(ANG_reg) << 8) + read8(ANG2_reg)); /*masking?*/
-	measurement[1] = binaryToDecimal(measurement[1]);
+	angle = getAngle() - startAngle;
+	angle = angle < 0 ? angle + 360.0f : angle;
 }
 
 std::unique_ptr<Data> ROT_AS5601::getData() {
     std::unique_ptr<Data> data_ptr(new Data());
 	data_ptr->setId((int)SensorType::ROT_ENC);
-	data_ptr->addValue("ROTRAW", measurement[0]);
-	data_ptr->addValue("ROT", measurement[1]);
+	data_ptr->addValue("ROTRAW", angle);
+	data_ptr->addValue("ROT", 0.0f);
 	return data_ptr;
 	/*Effekt der eigenerhitzung wird vernachl�ssigt*/
 }

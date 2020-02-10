@@ -23,9 +23,9 @@ private:
 	FSM_Controller* obcPtr;
     std::atomic<int> obc_uplink_rcu;
     std::atomic<int> obc_downlink_rcu;
-    std::atomic<bool> obc_sim_mode;
-    std::atomic<double> pg_rover;
-    std::atomic<double> pg_cam;
+    std::atomic<float> obc_sim_mode;
+    std::atomic<float> pg_rover;
+    std::atomic<float> pg_cam;
 public:
 	OBC_Systemstatus(float updateFreq, FSM_Controller* obc);
 	void init();

@@ -12,6 +12,7 @@
 #include "../Roach2_Sensor/Temp.h"
 #include "../Roach2_Sensor/Roach2_Sensor_adc.h"
 #include "../Roach2_Sensor/RocketSignals.h"
+#include "../Roach2_Sensor/Roach2_Sensor_rotEnc.h"
 #include "../Roach2_Actuators/PWM.h"
 #include "../Roach2_Actuators/Rover.h"
 
@@ -89,11 +90,19 @@ int main(int argc, char* argv[]) {
         BNO055_IMU sensor2(10.0f);
         printSensorData(&sensor2);
 
+        cout << "[TEST] MCP3428 - ADC..." << endl;
+        ADC_MCP3428 sensor3(10.0f);
+        printSensorData(&sensor3);
+
+        cout << "[TEST] AS5601 - Rotary Encoder..." << endl;
+        ROT_AS5601 sensor4(10.0f);
+        printSensorData(&sensor4);
+
         cout << "[TEST] Starting motor..." << endl;
         PWM_PCA985 actuator2;
         actuator2.init();
         actuator2.drive();
-        usleep(1000 * 1000 * 2); // Run for 2 seconds
+        //usleep(1000 * 1000 * 2); // Run for 2 seconds
         actuator2.stop();
         cout << "Done!" << endl << endl;
     }

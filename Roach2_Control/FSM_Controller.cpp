@@ -95,6 +95,8 @@ void FSM_Controller::initThreads(PLATFORM target)
         sensor_manager->attachSensor(new ADC_MCP3428(10.0f));
         sensor_manager->attachSensor(new BNO055_IMU(10.0f));
         sensor_manager->attachSensor(new ROT_AS5601(10.0f));
+        sensor_manager->attachSensor(new LaserDist_VL530LX(10.0f, SensorType::LASERDIST_0, 0x52));
+        sensor_manager->attachSensor(new LaserDist_VL530LX(10.0f, SensorType::LASERDIST_1, 0x53));
         sensor_manager->attachSensor(new RCU_Systemstatus(10.0f, this));
 	}
 

@@ -22,7 +22,8 @@
 
 /* ##################################################################################### */
 /* 0. Hard coded settings  */
-const int AS5601_DEVICE_ID = 0x36; // in Schaltplan schauen
+static const int AS5601_DEVICE_ID = 0x36; // in Schaltplan schauen
+static const float PRESCALER = 360.0f / 0xFFF;
 
 /* ##################################################################################### */
 /* 1. Enumerations */
@@ -31,10 +32,8 @@ enum Setting_Rot {
 };
 //SCHREIB HIER MEHR REIN
 enum AS5601_REGISTER_t {
-	RAW1_reg = 0x0C,
-	RAW2_reg = 0x0D,
-	ANG_reg = 0x0E,
-	ANG2_reg = 0x0F
+	RAW_REG = 0x0C,
+	ANG_REG = 0x0E,
 };
 
 /* ##################################################################################### */
@@ -47,12 +46,13 @@ public:
 	~ROT_AS5601();
 	void init();
 	void update();
+	float getAngle();
     std::unique_ptr<Data> getData();
 	int getI2CAddr();
     SensorType getSensorType();
 private:
-	int measurement[2] = {};
-	unsigned long timeStamp = 0;
+	float angle;
+	float startAngle;
 };
 
 #endif //ROT_AS5601

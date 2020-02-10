@@ -15,6 +15,7 @@ add_executable(obc_firmware
         Roach2_Sensor/OBC_Systemstatus.cpp
         Roach2_Sensor/RCU_Systemstatus.cpp
         Roach2_Sensor/Temp.cpp
+        Roach2_Sensor/LaserDist_VL530LX.cpp
         Roach2_Sensor/Roach2_Sensor_rotEnc.cpp
         Roach2_Sensor/IMU.cpp
         Roach2_Sensor/Roach2_Sensor_adc.cpp
@@ -55,6 +56,7 @@ add_executable(rcu_firmware Roach2_RCU/main.cpp
         Roach2_Sensor/OBC_Systemstatus.cpp
         Roach2_Sensor/RCU_Systemstatus.cpp
         Roach2_Sensor/Temp.cpp
+        Roach2_Sensor/LaserDist_VL530LX.cpp
         Roach2_Sensor/Roach2_Sensor_rotEnc.cpp
         Roach2_Sensor/IMU.cpp
         Roach2_Sensor/Roach2_Sensor_adc.cpp
@@ -76,10 +78,12 @@ add_executable(syscheck Roach2_SysCheckUtil/main.cpp
         Roach2_Sensor/RCU_Systemstatus.cpp
         Roach2_Sensor/Temp.cpp
         Roach2_Sensor/Roach2_Sensor_rotEnc.cpp
+        Roach2_Sensor/LaserDist_VL530LX.cpp
         Roach2_Sensor/IMU.cpp
         Roach2_Sensor/Roach2_Sensor_adc.cpp
         Roach2_Sensor/ARM_Systeminfo.cpp
         Roach2_Sensor/RocketSignals.cpp
+        Roach2_Sensor/Roach2_Sensor_rotEnc.cpp
         Roach2_Actuators/PWM.cpp
         Roach2_Actuators/Actuator.cpp
         Roach2_Actuators/Rover.cpp
