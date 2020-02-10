@@ -65,7 +65,7 @@ uint16_t UART::calc_crc(const uint8_t * data, uint16_t size)
 	int bits_read = 0, bit_flag;
 
 	/* Sanity check: */
-	if (data == NULL)
+	if (data == nullptr)
 		return 0;
 
 	while (size > 0)
@@ -149,19 +149,26 @@ void UART::receive()
 			for (int i = 0; i < 8; i++) {
 				data = (data << 8) | this->rx_buffer[1 + i];
 			}
-			crc = (this->rx_buffer[9] << 8);
-			crc = crc + this->rx_buffer[10];
+			crc = rx_buffer[9] << 8;
+			crc |= rx_buffer[10];
 
 			this->numberDataReceived++;
 			this->numberPackagesReceived++;
 			
 			this->rx_buffer_counter = 0;
 
-			std::unique_ptr<Data_Raw> data_obj(new Data_Raw());
-			data_obj->addElement(data);
-            lock_receive_queue.lock();
-			this->receive_queue.push(std::move(data_obj));
-            lock_receive_queue.unlock();
+            // Calc CRC
+            uint8_t* crc_data = (uint8_t*) &data;
+			if(crc == calc_crc(crc_data, 8)) {
+                std::unique_ptr<Data_Raw> data_obj(new Data_Raw());
+                data_obj->addElement(data);
+                lock_receive_queue.lock();
+                this->receive_queue.push(std::move(data_obj));
+                lock_receive_queue.unlock();
+			} else {
+                crc_failure_counter_rx++;
+			    std::cout << "[UART] Incoming package has invalid CRC!" << std::endl;
+			}
 		}
 		else {
 			// Some parts missing
