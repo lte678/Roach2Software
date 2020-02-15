@@ -28,6 +28,8 @@ void UART::send()
         int data_length = tx_data.size();
 
         // write to UART
+        tcdrain(this->serial_port);
+
         uint64_t buffer_data;
         u_int16_t crc;
         uint8_t header_data;

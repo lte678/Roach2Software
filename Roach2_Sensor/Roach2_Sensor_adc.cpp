@@ -46,7 +46,7 @@ void ADC_MCP3428::update()
         // Tell ADC to take measurement
         simpleWrite(chSetting[ch]);
 
-        usleep(100);
+        usleep(5000);
 
         // Take measurement
         unsigned char data[4];
@@ -54,7 +54,7 @@ void ADC_MCP3428::update()
         do {
             if (readAttempts < MAX_READ_ATTEMPTS) {
                 readBlock((char*)data, 4);
-                usleep(100);
+                usleep(2000);
                 readAttempts++;
             } else {
                 measurementFailed = true;
@@ -63,6 +63,8 @@ void ADC_MCP3428::update()
 
         int16_t measurement = data[1];
         measurement |= data[0] << 8;
+
+        measurement = measurement << 4;
 
         dataLock.lock();
         if(!measurementFailed) {

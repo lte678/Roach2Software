@@ -34,10 +34,10 @@ extern const int MAX_READ_ATTEMPTS;
 /* ##################################################################################### */
 /* 1. Enumerations */
 enum Setting_Adc {
-	CONF_ADC1 = 0b10001000, /*CH1, 15 sps, conti, x1 gain*/
-	CONF_ADC2 = 0b10101000, /*CH2, 15 sps, conti, x1 gain*/
-    CONF_ADC3 = 0b11001000, /*CH3, 15 sps, conti, x1 gain*/
-	CONF_ADC4 = 0b11101000 /*CH4, 15 sps, conti, x1 gain*/
+	CONF_ADC1 = 0b10000000, /*CH1, 15 sps, conti, x1 gain*/
+	CONF_ADC2 = 0b10100000, /*CH2, 15 sps, conti, x1 gain*/
+    CONF_ADC3 = 0b11000000, /*CH3, 15 sps, conti, x1 gain*/
+	CONF_ADC4 = 0b11100000 /*CH4, 15 sps, conti, x1 gain*/
 };
 //SCHREIB HIER MEHR REIN
 
