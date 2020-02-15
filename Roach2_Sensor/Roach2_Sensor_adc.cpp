@@ -22,7 +22,7 @@ ADC_MCP3428::ADC_MCP3428(float updateFreq) : Sensor(updateFreq)
     chSetting[2] = CONF_ADC3;
     chSetting[3] = CONF_ADC4;
 
-	if (deviceHandle == 0 || simpleRead() != 0x00)
+	if (deviceHandle == 0 || simpleRead() == 0x00)
 	{
 		std::cout << "[Sensor|ADC] Connection failed!" << std::endl;
 	}
@@ -46,7 +46,7 @@ void ADC_MCP3428::update()
         // Tell ADC to take measurement
         simpleWrite(chSetting[ch]);
 
-        usleep(5000);
+        usleep(10000);
 
         // Take measurement
         unsigned char data[4];
