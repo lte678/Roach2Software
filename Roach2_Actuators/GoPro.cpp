@@ -1,9 +1,14 @@
 #include "GoPro.h"
 
+Actuator_GoPro & Actuator_GoPro::getInstance() {
+    static Actuator_GoPro singleton;
+    return singleton;
+}
+
 Actuator_GoPro::Actuator_GoPro() : Actuator()
 {
     std::cout << "[Actuator|GoPro] Initializing" << std::endl;
-	gopro_enabled = false;
+    goproEnabled = false;
 
     gopro1 = new GPIODevice(0, GPIODevice::INPUT);
     gopro2 = new GPIODevice(1, GPIODevice::INPUT);
@@ -30,51 +35,69 @@ void Actuator_GoPro::enable(bool debug)
 {
     std::cout << "[Actuator|GoPro] Enabling" << std::endl;
 
+    std::thread camEnableThread(&Actuator_GoPro::enableCameraThread, this);
+    camEnableThread.detach();
+}
+
+void Actuator_GoPro::enableCameraThread() {
+    camControlLock.lock();
     camsupply->write(true);
     lights1->write(true);
     lights2->write(true);
-	usleep(100 * 1000); // Wait 100ms for power on
+    usleep(100 * 1000); // Wait 100ms for power on
 
-	// Write "1" to output
-	gopro1->setMode(GPIODevice::OUTPUT);
+    // Write "1" to output
+    gopro1->setMode(GPIODevice::OUTPUT);
     gopro2->setMode(GPIODevice::OUTPUT);
-	gopro1->write(false);
-	gopro2->write(false);
+    gopro1->write(false);
+    gopro2->write(false);
 
-	// Note: GoPro signals are only trigger signals
-	usleep(500 * 1000); // wait 700ms
+    // Note: GoPro signals are only trigger signals
+    usleep(500 * 1000); // wait 700ms
 
-	// Set GoPro pins to floating
+    // Set GoPro pins to floating
     gopro1->setMode(GPIODevice::INPUT);
     gopro2->setMode(GPIODevice::INPUT);
 
-	gopro_enabled = true;
+    goproEnabled = true;
+    camControlLock.unlock();
 }
 
 void Actuator_GoPro::disableGoPro(bool debug) {
-	if (gopro_enabled) {
+	if (goproEnabled) {
         std::cout << "[Actuator|GoPro] Disabling" << std::endl;
 
-        // Write "1" to output
-        gopro1->setMode(GPIODevice::OUTPUT);
-        gopro2->setMode(GPIODevice::OUTPUT);
-        gopro1->write(false);
-        gopro2->write(false);
-
-        // Note: GoPro signals are only trigger signals
-        usleep(2300 * 1000); // wait 2500ms
-
-        // Set GoPro pins to floating
-        gopro1->setMode(GPIODevice::INPUT);
-        gopro2->setMode(GPIODevice::INPUT);
-
-		gopro_enabled = false;
+        std::thread camDisableThread(&Actuator_GoPro::disableCameraThread, this);
+        camDisableThread.detach();
 	}
 }
 
 void Actuator_GoPro::disable(bool debug)
 {
+    camControlLock.lock();
     camsupply->write(true);
     lights1->write(false);
     lights2->write(false);
+    camControlLock.unlock();
+}
+
+void Actuator_GoPro::disableCameraThread() {
+    camControlLock.lock();
+
+    // Write "1" to output
+    gopro1->setMode(GPIODevice::OUTPUT);
+    gopro2->setMode(GPIODevice::OUTPUT);
+    gopro1->write(false);
+    gopro2->write(false);
+
+    // Note: GoPro signals are only trigger signals
+    usleep(2300 * 1000); // wait 2500ms
+
+    // Set GoPro pins to floating
+    gopro1->setMode(GPIODevice::INPUT);
+    gopro2->setMode(GPIODevice::INPUT);
+
+    goproEnabled = false;
+
+    camControlLock.unlock();
 }

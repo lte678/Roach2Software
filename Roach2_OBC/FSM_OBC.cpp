@@ -34,7 +34,7 @@ FSM_OBC::FSM_OBC()
 	initThreads(PLATFORM::OBC);
 
 	// GoPro control
-	enableGoPro = new Actuator_GoPro();
+	enableGoPro = &Actuator_GoPro::getInstance();
 
 	// System start time
 	time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();

@@ -2,6 +2,9 @@
 #define _Actuator_GoPro_h_
 
 #include <iostream>
+#include <thread>
+#include <atomic>
+#include <mutex>
 
 #include "Actuator.h"
 #include "../Roach2_Hardware/GPIODevice.h"
@@ -14,14 +17,24 @@ private:
     GPIODevice* camsupply;
     GPIODevice* lights1;
     GPIODevice* lights2;
-    bool gopro_enabled;
+    std::atomic<bool> goproEnabled;
+    std::mutex camControlLock;
+
+    Actuator_GoPro();
 public:
-	Actuator_GoPro();
+    static Actuator_GoPro& getInstance();
+
 	~Actuator_GoPro();
 	int getActuatorType() override;
 	void enable(bool debug) override;
 	void disable(bool debug) override;
 	void disableGoPro(bool debug);
+	void enableCameraThread();
+	void disableCameraThread();
+
+	// Singleton class: prevent copy operators
+    Actuator_GoPro(Actuator_GoPro const&) = delete;
+    void operator=(Actuator_GoPro const&) = delete;
 };
 
 #endif
