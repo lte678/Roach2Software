@@ -30,20 +30,23 @@
 #include <memory>
 
 enum class SensorType {
-    TEMP_SENSOR = 0,
-    IMU = 1,
-    LASERDIST_0 = 2,
-    LASERDIST_1 = 3,
-    LASERDIST_2 = 4,
-    LASERDIST_3 = 5,
-    LASERDIST_4 = 6,
-    LASERDIST_5 = 7,
-    ADC = 8,
-    ROT_ENC = 9,
-    SYS_INFO = 10,
-    OBC_SYS_INFO = 11,
-    RCU_SYS_INFO = 12,
-    RX_SIGNALS = 13
+        TEMP_SENSOR = 0,
+        IMU = 1,
+        LASERDIST_0 = 2, // Backplane rover
+        LASERDIST_1 = 3, // Backplane rover
+        LASERDIST_2 = 4, // Bottom rover
+        LASERDIST_3 = 5, // Bottom rover
+        LASERDIST_4 = 6, // Bottom rover
+        LASERDIST_5 = 7, // Bottom rover
+        ADC = 8,
+        ROT_ENC = 9,
+        SYS_INFO = 10,
+        OBC_SYS_INFO = 11,
+        RCU_SYS_INFO = 12,
+        LASERDIST_6 = 13, // Front rover
+        LASERDIST_7 = 14, // Front rover
+        LASERDIST_8 = 15, // Top rover
+        RX_SIGNALS = 16
 };
 
 class Sensor
