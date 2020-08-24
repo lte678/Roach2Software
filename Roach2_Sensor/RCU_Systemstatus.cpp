@@ -3,6 +3,7 @@
 
 RCU_Systemstatus::RCU_Systemstatus(float updateFreq, FSM_Controller* rcu) : Sensor(updateFreq)
 {
+    std::cout << "[Sensor|System Status] Initializing" << std::endl;
     rcuPtr = rcu;
 }
 
@@ -76,6 +77,7 @@ void RCU_Systemstatus::update()
 std::unique_ptr<Data> RCU_Systemstatus::getData()
 {
     std::unique_ptr<Data> currentData(new Data());
+    currentData->setId((int)SensorType::RCU_SYS_INFO);
     currentData->addValue("RCU_UP_OBC", rcu_uplink_obc);
     currentData->addValue("RCU_DOWN_OBC", rcu_downlink_obc);
     currentData->addValue("PG_5V", pg_5v);

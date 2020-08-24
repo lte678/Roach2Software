@@ -106,6 +106,10 @@ void FSM_OBC::sensorDownlink() {
 
         // Send RXSM signal status
         sendRXSMSignalUpdate_Downlink();
+
+        // This is a special case! It doesn't send data to the GS but instead to the RCU.
+        // It makes sure that the rover definitely receives its state in case of missing the initial trigger.
+        eth_client->send(std::make_unique<Data_simple>((uint8_t)COMMAND::rcu_state_change, (uint32_t)currentRcuState));
     }
 }
 
@@ -279,6 +283,7 @@ void FSM_OBC::stateMachine()
 	if (currentState == FSM_STATES_OBC::EXPERIMENT && soeRisingEdge) {
         // Switch RCU from STANDBY to DRIVE_FORWARD if SOE given
         // Send drive forward command
+        currentRcuState = FSM_STATES_RCU::DRIVE_FORWARD;
         msg = std::make_unique<Data_simple>((uint8_t)COMMAND::rcu_state_change, (uint32_t)FSM_STATES_RCU::DRIVE_FORWARD);
         eth_client->send(std::move(msg));
     }
@@ -286,8 +291,8 @@ void FSM_OBC::stateMachine()
     // ------ State change RCU DRIVE_FORWARD -> STANDBY ------
     if (soeFallingEdge) {
         // Send standby command
-        msg = std::make_unique<Data_simple>((uint8_t)COMMAND::rcu_state_change, (uint32_t)FSM_STATES_RCU::STANDBY);
-        eth_client->send(std::move(msg));
+        currentRcuState = FSM_STATES_RCU::STANDBY;
+
     }
 
     // Detect state change
@@ -306,7 +311,13 @@ void FSM_OBC::stateMachine()
                 break;
         }
     }
-    lastState = currentState; // Update last state variable for change detection
+    if(lastRcuState != currentRcuState) {
+        msg = std::make_unique<Data_simple>((uint8_t)COMMAND::rcu_state_change, (uint32_t)currentRcuState);
+        eth_client->send(std::move(msg));
+    }
+    // Update last state variable for change detection
+    lastState = currentState;
+    lastRcuState = currentRcuState;
     prevSOE = soe;
 }
 

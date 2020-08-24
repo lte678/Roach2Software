@@ -206,8 +206,6 @@ void FSM_RCU::stateMachine() {
     if (lastState != currentState) {
         switch (currentState) {
             case FSM_STATES_RCU::IDLE:
-                // Perform selftest
-                // Check if all sensors reported at least one data object
                 pwm->stop(false);
                 pwm->disableLEDs(false);
                 hv->disable(false);

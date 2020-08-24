@@ -40,6 +40,8 @@ private:
     bool prevSOE, prevLO, prevSODS;
     FSM_STATES_OBC currentState;
     FSM_STATES_OBC lastState;
+    FSM_STATES_RCU currentRcuState;
+    FSM_STATES_RCU lastRcuState;
 
 	void sendRXSMSignalUpdate_Downlink();
     void sensorDownlink();

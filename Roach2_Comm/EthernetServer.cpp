@@ -44,62 +44,74 @@ std::string EthernetServer::popMessage()
 void EthernetServer::run()
 {
     std::cout << "[Ethernet Server] Started thread. Listening on " << port_number << std::endl;
-	std::string buffer;
-	ServerSock new_conn;
 
 	// Start thread
 	stop_running = false;
 
 	// Connect to client, wait unitl connection established or thread stopped
-	while (!stop_running && !connected) {
+	while (!stop_running) {
 		try {
-			socket->accept(new_conn);
+            std::unique_ptr<ServerSock> new_conn(new ServerSock);
+			socket->accept(*new_conn);
+			std::thread serverThread(&EthernetServer::clientThread, this, std::move(new_conn));
+			serverThreads.push_back(std::move(serverThread));
 			connected = true;
 		}
 		catch (SockExcept & e) {
-			connected = false;
+            usleep(100000); // Dont spam syscall if it crashes every time
 		}
 	}
 
-    std::cout << "[Ethernet Server] Connected!" << std::endl;
+	for(std::thread &thread : serverThreads) {
+	    thread.join();
+	}
+}
 
-	// Receive data until the end
-	while (!stop_running) {
-		try {
+void EthernetServer::clientThread(std::unique_ptr<ServerSock> conn) {
+    static int threadNum = 0;
+    threadNum++;
+    std::cout << "[Ethernet Server] ID " <<  threadNum << ", New client connection." << std::endl;
+
+    std::string buffer;
+
+    // Receive data until the end
+    while (!stop_running) {
+        try {
             std::string message;
-			new_conn >> message;
+            (*conn) >> message;
 
-			size_t pos = 0;
-			std::string token;
-			while((pos = message.find(delimiter)) != std::string::npos) {
-			    token = message.substr(0, pos);
+            size_t pos = 0;
+            std::string token;
+            while((pos = message.find(delimiter)) != std::string::npos) {
+                token = message.substr(0, pos);
                 message.erase(0, pos + 1);
                 access_receive_queue.lock();
                 receive_queue.push(buffer + token);
                 access_receive_queue.unlock();
                 buffer = "";
-			}
-			buffer += message;
-		}
-		catch (SockExcept & e) {
-			// Some error occurred, try to reconnect
-			connected = false;
-            std::cout << "[Ethernet Server] Disconnected!" << std::endl;
+            }
+            buffer += message;
+        }
+        catch (SockExcept & e) {
+            // Some error occurred, try to reconnect
+            connected = false;
+            std::cout << "[Ethernet Server] ID " <<  threadNum << ", Disconnected!" << std::endl;
 
-			// Now try to reconnect (accept incoming connection)
-			while (!stop_running && !connected) {
-				try {
-					socket->accept(new_conn);
-					connected = true;
-                    std::cout << "[Ethernet Server] Reconnected!" << std::endl;
-				}
-				catch (SockExcept & e) {
-					connected = false;
-				}
-			}
-		}
-	}
+            // Now try to reconnect (accept incoming connection)
+            while (!stop_running && !connected) {
+                try {
+                    socket->accept(*conn);
+                    connected = true;
+                    std::cout << "[Ethernet Server] ID " <<  threadNum << ", Reconnected!" << std::endl;
+                }
+                catch (SockExcept & e) {
+                    connected = false;
+                }
+            }
+        }
+    }
 }
+
 
 Data_Raw* EthernetServer::parseBinary(std::string msg) {
     if (msg.substr(0, 4) == "bin:") {

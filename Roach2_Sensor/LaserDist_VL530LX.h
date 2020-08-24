@@ -8,8 +8,8 @@ class LaserDist_VL530LX :
 	public Sensor
 {
 private:
-	int I2C_ADDRESS = 0x52;
-    SensorType sensor_type;
+	int i2cAddress = 0x52;
+    SensorType sensorType;
     float distance;
 public:
 	LaserDist_VL530LX(float updateFreq, SensorType sensor_type, int i2c_address);

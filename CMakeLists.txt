@@ -103,7 +103,7 @@ add_executable(syscheck Roach2_SysCheckUtil/main.cpp
 target_link_libraries(syscheck pthread atomic)
 
 if(LOCAL_DEV)
-    add_compile_definitions(LOCAL_DEV)
+    add_definitions(-DLOCAL_DEV)
 else()
     target_link_libraries(obc_firmware wiringPi)
     target_link_libraries(rcu_firmware wiringPi)

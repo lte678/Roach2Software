@@ -3,6 +3,7 @@
 
 OBC_Systemstatus::OBC_Systemstatus(float updateFreq, FSM_Controller* obc) : Sensor(updateFreq)
 {
+    std::cout << "[Sensor|System Status] Initializing" << std::endl;
     obcPtr = obc;
 }
 

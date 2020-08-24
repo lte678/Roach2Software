@@ -18,18 +18,19 @@ void UART::send()
     send_lock.lock();
     lock_send_queue.lock();
     while (!send_queue.empty()) {
+        lock_send_queue.unlock();
         // Convert into frame structure:
         // 64bit data, 16bit CRC, 4bit frame number, 4bit data length
 
+        lock_send_queue.lock();
         std::unique_ptr<Data_super> dataToSend = std::move(send_queue.front());
         send_queue.pop();
+        lock_send_queue.unlock();
 
         std::vector<uint64_t> tx_data = dataToSend->convert_to_serial(origin);
         int data_length = tx_data.size();
 
         // write to UART
-        tcdrain(this->serial_port);
-
         uint64_t buffer_data;
         u_int16_t crc;
         uint8_t header_data;
@@ -45,14 +46,23 @@ void UART::send()
             crc = this->calc_crc(crc_data, 8);
 
             // UART transmission are LSB first, this must be handled by the receiver
-            write(this->serial_port, &header_data, sizeof(header_data));
-            write(this->serial_port, &syncword, sizeof(syncword));
-            write(this->serial_port, &buffer_data, sizeof(buffer_data));
-            write(this->serial_port, &crc, sizeof(crc));
+            char writeBuffer[12];
+            writeBuffer[0] = header_data;
+            writeBuffer[1] = syncword;
+            std::memcpy(&writeBuffer[2], (char*)(&buffer_data), 8);
+            std::memcpy(&writeBuffer[10], (char*)(&crc), 2);
+
+            if(write(this->serial_port, &writeBuffer, sizeof(writeBuffer)) != sizeof(writeBuffer)) {
+                std::cout << "[UART] Buffer overflow!" << std::endl;
+                // drop packet
+                i = data_length;
+            }
         }
+        lock_send_queue.lock();
     }
-    send_lock.unlock();
     lock_send_queue.unlock();
+    send_lock.unlock();
+
 }
 
 /**
@@ -151,7 +161,7 @@ void UART::receive()
 			for (int i = 0; i < 8; i++) {
 				data = (data << 8) | this->rx_buffer[1 + i];
 			}
-			crc = rx_buffer[9] << 8;
+			crc = ((uint16_t)rx_buffer[9]) << 8;
 			crc |= rx_buffer[10];
 
 			this->numberDataReceived++;
@@ -170,6 +180,7 @@ void UART::receive()
 			} else {
                 crc_failure_counter_rx++;
 			    std::cout << "[UART] Incoming package has invalid CRC!" << std::endl;
+			    std::cout << std::hex << "[UART] Received: " << crc << ", Expected: " << calc_crc(crc_data, 8) << std::endl;
 			}
 		}
 		else {
@@ -218,7 +229,7 @@ UART::UART(PLATFORM _origin)
 
 	// Try to open serial port5E415E415E445E405E405E
 	// Normally: /dev/ttyUSB0 or similar
-	serial_port = open(this->port, O_RDWR);
+	serial_port = open(this->port, O_RDWR | O_NDELAY);
     std::cout << "[UART] Port acquired!" << std::endl;
 
 	// Check if open was done

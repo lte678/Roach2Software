@@ -31,6 +31,7 @@
 #include <mutex>
 #include <semaphore.h>
 #include <chrono>
+#include <cstring>
 #include <condition_variable>
 #include <atomic>
 #include <math.h>

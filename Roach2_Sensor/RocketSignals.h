@@ -15,26 +15,26 @@
 #include <mutex>
 
 #include "Roach2_Sensor_Sensor.h"
+#include "../Roach2_Hardware/GPIODevice.h"
 
 class RocketSignals :
         public Sensor
 {
 private:
+    GPIODevice *loPin;
+    GPIODevice *sodsPin;
+    GPIODevice *soePin;
+
     bool sods;
 	bool soe;
 	bool lo;
-	int fd_sods;
-	int fd_soe;
-	int fd_lo;
 	std::atomic<bool> changed;
-	std::atomic<bool> running;
 	std::mutex access_limit;
 	double sig_lo_acc;
 	double sig_sods_acc;
 	double sig_soe_acc;
-	int sig_counter;
 	int max_sig_counter = 100; // 100 samples
-	int sig_sample_interval = 500; // 100 ns zwischen samples
+	int sig_sample_interval = 20000; // 20 us zwischen samples
 public:
 	explicit RocketSignals(float updateFreq);
 	~RocketSignals() = default;

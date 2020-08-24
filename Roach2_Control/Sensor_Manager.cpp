@@ -3,8 +3,7 @@
 Sensor_Manager::Sensor_Manager()
 {
     std::cout << "[Sensor Manager] Initializing" << std::endl;
-	update_rate = 10.0f;
-	fast_update_rate = 100.0f;
+    logging_rate = 20.0f;
 	number_sensors = 0;
 
 	// Create and open logging file (check if already exist and increase name)
@@ -13,11 +12,10 @@ Sensor_Manager::Sensor_Manager()
 	int counter_f = 0;
 	while (file_exists) {
 		filename = this->filename_logging + std::to_string(counter_f) + ".csv";
-		std::ifstream f(filename.c_str());
-		file_exists = f.good();
+        file_exists = (access(filename.c_str(), F_OK ) != -1);
 		counter_f++;
 	}
-	logging_stream = new std::ofstream(filename.c_str());
+	logging_stream = open(filename.c_str(), O_WRONLY | O_CREAT);
     std::cout << "[Sensor Manager] Using log file " << filename << std::endl;
 }
 
@@ -29,30 +27,33 @@ void Sensor_Manager::run()
     std::cout << "[Sensor Manager] Started logging thread" << std::endl;
 
 	// Init sensor loop
-	unsigned int delay = (unsigned int)((1 / (double)logging_rate) * 1e6); // delay for usleep in us
-	stop_bit = false; // Disable stop variable
-
+	unsigned int delay = (unsigned int)((1.0 / (double)logging_rate) * 1e6); // delay for usleep in us
+	stop_bit = false;
 	// Sensor loop
 	while (!stop_bit) {
-		// Delay
-		usleep(delay);
+		usleep(delay); // Loop interval sleep
 
-		unsigned int time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch()).count();
+        unsigned int time = std::chrono::duration_cast<std::chrono::milliseconds>((std::chrono::system_clock::now().time_since_epoch())).count();
         sensor_lock.lock();
 		for (Sensor *sensor : sensors) {
 			std::unique_ptr<Data> data = sensor->getData();
-
 			if (data) {
                 // Store to csv file for logging
-                std::string text = data->serializeLogging();
-                *(logging_stream) << "TIME:" << time << ":";
-                *(logging_stream) << text << std::endl;
+                std::string logText;
+                logText += "TIME:";
+                logText += std::to_string(time);
+                logText += ";";
+                logText += data->serializeLogging();
+                logText += "\n";
+                const char* cString = logText.c_str();
+                write(logging_stream, cString, strlen(cString));
 			}
 		}
         sensor_lock.unlock();
+		fsync(logging_stream);
 	}
 
-	logging_stream->close();
+	close(logging_stream);
 }
 
 /**
@@ -81,6 +82,7 @@ Sensor* Sensor_Manager::getSensorHandle(SensorType sensor_id) {
     sensor_lock.lock();
     for(Sensor *sensor : sensors) {
         if(sensor->getSensorType() == sensor_id) {
+            sensor_lock.unlock();
             return sensor;
         }
     }
@@ -99,6 +101,8 @@ void Sensor_Manager::attachSensor(Sensor* sensor) {
     // Check if duplicate
     for(Sensor *existing_sensor : sensors) {
         if(existing_sensor->getSensorType() == sensor->getSensorType()) {
+            std::cout << "[Sensor Manager] Duplicate sensor! Skipping." << std::endl;
+            sensor_lock.unlock();
             return;
         }
     }

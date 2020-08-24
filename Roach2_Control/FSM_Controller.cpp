@@ -78,7 +78,7 @@ void FSM_Controller::initThreads(PLATFORM target)
 	{
 		// OBC
 		sensor_manager = new Sensor_Manager();
-		rocket_signals = new RocketSignals(500.0f);
+		rocket_signals = new RocketSignals(50.0f);
 		sensor_manager->attachSensor(rocket_signals);
         sensor_manager->attachSensor(new ARM_Systeminfo(10.0f));
         sensor_manager->attachSensor(new TEMP_LM75B(10.0f));

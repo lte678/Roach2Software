@@ -3,13 +3,13 @@
 
 #include <thread>
 #include <atomic>
-#include <math.h>
+#include <cmath>
 #include <mutex>
 
-#include <errno.h>
+#include <cerrno>
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -36,11 +36,9 @@ private:
 	std::vector<std::thread> sensorThreads;
 	std::atomic<int> number_sensors; // Total number of sensors used
 	std::atomic<bool> stop_bit;
-	float update_rate; // Update rate in Hz
-	float fast_update_rate; // Update rate in Hz for high rate measurements
 	float logging_rate; // Logging rate in Hz
 	const std::string filename_logging = "log"; // Without file extension, will be set to .csv
-	std::ofstream* logging_stream;
+	int logging_stream;
 public:
 	Sensor_Manager();
 	// Threading related

@@ -164,18 +164,15 @@ std::string Data::get_string_ethernet()
 
 std::string Data::serializeLogging()
 {
-	std::string result;
+	std::stringstream result;
 
-	result += "SENSOR";
-	result += std::to_string(this->id);
+	result << "SENSOR" << ":" << std::to_string(this->id) << ";";
 
 	for (int i = 0; i < this->columnNames.size(); i++) {
-		result += columnNames[i];
-		result += ";";
-		result += std::to_string(values[i]);
+		result << columnNames[i] << ":" << std::fixed << std::setprecision(3) << values[i] << ";";
 	}
 
-	return result;
+	return result.str();
 }
 
 /**

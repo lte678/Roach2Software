@@ -13,7 +13,6 @@
  * @brief Constructor
  **/
 RocketSignals::RocketSignals(float updateFreq) : Sensor(updateFreq) {
-	sig_counter = 0;
 	sig_lo_acc = 0;
 	sig_sods_acc = 0;
 	sig_soe_acc = 0;
@@ -21,54 +20,17 @@ RocketSignals::RocketSignals(float updateFreq) : Sensor(updateFreq) {
 
 /**
  * @brief Inits the GPIO pins which are connected to the RXSM signals SODS, SOE and LO.
- * This GPIO uses sysfs interface from Linux Kernel directly.
  */
 void RocketSignals::init()
 {
     std::cout << "[Sensor|RX Signals] Initializing" << std::endl;
 
-    // Sunix sysfs interface init
-    int fd_0 = open("/sys/class/gpio/export", O_WRONLY);
-    if (fd_0 != -1) {
-        int res0 = write(fd_0, "67", 2); // SODS pin
-        int res1 = write(fd_0, "66", 2); // SOE pin
-        int res2 = write(fd_0, "65", 2); // LO pin
-        close(fd_0);
-
-        // Control direction: set to input
-        int fd_1 = open("/sys/class/gpio/gpio67/direction", O_WRONLY);
-        if (fd_1 != -1) {
-            int res = write(fd_1, "in", 2);
-            close(fd_1);
-        }
-        else {
-            // Error!
-        }
-        int fd_2 = open("/sys/class/gpio/gpio66/direction", O_WRONLY);
-        if (fd_2 != -1) {
-            int res = write(fd_2, "in", 2);
-            close(fd_2);
-        }
-        else {
-            // Error!
-        }
-
-        int fd_3 = open("/sys/class/gpio/gpio65/direction", O_WRONLY);
-        if (fd_3 != -1) {
-            int res = write(fd_3, "in", 2);
-            close(fd_3);
-        }
-        else {
-            // Error!
-        }
-
-        // Open GPIOs for later usage, read only
-        this->fd_sods = open("/sys/class/gpio/gpio67/value", O_RDONLY);
-        this->fd_soe = open("/sys/class/gpio/gpio66/value", O_RDONLY);
-        this->fd_lo = open("/sys/class/gpio/gpio65/value", O_RDONLY);
-    }
-    else {
-        // Error!
+    // Create GPIOs
+    loPin = new GPIODevice(65, GPIODevice::INPUT);
+    soePin = new GPIODevice(66, GPIODevice::INPUT);
+    sodsPin = new GPIODevice(67, GPIODevice::INPUT);
+    if(!(loPin->isValid() && soePin->isValid() && sodsPin->isValid())) {
+        std::cout << "[Sensor|RX Signals] Critical: GPIOs invalid!" << std::endl;
     }
 
     // Init pin values
@@ -93,28 +55,22 @@ void RocketSignals::update()
 
 	int buffer = 0;
 	for (int i = 0; i < max_sig_counter; i++) {
-		read(fd_lo, &buffer, 1);
-		lseek(fd_lo, 0, SEEK_SET);
-		if (buffer == '1') {
-			sig_lo_acc++;
+		if(loPin->read()) {
+		    sig_lo_acc++;
 		}
-		read(fd_soe, &buffer, 1);
-		lseek(fd_soe, 0, SEEK_SET);
-		if (buffer == '1') {
-			sig_soe_acc++;
-		}
-		read(fd_sods, &buffer, 1);
-		lseek(fd_sods, 0, SEEK_SET);
-		if (buffer == '1') {
-			this->sig_sods_acc++;
-		}
+        if(soePin->read()) {
+            sig_soe_acc++;
+        }
+        if(sodsPin->read()) {
+            sig_sods_acc++;
+        }
 		nanosleep(reinterpret_cast<const timespec *>(sig_sample_interval), nullptr);
 	}
 
 	// Evaluate accumulator registers
-	double sig_lo = sig_lo_acc / (double)max_sig_counter;
-	double sig_soe = sig_soe_acc / (double)max_sig_counter;
-	double sig_sods = sig_sods_acc / (double)max_sig_counter;
+	double sig_lo = (double)sig_lo_acc / (double)max_sig_counter;
+	double sig_soe = (double)sig_soe_acc / (double)max_sig_counter;
+	double sig_sods = (double)sig_sods_acc / (double)max_sig_counter;
 
 	// Check if "1"
 	if (sig_lo > 0.85) {
@@ -143,8 +99,7 @@ void RocketSignals::update()
 	sods = new_sods;
 	lo = new_lo;
 
-	// Reset counter
-	sig_counter = 0;
+	// Reset counters
 	sig_lo_acc = 0;
 	sig_sods_acc = 0;
 	sig_soe_acc = 0;

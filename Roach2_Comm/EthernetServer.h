@@ -9,7 +9,9 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <thread>
 #include <queue>
+#include <memory>
 
 // Threading related
 #include <mutex>
@@ -27,6 +29,7 @@ private:
 	std::mutex access_receive_queue;
 	std::atomic<bool> stop_running;
 	std::queue<std::string> receive_queue;
+	std::vector<std::thread> serverThreads;
 public:
 	EthernetServer();
 	int whichConnection();
@@ -34,6 +37,7 @@ public:
 	bool isConnected();
 	std::string popMessage();
 	void run();
+	void clientThread(std::unique_ptr<ServerSock> conn);
 
 	static Data_Raw* parseBinary(std::string msg);
 };
