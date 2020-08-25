@@ -21,6 +21,10 @@ private:
     std::mutex camControlLock;
 
     Actuator_GoPro();
+
+    // Dont let the programmer mess around with threads, we'll do that with caller functions
+    void enableCameraThread();
+	void disableCameraThread();
 public:
     static Actuator_GoPro& getInstance();
 
@@ -28,9 +32,9 @@ public:
 	int getActuatorType() override;
 	void enable(bool debug) override;
 	void disable(bool debug) override;
+    void enableLights(bool debug);
+    void disableLights(bool debug);
 	void disableGoPro(bool debug);
-	void enableCameraThread();
-	void disableCameraThread();
 
 	// Singleton class: prevent copy operators
     Actuator_GoPro(Actuator_GoPro const&) = delete;

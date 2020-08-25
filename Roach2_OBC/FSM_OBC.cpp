@@ -184,6 +184,24 @@ void FSM_OBC::packageReceivedUART(uint64_t message, int msg_length)
             // Switch RCU/rover on
             enableRoverPower->enable(true);
             break;
+        
+        case COMMAND::obc_lights_off:
+            enableGoPro->disableLights(true);
+            break;
+
+        case COMMAND::obc_lights_on:
+            enableGoPro->enableLights(true);
+            break;
+
+        case COMMAND::obc_gopro_off:
+            // Disables both GoPros and LEDs
+            enableGoPro->disable(true);
+            break;
+
+        case COMMAND::obc_gopro_on:
+            // Enables GoPros and LEDs!
+            enableGoPro->enable(true);
+            break;
 
         case COMMAND::obc_read_sensor:
             // Read the sensor with the given sensor id

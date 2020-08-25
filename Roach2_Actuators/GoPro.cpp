@@ -33,17 +33,48 @@ int Actuator_GoPro::getActuatorType()
 
 void Actuator_GoPro::enable(bool debug)
 {
-    std::cout << "[Actuator|GoPro] Enabling" << std::endl;
+    std::cout << "[Actuator|GoPro] Enabling lights and camera" << std::endl;
 
+    enableLights(debug);
+    // Send camera enable signal and start power supply. Takes some time
     std::thread camEnableThread(&Actuator_GoPro::enableCameraThread, this);
     camEnableThread.detach();
+}
+
+void Actuator_GoPro::disable(bool debug)
+{
+    std::cout << "[Actuator|GoPro] Disabling lights and camera" << std::endl;
+
+    camControlLock.lock();
+    camsupply->write(true);
+    disableLights(debug);
+    camControlLock.unlock();
+}
+
+void Actuator_GoPro::enableLights(bool debug) {
+    std::cout << "[Actuator|GoPro] Lights on" << std::endl;
+    lights1->write(true);
+    lights2->write(true);
+}
+
+void Actuator_GoPro::disableLights(bool debug) {
+    std::cout << "[Actuator|GoPro] Lights off" << std::endl;
+    lights1->write(false);
+    lights2->write(false);
+}
+
+void Actuator_GoPro::disableGoPro(bool debug) {
+	if (goproEnabled) {
+        std::cout << "[Actuator|GoPro] Disabling" << std::endl;
+
+        std::thread camDisableThread(&Actuator_GoPro::disableCameraThread, this);
+        camDisableThread.detach();
+	}
 }
 
 void Actuator_GoPro::enableCameraThread() {
     camControlLock.lock();
     camsupply->write(true);
-    lights1->write(true);
-    lights2->write(true);
     usleep(100 * 1000); // Wait 100ms for power on
 
     // Write "1" to output
@@ -60,24 +91,6 @@ void Actuator_GoPro::enableCameraThread() {
     gopro2->setMode(GPIODevice::INPUT);
 
     goproEnabled = true;
-    camControlLock.unlock();
-}
-
-void Actuator_GoPro::disableGoPro(bool debug) {
-	if (goproEnabled) {
-        std::cout << "[Actuator|GoPro] Disabling" << std::endl;
-
-        std::thread camDisableThread(&Actuator_GoPro::disableCameraThread, this);
-        camDisableThread.detach();
-	}
-}
-
-void Actuator_GoPro::disable(bool debug)
-{
-    camControlLock.lock();
-    camsupply->write(true);
-    lights1->write(false);
-    lights2->write(false);
     camControlLock.unlock();
 }
 
