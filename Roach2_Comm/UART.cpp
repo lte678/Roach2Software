@@ -263,7 +263,7 @@ UART::UART(PLATFORM _origin)
 			cfsetospeed(&tty, B38400); // Baudrate output
 
 			// RX internal buffer
-			this->rx_buffer = new char[11];
+			this->rx_buffer = new uint8_t[11];
 			this->rx_buffer_counter = 0;
 
 			// Save tty settings, also checking for error

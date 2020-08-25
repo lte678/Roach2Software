@@ -58,7 +58,7 @@ private:
 	int numberPackagesReceived;
 	int frame_counter_rx;
 	int crc_failure_counter_rx;
-	char* rx_buffer;
+	uint8_t  * rx_buffer;
 	uint rx_buffer_counter;
 	int numberDataReceived;
 	std::mutex send_lock;
