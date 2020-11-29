@@ -50,9 +50,16 @@ public:
     std::unique_ptr<Data> getData();
 	int getI2CAddr();
     SensorType getSensorType();
+    //for Test-Purpose
+    bool logData(float angle, float rot);
+
 private:
 	float angle;
 	float startAngle;
+	float rotationRate;
+	unsigned int systemMillis;
+
+
 };
 
 #endif //ROT_AS5601

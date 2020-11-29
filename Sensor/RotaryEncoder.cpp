@@ -1,3 +1,4 @@
+#include <wiringPi.h>
 #include "RotaryEncoder.h"
 
 ROT_AS5601::ROT_AS5601(float updateFreq) : Sensor(updateFreq)
@@ -5,13 +6,18 @@ ROT_AS5601::ROT_AS5601(float updateFreq) : Sensor(updateFreq)
     std::cout << "[Sensor|Rot Enc] Initializing" << std::endl;
     deviceHandle = i2cConnect(AS5601_DEVICE_ID); // Get file/I2C handle
     angle = 0.0f;
+    rotationRate = 0.0f;
+    printf("Device Handle  %i , Angle %f", deviceHandle, angle);
+    std::cout << "" <<std::endl;
 }
 
 ROT_AS5601::~ROT_AS5601() = default;
 
 void ROT_AS5601::init()
 {
+    std::cout << "[Sensor|Rot Enc] Get Angle" << std::endl;
     startAngle = getAngle();
+    rotationRate = 0.0f;
 }
 
 float ROT_AS5601::getAngle() {
@@ -23,17 +29,22 @@ float ROT_AS5601::getAngle() {
 
 void ROT_AS5601::update()
 {
-	angle = getAngle() - startAngle;
-	angle = angle < 0 ? angle + 360.0f : angle;
+    float previousAngle = angle;
+    unsigned int previousSystemMillis = systemMillis;
+	angle = getAngle(); //- startAngle; due to initialization before calling get update, angle will always be zero
+	systemMillis = millis();
+    rotationRate = ((angle-previousAngle)/(systemMillis-previousSystemMillis));
+	//angle = angle < 0 ? angle + 360.0f : angle;
 }
 
 std::unique_ptr<Data> ROT_AS5601::getData() {
     std::unique_ptr<Data> data_ptr(new Data());
 	data_ptr->setId((int)SensorType::ROT_ENC);
 	data_ptr->addValue("ROTRAW", angle);
-	data_ptr->addValue("ROT", 0.0f);
+	data_ptr->addValue("ROTRATE", rotationRate);
+	logData(angle, rotationRate);
 	return data_ptr;
-	/*Effekt der eigenerhitzung wird vernachl�ssigt*/
+	/*Effekt der eigenerhitzung wird vernachlaessigt*/
 }
 
 int ROT_AS5601::getI2CAddr() {
@@ -43,5 +54,12 @@ int ROT_AS5601::getI2CAddr() {
 SensorType ROT_AS5601::getSensorType()
 {
 	return SensorType::ROT_ENC;
+}
+
+bool ROT_AS5601::logData(float angle, float rot) {
+    FILE* logFile = fopen("/home/pi/Desktop/log.txt", "a");
+    fprintf(logFile, "%f; %f;\n",angle, rot);
+    fclose(logFile);
+    return true;
 }
 

@@ -54,7 +54,7 @@ int Sensor::read16(int reg){
 
 int Sensor::i2cConnect(const int dev){
 #ifndef LOCAL_DEV
-	int fd = open("/dev/i2c-0", O_RDWR);
+	int fd = open("/dev/i2c-1", O_RDWR);
 	int con = ioctl(fd, I2C_SLAVE, dev);
 #else
 	int fd = 0;

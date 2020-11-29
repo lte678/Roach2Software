@@ -96,7 +96,10 @@ int main(int argc, char* argv[]) {
 
         cout << "[TEST] AS5601 - Rotary Encoder..." << endl;
         ROT_AS5601 sensor4(10.0f);
-        printSensorData(&sensor4);
+        for(int i = 0; i < 20; i++) {
+            printSensorData(&sensor4);
+            usleep(1000*1000*1);
+        }
 
         cout << "[TEST] Starting motor..." << endl;
         PWM_PCA985 actuator2;
