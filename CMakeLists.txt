@@ -85,7 +85,6 @@ add_executable(syscheck
         Sensor/ADC.cpp
         Sensor/ARM_Systeminfo.cpp
         Sensor/RocketSignals.cpp
-        Sensor/RotaryEncoder.cpp
         Actuators/PWM.cpp
         Actuators/Actuator.cpp
         Actuators/Rover.cpp

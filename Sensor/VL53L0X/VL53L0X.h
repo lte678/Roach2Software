@@ -1,40 +1,21 @@
-#ifndef LASER_DIST_VL53L0X_HEADER_FILE
-#define LASER_DIST_VL53L0X_HEADER_FILE
+//
+// Created by root on 29.11.20.
+//
+#ifndef VL53L0X_h
+#define VL53L0X_h
 
-#include "Sensor.h"
-#include "../DataStore/data.h"
 
-class LaserDist_VL530LX :
-	public Sensor
+#include <wiringPiI2C.h>
+#include "../Sensor.h"
+#include <unistd.h> // write(), read(), close()
+#include <unistd.h>
+#include <memory>
+#include <cstring>
+
+class VL53L0X
 {
-
 public:
-	LaserDist_VL530LX(float updateFreq, SensorType sensor_type, int i2c_address);
-	void init() override;
-	void update() override;
-    std::unique_ptr<Data> getData() override;
-	int getI2CAddr() override;
-	/**
-	* @brief Returns the sensor identifier number (see SENSOR_TYPES in data.h from datastore project)
-	* @return int sensor identifier
-	*/
-    SensorType getSensorType() override;
-
-    struct SequenceStepEnables
-    {
-        bool tcc, msrc, dss, pre_range, final_range;
-    };
-
-    struct SequenceStepTimeouts
-    {
-        uint16_t pre_range_vcsel_period_pclks, final_range_vcsel_period_pclks;
-
-        uint16_t msrc_dss_tcc_mclks, pre_range_mclks, final_range_mclks;
-        uint32_t msrc_dss_tcc_us,    pre_range_us,    final_range_us;
-    };
-
-    enum vcselPeriodType { VcselPeriodPreRange, VcselPeriodFinalRange };
-
+    // register addresses from API vl53l0x_device.h (ordered as listed there)
     enum regAddr
     {
         SYSRANGE_START                              = 0x00,
@@ -120,12 +101,69 @@ public:
         ALGO_PHASECAL_CONFIG_TIMEOUT                = 0x30,
     };
 
+    enum vcselPeriodType { VcselPeriodPreRange, VcselPeriodFinalRange };
+
+    uint8_t last_status; // status of last I2C transmission
+
+    VL53L0X();
+
+    void setBus(TwoWire * bus) { this->bus = bus; }
+    TwoWire * getBus() { return bus; }
+
+    void setAddress(uint8_t new_addr);
+    inline uint8_t getAddress() { return address; }
+
+    bool init(bool io_2v8 = true);
+
+    void writeReg(uint8_t reg, uint8_t value);
+    void writeReg16Bit(uint8_t reg, uint16_t value);
+    void writeReg32Bit(uint8_t reg, uint32_t value);
+    uint8_t readReg(uint8_t reg);
+    uint16_t readReg16Bit(uint8_t reg);
+    uint32_t readReg32Bit(uint8_t reg);
+
+    void writeMulti(uint8_t reg, uint8_t const * src, uint8_t count);
+    void readMulti(uint8_t reg, uint8_t * dst, uint8_t count);
+
+    bool setSignalRateLimit(float limit_Mcps);
+    float getSignalRateLimit();
+
+    bool setMeasurementTimingBudget(uint32_t budget_us);
+    uint32_t getMeasurementTimingBudget();
+
+    bool setVcselPulsePeriod(vcselPeriodType type, uint8_t period_pclks);
+    uint8_t getVcselPulsePeriod(vcselPeriodType type);
+
+    void startContinuous(uint32_t period_ms = 0);
+    void stopContinuous();
+    uint16_t readRangeContinuousMillimeters();
+    uint16_t readRangeSingleMillimeters();
+
+    inline void setTimeout(uint16_t timeout) { io_timeout = timeout; }
+    inline uint16_t getTimeout() { return io_timeout; }
+    bool timeoutOccurred();
+
 private:
+    // TCC: Target CentreCheck
+    // MSRC: Minimum Signal Rate Check
+    // DSS: Dynamic Spad Selection
 
-    int i2cAddress;
-    SensorType sensorType;
-    float distance;
+    struct SequenceStepEnables
+    {
+        bool tcc, msrc, dss, pre_range, final_range;
+    };
 
+    struct SequenceStepTimeouts
+    {
+        uint16_t pre_range_vcsel_period_pclks, final_range_vcsel_period_pclks;
+
+        uint16_t msrc_dss_tcc_mclks, pre_range_mclks, final_range_mclks;
+        uint32_t msrc_dss_tcc_us,    pre_range_us,    final_range_us;
+    };
+
+
+    TwoWire * bus;
+    uint8_t address;
     uint16_t io_timeout;
     bool did_timeout;
     uint16_t timeout_start_ms;
@@ -133,25 +171,10 @@ private:
     uint8_t stop_variable; // read by init and used when starting measurement; is StopVariable field of VL53L0X_DevData_t structure in API
     uint32_t measurement_timing_budget_us;
 
-    bool initLaserSensor(bool io_2v8 = true);
-
-    uint16_t readRangeSingleMillimeters();
-    uint16_t readRangeContinuousMillimeters();
-
-    bool setMeasurementTimingBudget(uint32_t budget_us);
-    uint32_t getMeasurementTimingBudget();
-
-    bool setSignalRateLimit(float limit_Mcps);
     bool getSpadInfo(uint8_t * count, bool * type_is_aperture);
-
-    void writeMulti(uint8_t reg, uint8_t const * src, uint8_t count);
-    void readMulti(uint8_t reg, uint8_t * dst, uint8_t count);
 
     void getSequenceStepEnables(SequenceStepEnables * enables);
     void getSequenceStepTimeouts(SequenceStepEnables const * enables, SequenceStepTimeouts * timeouts);
-
-    bool setVcselPulsePeriod(vcselPeriodType type, uint8_t period_pclks);
-    uint8_t getVcselPulsePeriod(vcselPeriodType type);
 
     bool performSingleRefCalibration(uint8_t vhv_init_byte);
 
@@ -162,3 +185,6 @@ private:
 };
 
 #endif
+
+
+

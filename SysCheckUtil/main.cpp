@@ -13,6 +13,7 @@
 #include "../Sensor/ADC.h"
 #include "../Sensor/RocketSignals.h"
 #include "../Sensor/RotaryEncoder.h"
+#include "../Sensor/LaserDist_VL530LX.h"
 #include "../Actuators/PWM.h"
 #include "../Actuators/Rover.h"
 
@@ -97,6 +98,11 @@ int main(int argc, char* argv[]) {
         cout << "[TEST] AS5601 - Rotary Encoder..." << endl;
         ROT_AS5601 sensor4(10.0f);
         printSensorData(&sensor4);
+
+        cout << "[TEST] STVL53L0X - Laser Dist..." << endl;
+        LaserDist_VL530LX sensor5(10.0f, SensorType::LASERDIST_0, 0x29);
+        printSensorData(&sensor5);
+
 
         cout << "[TEST] Starting motor..." << endl;
         PWM_PCA985 actuator2;
