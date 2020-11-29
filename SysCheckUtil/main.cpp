@@ -33,12 +33,12 @@ void printSensorData(Sensor *sensor) {
 int main(int argc, char* argv[]) {
     PLATFORM platform = PLATFORM::UNKNOWN;
 
-    if(argc == 2) {
-        if(strcmp(argv[1], "obc") == 0) {
+    if (argc == 2) {
+        if (strcmp(argv[1], "obc") == 0) {
             platform = PLATFORM::OBC;
-        } else if(strcmp(argv[1], "rcu") == 0) {
+        } else if (strcmp(argv[1], "rcu") == 0) {
             platform = PLATFORM::RCU;
-        } else if(strcmp(argv[1], "rover") == 0) {
+        } else if (strcmp(argv[1], "rover") == 0) {
             platform = PLATFORM::RCU;
         } else {
             cout << "Unknown target " << argv[1] << endl;
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Start analysis
-    if(platform == PLATFORM::OBC) {
+    if (platform == PLATFORM::OBC) {
         cout << "Running hardware tests for OBC" << endl << endl;
 
         cout << "[TEST] ARM Systeminfo..." << endl;
@@ -96,10 +96,8 @@ int main(int argc, char* argv[]) {
 
         cout << "[TEST] AS5601 - Rotary Encoder..." << endl;
         ROT_AS5601 sensor4(10.0f);
-        for(int i = 0; i < 20; i++) {
-            printSensorData(&sensor4);
-            usleep(1000*1000*1);
-        }
+        printSensorData(&sensor4);
+
 
         cout << "[TEST] Starting motor..." << endl;
         PWM_PCA985 actuator2;
@@ -109,6 +107,8 @@ int main(int argc, char* argv[]) {
         actuator2.stop();
         cout << "Done!" << endl << endl;
     }
+
+
 
     cout << "Tests executed successfully" << endl;
     cout << "Validate results manually!" << endl;
