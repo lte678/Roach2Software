@@ -2,11 +2,12 @@
 #define ARM_SYSTEMINFO_HEADER_FILE
 
 #include "Sensor.h"
-#include "sys/types.h"
-#include "sys/sysinfo.h"
+#include <fcntl.h>
 #include "../DataStore/data.h"
 #include "../DataStore/Data_simple.h"
 #include <unistd.h>
+#include <fstream>
+#include <string>
 
 /* @file ARM_Systeminfo.h
  * @date 29.08.2019
@@ -21,10 +22,15 @@ class ARM_Systeminfo :
 private:
 	Data* data_obj;
 
-    long long totalPhysMem;
-    long long physMemUsed;
+    unsigned long totalPhysMem;
+    unsigned long physMemUsed;
     float percent;
     float temp;
+
+    // Variables used for cpu usage calculation:
+    // Yes I know jiffies sound stupid; but that's what they (1/100th of a second) are called :)
+    unsigned long last_jiffies;
+    unsigned long last_jiffies_worked;
 public:
     explicit ARM_Systeminfo(float updateFreq);
 	void init();

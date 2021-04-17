@@ -1,5 +1,4 @@
 #include "ARM_Systeminfo.h"
-#include <fcntl.h>
 
 ARM_Systeminfo::ARM_Systeminfo(float updateFreq) : Sensor(updateFreq) {
     // Log for consistencies sake. Not really necessary.
@@ -16,39 +15,40 @@ void ARM_Systeminfo::init()
 */
 void ARM_Systeminfo::update()
 {
+    int fd;
+    char buffer[4096];
 
+    // https://stackoverflow.com/questions/3017162/how-to-get-total-cpu-usage-in-linux-using-c
+    std::ifstream file("/proc/meminfo");
+    std::string line;
+    while(std::getline(file, line)) {
+        char key[64];
+        unsigned long value;
+        sscanf(line.c_str(), "%s %lu", key, &value);
+        if(std::string(key) == "MemTotal:") {
+            totalPhysMem = value;
+        } else if(std::string(key) == "MemAvailable:") {
+            physMemUsed = totalPhysMem - value;
+        }
+    }
 
-	// See: https://stackoverflow.com/questions/63166/how-to-determine-cpu-and-memory-consumption-from-inside-a-process
+	// https://stackoverflow.com/questions/3017162/how-to-get-total-cpu-usage-in-linux-using-c
+    fd = open("/proc/stat", O_RDONLY);
+	read(fd, buffer, sizeof(buffer) - 1);
 
-	struct sysinfo memInfo;
-	sysinfo(&memInfo);
-	long long totalVirtualMem = memInfo.totalram;
-	//Add other values in next statement to avoid int overflow on right hand side...
-	totalVirtualMem += memInfo.totalswap;
-	totalVirtualMem *= memInfo.mem_unit;
-	totalPhysMem = memInfo.totalram;
-	//Multiply in next statement to avoid int overflow on right hand side...
-	totalPhysMem *= memInfo.mem_unit; // Physical total amount RAM in Bytes
-	physMemUsed = memInfo.totalram - memInfo.freeram;
-	//Multiply in next statement to avoid int overflow on right hand side...
-	physMemUsed *= memInfo.mem_unit; // Physical amount of RAM used in Bytes
-
-	int FileHandler;
-	char FileBuffer[1024];
-	float load;
-
-	// Source https://www.raspberrypi.org/forums/viewtopic.php?t=64835 https://linuxwiki.de/proc/loadavg
-	// Interpretation: as we have 4 cores => 4 is full load, any value below is meaning that the system is not
-	// fully used. Values above 4 would indicate overload (not possible for CPU to execute all tasks in the defined time)
-	FileHandler = open("/proc/loadavg", O_RDONLY);
-	read(FileHandler, FileBuffer, sizeof(FileBuffer) - 1);
-	sscanf(FileBuffer, "%f", &load);
-	close(FileHandler);
-	percent = load * 100.0f;
+	unsigned long int n[10];
+	sscanf(buffer, "%*s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu", &n[0], &n[1], &n[2], &n[3], &n[4], &n[5], &n[6], &n[7], &n[8], &n[9]);
+    unsigned int jiffies = 0;
+	for(int i = 0; i < 10; i++) {
+	    jiffies += n[i];
+	}
+	unsigned long jiffies_worked = jiffies - n[3];
+	percent = (float)(jiffies_worked - last_jiffies_worked) / (float)(jiffies - last_jiffies) * 100.0f;
+	last_jiffies_worked = jiffies_worked;
+	last_jiffies = jiffies;
+	close(fd);
 
 	// CPU temperature, value is in /sys/devices/virtual/thermal/thermal_zone0/temp => Nano Pi Neo Air has one temperature sensor there (thermal_zone0)
-	int fd;
-	char buffer[6];
 	fd = open("/sys/devices/virtual/thermal/thermal_zone0/temp", O_RDONLY);
 	read(fd, buffer, sizeof(buffer) - 1);
 	sscanf(buffer, "%f", &temp);
